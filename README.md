@@ -91,6 +91,7 @@ out-dir/
 | `--perf-events` | curated set | Custom perf event list |
 | `--time-repeats` | `5` | GNU time iterations (when no pytest-benchmark) |
 | `--asm-audit` | off | Enable Tier 4 objdump + Numba ASM |
+| `--valgrind-timeout` | `1800` | Timeout per Valgrind run in seconds |
 | `--env` | none | Environment variable `KEY=VALUE` (repeatable) |
 
 ## License

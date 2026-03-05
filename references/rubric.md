@@ -93,11 +93,11 @@ Source: callgrind call tree.
 
 The `--expected-complexity` flag adjusts the complexity exponent thresholds:
 
-| Mode | FAIL threshold |
-|------|----------------|
-| `linear` | k > 1.1 |
-| `nlogn` (default) | k > 1.5 |
-| `quadratic` | k > 2.2 |
+| Mode | WARN threshold | FAIL threshold |
+|------|----------------|----------------|
+| `linear` | k > 1.1 | k > 1.3 |
+| `nlogn` (default) | k > 1.3 | k > 1.5 |
+| `quadratic` | k > 2.0 | k > 2.2 |
 
 ---
 

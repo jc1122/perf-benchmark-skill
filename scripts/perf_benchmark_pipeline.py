@@ -19,6 +19,7 @@ import json
 import math
 import os
 import re
+import shlex
 import shutil
 import subprocess
 import sys
@@ -68,8 +69,6 @@ def detect_cache_topology() -> dict[str, str]:
     """Read sysfs cache info, return Valgrind --I1/--D1/--LL flags."""
     base = Path("/sys/devices/system/cpu/cpu0/cache")
     result: dict[str, str] = {}
-    mapping = {"Data": "D1", "Instruction": "I1", "Unified": None}
-
     indexes: dict[str, dict[str, str]] = {}
     try:
         for idx_dir in sorted(base.iterdir()):
@@ -169,7 +168,7 @@ def check_prerequisites(args: argparse.Namespace) -> dict[str, Any]:
 
     if prereqs["perf_paranoid"] > 1:
         _log(f"  INFO: perf_event_paranoid={prereqs['perf_paranoid']}. perf stat will be skipped.")
-        _log(f"  Fix: sudo sysctl kernel.perf_event_paranoid=1")
+        _log("  Fix: sudo sysctl kernel.perf_event_paranoid=1")
 
     if not prereqs["valgrind"] and args.tier != "fast":
         _log("  WARNING: valgrind not found. Tiers 2-4 will be skipped.")
@@ -186,14 +185,14 @@ def check_prerequisites(args: argparse.Namespace) -> dict[str, Any]:
 # ---------------------------------------------------------------------------
 
 def discover_targets(root: Path) -> list[str]:
-    """Scan for pytest benchmark tests."""
+    """Scan for pytest benchmark tests. Returns paths relative to root."""
     targets: list[str] = []
     bench_dir = root / "tests" / "benchmarks"
     if bench_dir.is_dir():
-        targets.append(str(bench_dir))
+        targets.append(str(bench_dir.relative_to(root)))
         return targets
 
-    # Scan for pytest.mark.benchmark in .py files (shallow)
+    # Scan for pytest.mark.benchmark in .py files
     for py_file in root.rglob("test_*.py"):
         try:
             text = py_file.read_text(errors="replace")
@@ -228,10 +227,10 @@ def _build_target_cmd(args: argparse.Namespace, targets: list[str]) -> list[str]
             cmd.append(str(args.sizes[-1]))
         return cmd
     if args.target:
-        parts = args.target
-        if args.sizes and "{SIZE}" in parts:
-            parts = parts.replace("{SIZE}", str(args.sizes[-1]))
-        return parts.split()
+        expanded = args.target
+        if args.sizes and "{SIZE}" in expanded:
+            expanded = expanded.replace("{SIZE}", str(args.sizes[-1]))
+        return shlex.split(expanded)
     if targets:
         return [args.python, "-m", "pytest", "-x", "-q", "--benchmark-disable"] + targets
     return [args.python, "-c", "pass"]
@@ -244,15 +243,15 @@ def _build_valgrind_target_cmd(args: argparse.Namespace, targets: list[str]) -> 
         cmd.append(str(args.valgrind_size))
         return cmd
     if args.target:
-        parts = args.target
-        if "{SIZE}" in parts:
-            parts = parts.replace("{SIZE}", str(args.valgrind_size))
-        return parts.split()
+        expanded = args.target
+        if "{SIZE}" in expanded:
+            expanded = expanded.replace("{SIZE}", str(args.valgrind_size))
+        return shlex.split(expanded)
     if targets:
         return [
             args.python, "-m", "pytest", "-x", "-q",
             "--benchmark-enable", "--benchmark-only",
-            f"-k", f"n{args.valgrind_size}",
+            "-k", f"n{args.valgrind_size}",
         ] + targets
     return [args.python, "-c", "pass"]
 
@@ -290,32 +289,40 @@ def _parse_gnu_time(stderr: str) -> dict[str, Any]:
     return result
 
 
-def _generate_tracemalloc_wrapper(args: argparse.Namespace, targets: list[str]) -> Path:
-    """Generate a temporary script that runs tracemalloc on the target."""
-    # Build a minimal import+run statement
-    if args.target:
-        run_code = args.target.replace("{SIZE}", str(args.sizes[-1] if args.sizes else 10000))
-    elif targets:
-        run_code = f"import subprocess; subprocess.run(['{args.python}', '-m', 'pytest', '-x', '-q', '--benchmark-disable'] + {targets!r}, check=False)"
-    else:
-        run_code = "pass"
+def _generate_tracemalloc_wrapper(
+    args: argparse.Namespace, targets: list[str]
+) -> tuple[Path, list[str]]:
+    """Generate a temporary script that wraps tracemalloc around a subprocess call.
 
-    wrapper_code = f'''
-import tracemalloc, json, sys, os
-os.chdir({str(args.root)!r})
+    Returns (wrapper_path, target_cmd_list).  The target command is passed via
+    a JSON-encoded argv list in sys.argv[3] to avoid code injection through
+    ``--target`` values.
+    """
+    if args.target:
+        target_str = args.target.replace("{SIZE}", str(args.sizes[-1] if args.sizes else 10000))
+        cmd_list = shlex.split(target_str)
+    elif targets:
+        cmd_list = [args.python, "-m", "pytest", "-x", "-q", "--benchmark-disable"] + targets
+    else:
+        cmd_list = [args.python, "-c", "pass"]
+
+    wrapper_code = '''\
+import tracemalloc, json, sys, os, subprocess
+os.chdir(json.loads(sys.argv[2]))
+cmd = json.loads(sys.argv[3])
 tracemalloc.start(25)
-{run_code}
+subprocess.run(cmd, check=False)
 current, peak = tracemalloc.get_traced_memory()
 snapshot = tracemalloc.take_snapshot()
 top = snapshot.statistics("lineno")[:20]
-result = {{
+result = {
     "current_bytes": current,
     "peak_bytes": peak,
     "top_allocators": [
-        {{"traceback": str(s.traceback), "size_bytes": s.size, "count": s.count}}
+        {"traceback": str(s.traceback), "size_bytes": s.size, "count": s.count}
         for s in top
     ]
-}}
+}
 tracemalloc.stop()
 with open(sys.argv[1], "w") as f:
     json.dump(result, f, indent=2)
@@ -323,7 +330,7 @@ with open(sys.argv[1], "w") as f:
     tmp = tempfile.NamedTemporaryFile(mode="w", suffix="_tracemalloc.py", delete=False)
     tmp.write(wrapper_code)
     tmp.close()
-    return Path(tmp.name)
+    return Path(tmp.name), cmd_list
 
 
 def stage_tier1(
@@ -356,11 +363,15 @@ def stage_tier1(
     # 2. tracemalloc (Python only)
     if not args.binary:
         tracemalloc_out = tier1_dir / "tracemalloc.json"
-        wrapper = _generate_tracemalloc_wrapper(args, targets)
+        wrapper_path, wrapper_cmd = _generate_tracemalloc_wrapper(args, targets)
         try:
             _log("  -> tracemalloc wrapper...")
             subprocess.run(
-                [args.python, str(wrapper), str(tracemalloc_out)],
+                [
+                    args.python, str(wrapper_path), str(tracemalloc_out),
+                    json.dumps(str(args.root)),
+                    json.dumps(wrapper_cmd),
+                ],
                 capture_output=True, text=True, cwd=str(args.root), env=env, timeout=300,
             )
             if tracemalloc_out.exists():
@@ -368,7 +379,7 @@ def stage_tier1(
         except (subprocess.TimeoutExpired, json.JSONDecodeError, OSError) as e:
             results["tracemalloc"] = {"error": str(e)}
         finally:
-            wrapper.unlink(missing_ok=True)
+            wrapper_path.unlink(missing_ok=True)
 
     # 3. /usr/bin/time -v (repeated for CV)
     target_cmd = _build_target_cmd(args, targets)
@@ -465,8 +476,6 @@ def _parse_callgrind_output(text: str) -> dict[str, Any]:
 
     # Parse function-level lines: "  123,456  file:line  function_name"
     fn_pattern = re.compile(r"^\s*([\d,]+)\s+(.+?):(\d+)\s+(.+)$")
-    # Also handle simpler format: "  123,456  function_name"
-    fn_simple = re.compile(r"^\s*([\d,]+)\s+(\S+.*)")
 
     for line in lines:
         m = fn_pattern.match(line)
@@ -506,10 +515,13 @@ def stage_cachegrind(
         cmd.append(f"--LL={cache['LL']}")
     cmd += [f"--cachegrind-out-file={outfile}", "--"] + target_cmd
 
-    _log(f"  -> cachegrind: running...")
-    r = subprocess.run(cmd, capture_output=True, text=True, cwd=str(args.root), env=env)
-    if r.returncode != 0 and not outfile.exists():
+    _log("  -> cachegrind: running...")
+    r = subprocess.run(cmd, capture_output=True, text=True, cwd=str(args.root), env=env,
+                        timeout=args.valgrind_timeout)
+    if not outfile.exists():
         return {"error": f"cachegrind failed (exit {r.returncode})", "stderr": r.stderr[:500]}
+    if "Invalid argument" in r.stderr or "Bad option" in r.stderr:
+        return {"error": "cachegrind bad flags", "stderr": r.stderr[:500]}
 
     # Annotate with source filtering
     ann_cmd = ["cg_annotate"]
@@ -540,8 +552,9 @@ def stage_callgrind(
         "--", *target_cmd,
     ]
     _log("  -> callgrind: running...")
-    r = subprocess.run(cmd, capture_output=True, text=True, cwd=str(args.root), env=env)
-    if r.returncode != 0 and not outfile.exists():
+    r = subprocess.run(cmd, capture_output=True, text=True, cwd=str(args.root), env=env,
+                        timeout=args.valgrind_timeout)
+    if not outfile.exists():
         return {"error": f"callgrind failed (exit {r.returncode})", "stderr": r.stderr[:500]}
 
     ann_cmd = [
@@ -633,7 +646,8 @@ def stage_massif(
         "--", *target_cmd,
     ]
     _log("  -> massif: running...")
-    r = subprocess.run(cmd, capture_output=True, text=True, cwd=str(args.root), env=env)
+    r = subprocess.run(cmd, capture_output=True, text=True, cwd=str(args.root), env=env,
+                        timeout=args.valgrind_timeout)
 
     # Generate ms_print as human artifact
     if outfile.exists():
@@ -784,9 +798,12 @@ def run_parallel_tiers(
         for name, fut in futures.items():
             try:
                 results[name] = fut.result()
-                _log(f"  ✓ {name}")
+                _log(f"  done: {name}")
+            except subprocess.TimeoutExpired:
+                _log(f"  TIMEOUT: {name} (exceeded {args.valgrind_timeout}s)")
+                results[name] = {"error": f"timeout after {args.valgrind_timeout}s"}
             except Exception as e:
-                _log(f"  ✗ {name}: {e}")
+                _log(f"  FAIL: {name}: {e}")
                 results[name] = {"error": str(e)}
 
     return results
@@ -849,7 +866,7 @@ def score_algorithmic_scaling(
                     matched_times.append(sum(times_by_size[s]) / len(times_by_size[s]))
             if len(matched_sizes) >= 2:
                 k = _fit_exponent(matched_sizes, matched_times)
-                thresholds = {"linear": (1.1, 1.3), "nlogn": (1.3, 1.8), "quadratic": (2.0, 2.5)}
+                thresholds = {"linear": (1.1, 1.3), "nlogn": (1.3, 1.5), "quadratic": (2.0, 2.2)}
                 warn_k, fail_k = thresholds.get(args.expected_complexity, (1.3, 1.8))
                 tier_val = "PASS" if k <= warn_k else "WARN" if k <= fail_k else "FAIL"
                 sub_checks["complexity_exponent"] = {"k": k, "tier": tier_val}
@@ -859,7 +876,6 @@ def score_algorithmic_scaling(
     # H2: Call amplification
     cg = tier234.get("callgrind", {})
     if cg and not cg.get("error") and cg.get("functions"):
-        max_ir = max((f.get("Ir", 0) for f in cg["functions"]), default=0)
         # Use total_ir / input_size as proxy for amplification
         if input_size > 0 and cg.get("total_ir", 0) > 0:
             amp = cg["total_ir"] / input_size
@@ -977,7 +993,11 @@ def score_cpu_efficiency(tier234: dict) -> dict[str, Any]:
 
 
 def score_cache_dim(tier234: dict, metric_key: str, pass_t: float, warn_t: float, fail_t: float) -> dict[str, Any]:
-    """Generic cache dimension scorer."""
+    """Generic cache dimension scorer.
+
+    Thresholds: <= pass_t → PASS, <= warn_t → WARN, > warn_t → FAIL.
+    (fail_t is kept for API compatibility but warn_t is the WARN/FAIL boundary.)
+    """
     ch = tier234.get("cachegrind", {})
     if not ch or ch.get("error"):
         return {"score": -1, "tier": "N/A"}
@@ -1001,7 +1021,7 @@ def score_cache_dim(tier234: dict, metric_key: str, pass_t: float, warn_t: float
         return {"score": -1, "tier": "N/A"}
 
     worst = max(values)
-    tier_val = "PASS" if worst <= pass_t else "WARN" if worst <= fail_t else "FAIL"
+    tier_val = "PASS" if worst <= pass_t else "WARN" if worst <= warn_t else "FAIL"
     score = 4 if tier_val == "PASS" else 2 if tier_val == "WARN" else 0
     return {"score": score, "tier": tier_val, "worst_pct": round(worst, 3)}
 
@@ -1153,24 +1173,23 @@ def write_markdown_report(
     lines.append("")
     lines.append("*Priority order: Algorithmic > Data Layout > Execution > Micro*")
     lines.append("")
+    prescriptions = {
+        "Algorithmic": "Review scaling sub-checks. Memoize, precompute, or restructure hot paths.",
+        "L1": "Improve data locality: struct-of-arrays, cache-line alignment, sequential access.",
+        "Last-Level": "Reduce working set size or improve spatial locality.",
+        "Branch": "Replace unpredictable branches with cmov, lookup tables, or branchless arithmetic.",
+        "CPU": "Reduce hotspot concentration. Consider splitting large functions.",
+        "Memory": "Pre-allocate buffers, use object pools, reduce allocation churn.",
+        "Wall": "Reduce measurement noise: set governor=performance, increase rounds.",
+    }
     for name, d in rubric["dimensions"]:
         if d.get("tier") in ("FAIL", "WARN"):
-            lines.append(f"- **{name}**: ", )
-            if "Algorithmic" in name:
-                lines.append("  Review scaling sub-checks. Memoize, precompute, or restructure hot paths.")
-            elif "L1" in name:
-                lines.append("  Improve data locality: struct-of-arrays, cache-line alignment, sequential access.")
-            elif "Last-Level" in name:
-                lines.append("  Reduce working set size or improve spatial locality.")
-            elif "Branch" in name:
-                lines.append("  Replace unpredictable branches with cmov, lookup tables, or branchless arithmetic.")
-            elif "CPU" in name:
-                lines.append("  Reduce hotspot concentration. Consider splitting large functions.")
-            elif "Memory" in name:
-                lines.append("  Pre-allocate buffers, use object pools, reduce allocation churn.")
-            elif "Wall" in name:
-                lines.append("  Reduce measurement noise: set governor=performance, increase rounds, disable turbo boost.")
-            lines.append("")
+            advice = next(
+                (v for k, v in prescriptions.items() if k in name),
+                "See rubric for details.",
+            )
+            lines.append(f"- **{name}**: {advice}")
+    lines.append("")
 
     # Cache model disclaimer
     lines.append("## Cache Model")
@@ -1253,7 +1272,7 @@ def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
     p.add_argument("--perf-events", default=None, help="Custom perf event list")
     p.add_argument("--time-repeats", type=int, default=5, help="/usr/bin/time iterations")
     p.add_argument("--asm-audit", action="store_true", help="Enable Tier 4 ASM audit")
-    p.add_argument("--validate-scaling", action="store_true", help="Validate Valgrind scaling")
+    p.add_argument("--valgrind-timeout", type=int, default=1800, help="Timeout per Valgrind run in seconds (default 1800)")
     p.add_argument("--env", action="append", default=[], help="Environment variable KEY=VALUE")
 
     args = p.parse_args(argv)
@@ -1294,7 +1313,7 @@ def main(argv: list[str] | None = None) -> int:
         _log("Continuing with minimal profiling (system-level metrics only).")
 
     # Stage 2: Tier 1
-    _log(f"\nStage 2: Tier 1 — wall time + memory...")
+    _log("\nStage 2: Tier 1 — wall time + memory...")
     tier1_results = stage_tier1(args, prereqs, targets, out_dir)
 
     # Stage 3: Tiers 2-4 (parallel)
