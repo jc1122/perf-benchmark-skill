@@ -1,0 +1,71 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Performance Benchmark Finding",
+  "description": "Structured finding from a parallel analysis agent",
+  "type": "object",
+  "required": ["dimension", "score", "tier", "evidence", "prescription"],
+  "properties": {
+    "dimension": {
+      "type": "string",
+      "description": "Rubric dimension name (e.g., 'Algorithmic Scaling', 'Wall-time stability', 'CPU efficiency', 'L1 cache efficiency', 'Last-level cache', 'Branch prediction', 'Memory profile')"
+    },
+    "score": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 4,
+      "description": "0=FAIL, 2=WARN, 4=PASS"
+    },
+    "tier": {
+      "type": "string",
+      "enum": ["PASS", "WARN", "FAIL", "N/A"]
+    },
+    "evidence": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["file", "metric", "value"],
+        "properties": {
+          "file": {
+            "type": "string",
+            "description": "Source file path relative to project root"
+          },
+          "line": {
+            "type": "integer",
+            "description": "Source line number (if applicable)"
+          },
+          "function": {
+            "type": "string",
+            "description": "Function name where the metric was observed"
+          },
+          "metric": {
+            "type": "string",
+            "description": "Name of the measured metric (e.g., 'L1d_miss_rate', 'complexity_exponent', 'wall_time_cv')"
+          },
+          "value": {
+            "type": "number",
+            "description": "Measured value of the metric"
+          },
+          "unit": {
+            "type": "string",
+            "description": "Unit of measurement (e.g., '%', 'ratio', 'ms', 'bytes')"
+          },
+          "threshold_pass": {
+            "type": "number",
+            "description": "Rubric PASS threshold for this metric"
+          },
+          "threshold_fail": {
+            "type": "number",
+            "description": "Rubric FAIL threshold for this metric"
+          }
+        }
+      },
+      "minItems": 1,
+      "description": "Evidence items supporting the score. Each item ties a metric to a specific file, function, and line."
+    },
+    "prescription": {
+      "type": "string",
+      "description": "Actionable optimization recommendation. Should reference specific code locations and suggest concrete changes."
+    }
+  },
+  "additionalProperties": false
+}
