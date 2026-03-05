@@ -1,10 +1,9 @@
 ---
 name: perf-benchmark
 description: >
-  Linux performance benchmarking skill with 7-dimension rubric (0-28). Measures
-  algorithmic scaling, CPU cycles, L1/L2/L3 cache, branch prediction, memory
-  profile, and ASM metrics using Valgrind, perf, pytest-benchmark. Produces
-  scored reports with priority-ordered prescriptions. Repo-agnostic.
+  Use when profiling Linux Python or C workloads for algorithmic scaling,
+  cache, branch, memory, or ASM bottlenecks, or when comparing a new benchmark
+  run against a saved performance baseline.
 ---
 
 # Performance Benchmark Pipeline
@@ -56,8 +55,7 @@ Override with `--target "cmd {SIZE}"` or `--binary ./my_program`.
 ### 3. Run Pipeline
 
 ```bash
-SKILLS_DIR="${SKILLS_DIR:-$HOME/.claude/skills}"
-python "$SKILLS_DIR/perf-benchmark-skill/scripts/perf_benchmark_pipeline.py" \
+python /path/to/perf-benchmark/scripts/perf_benchmark_pipeline.py \
   --root /path/to/repo \
   --source-prefix src/pkg/ \
   --tier medium \
@@ -97,10 +95,14 @@ tool selection guidance.
 ### 6. Regression Comparison (Optional)
 
 ```bash
-python pipeline.py --root . --out-dir /tmp/bench --baseline /tmp/previous/benchmark_summary.json
+python scripts/perf_benchmark_pipeline.py \
+  --root . \
+  --out-dir /tmp/bench \
+  --baseline /tmp/previous/benchmark_summary.json
 ```
 
-Any dimension dropping >= 1 tier from baseline = regression blocker.
+Any scored dimension dropping >= 1 tier from baseline is surfaced in the
+report and summary as a regression blocker.
 
 ## Agent Parallelism Opportunities
 
@@ -133,16 +135,16 @@ Sub-agents return structured findings matching `references/finding-schema.json`.
 
 ```bash
 # Fast check (seconds)
-python pipeline.py --root . --out-dir /tmp/b --tier fast --sizes 10000,100000
+python scripts/perf_benchmark_pipeline.py --root . --out-dir /tmp/b --tier fast --sizes 10000,100000
 
 # Medium with source filtering
-python pipeline.py --root . --out-dir /tmp/b --tier medium --source-prefix src/pkg/ --sizes 10000,100000
+python scripts/perf_benchmark_pipeline.py --root . --out-dir /tmp/b --tier medium --source-prefix src/pkg/ --sizes 10000,100000
 
 # Deep with regression baseline
-python pipeline.py --root . --out-dir /tmp/b --tier deep --baseline /tmp/prev/benchmark_summary.json --sizes 10000,100000
+python scripts/perf_benchmark_pipeline.py --root . --out-dir /tmp/b --tier deep --baseline /tmp/prev/benchmark_summary.json --sizes 10000,100000
 
 # ASM audit for C binary
-python pipeline.py --root . --out-dir /tmp/b --tier asm --binary ./build/my_program --asm-audit
+python scripts/perf_benchmark_pipeline.py --root . --out-dir /tmp/b --tier asm --binary ./build/my_program --asm-audit
 ```
 
 ## References

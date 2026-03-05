@@ -30,6 +30,9 @@ from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any
 
+
+TIER_RANK = {"FAIL": 0, "WARN": 1, "PASS": 2}
+
 # ---------------------------------------------------------------------------
 # Logging
 # ---------------------------------------------------------------------------
@@ -171,7 +174,7 @@ def check_prerequisites(args: argparse.Namespace) -> dict[str, Any]:
         _log("  Fix: sudo sysctl kernel.perf_event_paranoid=1")
 
     if not prereqs["valgrind"] and args.tier != "fast":
-        _log("  WARNING: valgrind not found. Tiers 2-4 will be skipped.")
+        _log("  WARNING: valgrind not found. Valgrind-backed stages will be skipped.")
 
     ram = prereqs["ram_mb"]
     if ram > 0 and ram < args.max_valgrind_parallel * 4000:
@@ -700,6 +703,7 @@ def stage_perf_stat(
 
     tier3_dir = out_dir / "tier3"
     tier3_dir.mkdir(parents=True, exist_ok=True)
+    env = _build_env(os.environ.copy(), args.env)
 
     events = args.perf_events or (
         "cycles,instructions,branches,branch-misses,"
@@ -710,7 +714,7 @@ def stage_perf_stat(
     cmd = ["perf", "stat", "-r", str(args.perf_repeats), "-e", events, "--"] + target_cmd
 
     _log("  -> perf stat: running...")
-    r = subprocess.run(cmd, capture_output=True, text=True, cwd=str(args.root))
+    r = subprocess.run(cmd, capture_output=True, text=True, cwd=str(args.root), env=env)
     (tier3_dir / "perf_stat.txt").write_text(r.stderr)
 
     _log("  -> perf stat: done")
@@ -733,17 +737,36 @@ def stage_objdump(
         r = subprocess.run(["objdump", "-dS", args.binary], capture_output=True, text=True)
         outpath.write_text(r.stdout)
         generated.append(str(outpath))
-    elif args.source_prefix:
+    else:
         root = args.root
-        for so_file in Path(root).rglob("*.so"):
-            if args.source_prefix and args.source_prefix not in str(so_file):
-                continue
+        for so_file in _discover_objdump_targets(root, args.source_prefix):
             outpath = tier4_dir / f"objdump_{so_file.name}.txt"
             r = subprocess.run(["objdump", "-dS", str(so_file)], capture_output=True, text=True)
             outpath.write_text(r.stdout)
             generated.append(str(outpath))
 
     return {"generated": generated}
+
+
+def _discover_objdump_targets(root: Path, source_prefix: str | None) -> list[Path]:
+    candidates = sorted(Path(root).rglob("*.so"))
+    if not source_prefix:
+        return candidates
+
+    direct_matches = [so_file for so_file in candidates if source_prefix in str(so_file)]
+    if direct_matches:
+        return direct_matches
+
+    source_tokens = {
+        token
+        for token in Path(source_prefix).parts
+        if token and token not in {".", "src", "source", "python", "lib"}
+    }
+    token_matches = [so_file for so_file in candidates if source_tokens.intersection(so_file.parts)]
+    if token_matches:
+        return token_matches
+
+    return candidates
 
 
 def stage_numba_asm(
@@ -1062,6 +1085,35 @@ def score_memory_profile(tier1: dict, tier234: dict, baseline: dict | None) -> d
     return {"score": 4, "tier": "PASS", "peak_bytes": peak_bytes, "source": source}
 
 
+def _collect_baseline_regressions(
+    dimensions: list[tuple[str, dict[str, Any]]], baseline: dict[str, Any] | None
+) -> list[dict[str, Any]]:
+    if not baseline:
+        return []
+
+    baseline_dimensions = baseline.get("rubric", {}).get("dimensions", {})
+    regressions: list[dict[str, Any]] = []
+
+    for name, current in dimensions:
+        current_tier = current.get("tier")
+        baseline_tier = baseline_dimensions.get(name, {}).get("tier")
+        if current_tier not in TIER_RANK or baseline_tier not in TIER_RANK:
+            continue
+
+        drop = TIER_RANK[baseline_tier] - TIER_RANK[current_tier]
+        if drop >= 1:
+            regressions.append(
+                {
+                    "dimension": name,
+                    "baseline_tier": baseline_tier,
+                    "current_tier": current_tier,
+                    "drop": drop,
+                }
+            )
+
+    return regressions
+
+
 def score_rubric(
     tier1: dict, tier234: dict, args: argparse.Namespace
 ) -> dict[str, Any]:
@@ -1085,8 +1137,14 @@ def score_rubric(
     available = [(n, d) for n, d in dimensions if d.get("tier") != "N/A"]
     total = sum(d["score"] for _, d in available)
     max_possible = len(available) * 4
+    baseline_regressions = _collect_baseline_regressions(dimensions, baseline)
 
-    return {"dimensions": dimensions, "total": total, "max_possible": max_possible}
+    return {
+        "dimensions": dimensions,
+        "total": total,
+        "max_possible": max_possible,
+        "baseline_regressions": baseline_regressions,
+    }
 
 
 # ---------------------------------------------------------------------------
@@ -1142,6 +1200,26 @@ def write_markdown_report(
             lines.append("> Expected impact: 10-1000x improvement.")
             lines.append("> Hardware optimizations (cache, branch, ASM) are irrelevant until this is resolved.")
     lines.append("")
+
+    if args.baseline:
+        regressions = rubric.get("baseline_regressions", [])
+        lines.append("## Baseline Comparison")
+        lines.append("")
+        lines.append(f"**Baseline**: `{args.baseline}`")
+        lines.append("")
+        if regressions:
+            lines.append("> **Regression blocker**: one or more scored dimensions dropped versus the baseline.")
+            lines.append("")
+            lines.append("| Dimension | Baseline | Current | Tier Drop |")
+            lines.append("|-----------|----------|---------|-----------|")
+            for regression in regressions:
+                lines.append(
+                    f"| {regression['dimension']} | {regression['baseline_tier']} | "
+                    f"{regression['current_tier']} | {regression['drop']} |"
+                )
+        else:
+            lines.append("No scored dimension regressed against the supplied baseline.")
+        lines.append("")
 
     # Rubric Scorecard
     lines.append("## Rubric Scorecard")
@@ -1225,6 +1303,8 @@ def write_json_summary(
             "cache_topology": prereqs.get("cache_topology", {}),
             "ram_mb": prereqs["ram_mb"],
         },
+        "baseline_regressions": rubric.get("baseline_regressions", []),
+        "regression_blocker": bool(rubric.get("baseline_regressions")),
     }
 
     # Include raw tier1 metrics
@@ -1319,11 +1399,8 @@ def main(argv: list[str] | None = None) -> int:
     # Stage 3: Tiers 2-4 (parallel)
     tier234_results: dict[str, Any] = {}
     if args.tier != "fast":
-        if prereqs.get("valgrind"):
-            _log(f"\nStage 3: Tiers 2-4 — profiling ({args.tier})...")
-            tier234_results = run_parallel_tiers(args, prereqs, targets, out_dir)
-        else:
-            _log("\nStage 3: Skipped (valgrind not available)")
+        _log(f"\nStage 3: Tiers 2-4 — profiling ({args.tier})...")
+        tier234_results = run_parallel_tiers(args, prereqs, targets, out_dir)
 
     # Stage 4: Scoring + report
     _log("\nStage 4: Scoring rubric + generating report...")

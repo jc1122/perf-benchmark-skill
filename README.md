@@ -1,6 +1,8 @@
 # perf-benchmark-skill
 
-Linux performance benchmarking skill for [Claude Code](https://claude.com/claude-code). Measures algorithmic scaling, CPU cycles, L1/L2/L3 cache efficiency, branch prediction, memory profile, and ASM metrics using industry-standard tools.
+Linux performance benchmarking skill for coding agents that support Skills. It
+measures algorithmic scaling, CPU cycles, L1/L2/L3 cache efficiency, branch
+prediction, memory profile, and ASM metrics using industry-standard tools.
 
 ## Installation
 
@@ -71,6 +73,10 @@ out-dir/
 ├── tier3/                    # Massif heap profile + perf stat
 └── tier4/                    # objdump disassembly (if --asm-audit)
 ```
+
+When `--baseline` is supplied, the report and summary also include
+`baseline_regressions` and a `regression_blocker` flag for any scored
+dimension that drops by at least one tier versus the baseline.
 
 ## CLI Reference
 
