@@ -163,6 +163,45 @@ def test_skill_markdown_examples_reference_real_script_names() -> None:
     assert "python pipeline.py" not in text
 
 
+def test_docs_describe_explicit_target_as_repo_agnostic_path() -> None:
+    skill_text = (REPO_ROOT / "SKILL.md").read_text()
+    readme_text = (REPO_ROOT / "README.md").read_text()
+
+    assert "Use `--target` or `--binary` for non-pytest repos." in skill_text
+    assert "Pytest benchmark autodiscovery is a convenience for Python repos." in skill_text
+    assert "For repo-agnostic use, pass an explicit `--target` or `--binary`." in readme_text
+
+
+def test_main_requires_real_benchmark_target(monkeypatch, tmp_path: Path) -> None:
+    args = make_args(tmp_path, tier="fast")
+    called: dict[str, bool] = {}
+
+    monkeypatch.setattr(pipeline, "parse_args", lambda argv=None: args)
+    monkeypatch.setattr(
+        pipeline,
+        "check_prerequisites",
+        lambda _args: {
+            "python_ok": True,
+            "valgrind": None,
+            "perf_paranoid": 0,
+            "governor": "performance",
+            "cache_topology": {},
+            "ram_mb": 16_384,
+        },
+    )
+    monkeypatch.setattr(pipeline, "discover_targets", lambda _root: [])
+    monkeypatch.setattr(
+        pipeline,
+        "stage_tier1",
+        lambda *_args, **_kwargs: called.setdefault("tier1", True),
+    )
+
+    exit_code = pipeline.main([])
+
+    assert exit_code == 1
+    assert called == {}
+
+
 def test_stage_tier1_tracemalloc_measures_child_python_process(tmp_path: Path) -> None:
     script_path = tmp_path / "alloc.py"
     script_path.write_text(
@@ -181,7 +220,13 @@ def test_stage_tier1_tracemalloc_measures_child_python_process(tmp_path: Path) -
 
 
 def test_stage_cachegrind_annotation_uses_timeout(monkeypatch, tmp_path: Path) -> None:
-    args = make_args(tmp_path, root=tmp_path, out_dir=tmp_path / "out", source_prefix="src/pkg/")
+    args = make_args(
+        tmp_path,
+        root=tmp_path,
+        out_dir=tmp_path / "out",
+        source_prefix="src/pkg/",
+        binary="/bin/true",
+    )
     captured: list[int | None] = []
 
     def fake_run(cmd, capture_output, text, cwd=None, env=None, timeout=None):
@@ -200,7 +245,13 @@ def test_stage_cachegrind_annotation_uses_timeout(monkeypatch, tmp_path: Path) -
 
 
 def test_stage_callgrind_annotation_uses_timeout(monkeypatch, tmp_path: Path) -> None:
-    args = make_args(tmp_path, root=tmp_path, out_dir=tmp_path / "out", source_prefix="src/pkg/")
+    args = make_args(
+        tmp_path,
+        root=tmp_path,
+        out_dir=tmp_path / "out",
+        source_prefix="src/pkg/",
+        binary="/bin/true",
+    )
     captured: list[int | None] = []
 
     def fake_run(cmd, capture_output, text, cwd=None, env=None, timeout=None):
@@ -219,7 +270,7 @@ def test_stage_callgrind_annotation_uses_timeout(monkeypatch, tmp_path: Path) ->
 
 
 def test_stage_massif_post_processing_uses_timeout(monkeypatch, tmp_path: Path) -> None:
-    args = make_args(tmp_path, root=tmp_path, out_dir=tmp_path / "out")
+    args = make_args(tmp_path, root=tmp_path, out_dir=tmp_path / "out", binary="/bin/true")
     captured: list[int | None] = []
 
     def fake_run(cmd, capture_output, text, cwd=None, env=None, timeout=None):

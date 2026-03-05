@@ -3,6 +3,7 @@
 Linux performance benchmarking skill for coding agents that support Skills. It
 measures algorithmic scaling, CPU cycles, L1/L2/L3 cache efficiency, branch
 prediction, memory profile, and ASM metrics using industry-standard tools.
+For repo-agnostic use, pass an explicit `--target` or `--binary`.
 
 ## Installation
 
@@ -43,6 +44,7 @@ python scripts/perf_benchmark_pipeline.py \
   --root /path/to/repo \
   --out-dir /tmp/bench \
   --tier fast \
+  --target "python -m mypkg.bench {SIZE}" \
   --sizes 10000,100000
 
 # Medium mode (minutes) — adds cache + CPU profiling
@@ -50,6 +52,7 @@ python scripts/perf_benchmark_pipeline.py \
   --root /path/to/repo \
   --out-dir /tmp/bench \
   --tier medium \
+  --target "./bench.sh {SIZE}" \
   --source-prefix src/mypackage/ \
   --sizes 10000,100000
 
@@ -79,6 +82,10 @@ When `--baseline` is supplied, the report and summary also include
 dimension that drops by at least one tier versus the baseline.
 
 ## CLI Reference
+
+Pytest benchmark autodiscovery is a convenience for Python repos. Use
+`--target` or `--binary` when you want the skill to work against an arbitrary
+benchmark entrypoint.
 
 | Flag | Default | Description |
 |------|---------|-------------|

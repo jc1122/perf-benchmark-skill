@@ -15,8 +15,8 @@ projects on Linux. It orchestrates industry-standard tools across 4 tiers of
 increasing depth, scores a 7-dimension rubric, and outputs priority-ordered
 prescriptions.
 
-This skill is intentionally repo-agnostic: all project-specific inputs
-(source paths, targets, sizes) are CLI parameters.
+This skill is intentionally repo-agnostic when you provide the benchmark
+entrypoint explicitly. Pytest benchmark autodiscovery is a convenience for Python repos.
 
 ## Use This Skill When
 
@@ -51,12 +51,14 @@ The script auto-checks at startup:
 
 Auto-discovers `pytest.mark.benchmark` tests and `tests/benchmarks/` directories.
 Override with `--target "cmd {SIZE}"` or `--binary ./my_program`.
+Use `--target` or `--binary` for non-pytest repos.
 
 ### 3. Run Pipeline
 
 ```bash
 python /path/to/perf-benchmark/scripts/perf_benchmark_pipeline.py \
   --root /path/to/repo \
+  --target "python -m mypkg.bench {SIZE}" \
   --source-prefix src/pkg/ \
   --tier medium \
   --sizes 10000,100000 \
@@ -135,13 +137,13 @@ Sub-agents return structured findings matching `references/finding-schema.json`.
 
 ```bash
 # Fast check (seconds)
-python scripts/perf_benchmark_pipeline.py --root . --out-dir /tmp/b --tier fast --sizes 10000,100000
+python scripts/perf_benchmark_pipeline.py --root . --out-dir /tmp/b --tier fast --target "python -m mypkg.bench {SIZE}" --sizes 10000,100000
 
 # Medium with source filtering
-python scripts/perf_benchmark_pipeline.py --root . --out-dir /tmp/b --tier medium --source-prefix src/pkg/ --sizes 10000,100000
+python scripts/perf_benchmark_pipeline.py --root . --out-dir /tmp/b --tier medium --target "./bench.sh {SIZE}" --source-prefix src/pkg/ --sizes 10000,100000
 
 # Deep with regression baseline
-python scripts/perf_benchmark_pipeline.py --root . --out-dir /tmp/b --tier deep --baseline /tmp/prev/benchmark_summary.json --sizes 10000,100000
+python scripts/perf_benchmark_pipeline.py --root . --out-dir /tmp/b --tier deep --target "cargo run --release --bin bench -- {SIZE}" --baseline /tmp/prev/benchmark_summary.json --sizes 10000,100000
 
 # ASM audit for C binary
 python scripts/perf_benchmark_pipeline.py --root . --out-dir /tmp/b --tier asm --binary ./build/my_program --asm-audit

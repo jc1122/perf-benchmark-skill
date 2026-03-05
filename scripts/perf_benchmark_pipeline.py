@@ -222,6 +222,12 @@ def _build_env(base: dict[str, str], env_pairs: list[str]) -> dict[str, str]:
     return env
 
 
+def _missing_target_error() -> ValueError:
+    return ValueError(
+        "No benchmark target found. Pass --target or --binary, or add pytest benchmark tests."
+    )
+
+
 def _build_target_cmd(args: argparse.Namespace, targets: list[str]) -> list[str]:
     """Build the command to run for benchmarking."""
     if args.binary:
@@ -236,7 +242,7 @@ def _build_target_cmd(args: argparse.Namespace, targets: list[str]) -> list[str]
         return shlex.split(expanded)
     if targets:
         return [args.python, "-m", "pytest", "-x", "-q", "--benchmark-disable"] + targets
-    return [args.python, "-c", "pass"]
+    raise _missing_target_error()
 
 
 def _build_valgrind_target_cmd(args: argparse.Namespace, targets: list[str]) -> list[str]:
@@ -256,7 +262,7 @@ def _build_valgrind_target_cmd(args: argparse.Namespace, targets: list[str]) -> 
             args.python, "-m", "pytest", "-x", "-q",
             "--benchmark-enable", "--benchmark-only",
         ] + targets
-    return [args.python, "-c", "pass"]
+    raise _missing_target_error()
 
 
 # ---------------------------------------------------------------------------
@@ -307,7 +313,7 @@ def _generate_tracemalloc_wrapper(
     elif targets:
         cmd_list = [args.python, "-m", "pytest", "-x", "-q", "--benchmark-disable"] + targets
     else:
-        cmd_list = [args.python, "-c", "pass"]
+        raise _missing_target_error()
 
     wrapper_code = '''\
 import json, os, runpy, sys, tracemalloc
@@ -1464,8 +1470,9 @@ def main(argv: list[str] | None = None) -> int:
     elif targets:
         _log(f"  Discovered {len(targets)} benchmark target(s): {targets}")
     else:
-        _log("WARNING: No benchmark targets found. Use --target or --binary.")
-        _log("Continuing with minimal profiling (system-level metrics only).")
+        _log("ERROR: No benchmark target found.")
+        _log("Pass --target or --binary, or add pytest benchmark tests for autodiscovery.")
+        return 1
 
     # Stage 2: Tier 1
     _log("\nStage 2: Tier 1 — wall time + memory...")
