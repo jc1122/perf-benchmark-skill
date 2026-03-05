@@ -1185,8 +1185,42 @@ def score_wall_time_stability(tier1: dict) -> dict[str, Any]:
     return result
 
 
+def _first_present_metric(check: dict[str, Any], keys: list[str]) -> Any:
+    """Return the first present metric value without dropping zero."""
+    for key in keys:
+        if key in check:
+            return check[key]
+    return ""
+
+
 def _summarize_wall_time_metrics(tier1: dict) -> dict[str, Any]:
     """Return summary-friendly wall-time metrics aligned with the scorer."""
+    pb = tier1.get("pytest_benchmark", {})
+    benchmarks = pb.get("benchmarks", [])
+    if benchmarks:
+        cvs = [
+            round(
+                b.get("stats", {}).get("stddev", 0)
+                / max(b.get("stats", {}).get("mean", 1e-12), 1e-12)
+                * 100,
+                2,
+            )
+            for b in benchmarks
+        ]
+        means = [
+            round(b.get("stats", {}).get("mean", 0), 4)
+            for b in benchmarks
+            if b.get("stats", {}).get("mean") is not None
+        ]
+        if cvs:
+            summary: dict[str, Any] = {
+                "wall_time_cv": round(sum(cvs) / len(cvs), 2),
+                "wall_time_cv_by_benchmark": cvs,
+            }
+            if means:
+                summary["wall_time_mean"] = round(sum(means) / len(means), 4)
+            return summary
+
     time_usage_by_size = tier1.get("time_usage_by_size", {})
     if time_usage_by_size:
         cv_by_size = {
@@ -1447,12 +1481,9 @@ def write_markdown_report(
             lines.append("| Available Sub-check | Value | Tier |")
             lines.append("|---------------------|-------|------|")
             for name, check in dim0["sub_checks"].items():
-                val = (
-                    check.get("k")
-                    or check.get("ratio")
-                    or check.get("peaks")
-                    or check.get("path_count")
-                    or check.get("top_fn_ir", "")
+                val = _first_present_metric(
+                    check,
+                    ["k", "ratio", "peaks", "path_count", "top_fn_ir"],
                 )
                 lines.append(f"| {name} | {val} | {check['tier']} |")
             lines.append("")
@@ -1471,7 +1502,10 @@ def write_markdown_report(
             lines.append("| Sub-check | Value | Tier |")
             lines.append("|-----------|-------|------|")
             for name, check in dim0["sub_checks"].items():
-                val = check.get("k") or check.get("ratio") or check.get("peaks") or check.get("top_fn_ir", "")
+                val = _first_present_metric(
+                    check,
+                    ["k", "ratio", "peaks", "path_count", "top_fn_ir"],
+                )
                 lines.append(f"| {name} | {val} | {check['tier']} |")
         if dim0["tier"] == "FAIL":
             lines.append("")
@@ -1633,8 +1667,8 @@ def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
         args.sizes = [int(s.strip()) for s in args.sizes.split(",")]
     else:
         args.sizes = []
-    if args.target and len(args.sizes) >= 2 and "{SIZE}" not in args.target:
-        p.error("Explicit --target with multiple --sizes requires a {SIZE} placeholder.")
+    if args.target and args.sizes and "{SIZE}" not in args.target:
+        p.error("Explicit --target with --sizes requires a {SIZE} placeholder.")
     args.root = args.root.resolve()
     args.out_dir = args.out_dir.resolve()
     return args

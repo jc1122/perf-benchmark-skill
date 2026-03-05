@@ -651,3 +651,98 @@ def test_docs_require_size_placeholder_for_multi_size_explicit_target() -> None:
 
     assert "Multi-size explicit targets must include `{SIZE}`." in skill_text
     assert "Multi-size explicit targets must include `{SIZE}`." in readme_text
+
+
+def test_parse_args_requires_size_placeholder_for_any_explicit_target_sizes(tmp_path: Path) -> None:
+    with pytest.raises(SystemExit):
+        pipeline.parse_args(
+            [
+                "--root",
+                str(tmp_path),
+                "--out-dir",
+                str(tmp_path / "out"),
+                "--target",
+                "python bench.py",
+                "--sizes",
+                "10",
+            ]
+        )
+
+
+def test_write_json_summary_prefers_pytest_wall_time_metrics(tmp_path: Path) -> None:
+    out_dir = tmp_path / "out"
+    out_dir.mkdir()
+    tier1 = {
+        "pytest_benchmark": {
+            "benchmarks": [
+                {"stats": {"mean": 1.0, "stddev": 0.01}},
+                {"stats": {"mean": 1.0, "stddev": 0.02}},
+            ]
+        },
+        "time_usage": [
+            {"wall_seconds": 0.01},
+            {"wall_seconds": 0.011},
+            {"wall_seconds": 1.0},
+            {"wall_seconds": 1.01},
+        ],
+    }
+    rubric = {
+        "total": 4,
+        "max_possible": 4,
+        "dimensions": [("Wall-Time Stability", pipeline.score_wall_time_stability(tier1))],
+        "baseline_regressions": [],
+    }
+    prereqs = {
+        "python_ok": True,
+        "valgrind": None,
+        "perf_paranoid": 0,
+        "governor": "performance",
+        "cache_topology": {},
+        "ram_mb": 1024,
+    }
+    args = make_args(tmp_path, tier="fast")
+
+    pipeline.write_json_summary(rubric, tier1, {}, prereqs, args, out_dir)
+
+    summary = json.loads((out_dir / "benchmark_summary.json").read_text())
+
+    assert summary["wall_time_cv"] == pipeline.score_wall_time_stability(tier1)["cv"]
+
+
+def test_write_markdown_report_preserves_zero_algorithmic_values(tmp_path: Path) -> None:
+    out_dir = tmp_path / "out"
+    out_dir.mkdir()
+    rubric = {
+        "total": 0,
+        "max_possible": 4,
+        "dimensions": [
+            (
+                "Algorithmic Scaling",
+                {
+                    "score": -1,
+                    "tier": "N/A",
+                    "sub_checks": {
+                        "multiplicative_paths": {"path_count": 0, "tier": "PASS"}
+                    },
+                    "missing_sub_checks": ["complexity_exponent"],
+                    "note": "Incomplete evidence for strict scaling rubric",
+                },
+            )
+        ],
+        "baseline_regressions": [],
+    }
+    prereqs = {
+        "python_ok": True,
+        "valgrind": None,
+        "perf_paranoid": 0,
+        "governor": "performance",
+        "cache_topology": {},
+        "ram_mb": 1024,
+    }
+    args = make_args(tmp_path, tier="fast", sizes=[1, 2])
+
+    pipeline.write_markdown_report(rubric, {}, {}, prereqs, args, out_dir)
+
+    report = (out_dir / "benchmark_report.md").read_text()
+
+    assert "| multiplicative_paths | 0 | PASS |" in report
