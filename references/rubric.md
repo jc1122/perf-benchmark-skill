@@ -35,7 +35,7 @@ Measure wall time at two or more input sizes. Fit `T(n) = c * n^k`.
 
 ### Sub-check 0b: Call Amplification
 
-Source: callgrind `call_count / input_size`.
+Source: raw callgrind `sum(calls=...) / input_size`.
 
 | Tier | Condition |
 |------|-----------|
@@ -75,16 +75,17 @@ Source: massif snapshots over time.
 
 ### Sub-check 0f: Multiplicative Call Paths
 
-Source: callgrind call tree.
+Source: raw callgrind call tree. Threshold `N` is the benchmark input size.
 
 | Tier | Condition |
 |------|-----------|
-| PASS | No multiplicative paths |
-| WARN | 1 path exceeding threshold N |
-| FAIL | Multiple paths exceeding threshold N |
+| PASS | No call edge with `calls > input_size` |
+| WARN | 1 call edge with `calls > input_size` |
+| FAIL | Multiple call edges with `calls > input_size` |
 
 ### Dimension 0 Composite Score
 
+- **N/A (-1):** Any required sub-check is missing.
 - **FAIL (0):** Any sub-check is FAIL.
 - **WARN (2):** Two or more sub-checks are WARN (and none FAIL).
 - **PASS (4):** Otherwise.

@@ -604,6 +604,27 @@ def _parse_callgrind_output(text: str) -> dict[str, Any]:
     return result
 
 
+def _parse_callgrind_raw(text: str, input_size: int) -> dict[str, int]:
+    """Parse raw callgrind output for call counts and multiplicative paths."""
+    total_calls = 0
+    multiplicative_path_count = 0
+    threshold = max(input_size, 0)
+
+    for line in text.splitlines():
+        match = re.match(r"^calls=(\d+)\b", line.strip())
+        if not match:
+            continue
+        call_count = int(match.group(1))
+        total_calls += call_count
+        if threshold > 0 and call_count > threshold:
+            multiplicative_path_count += 1
+
+    return {
+        "total_calls": total_calls,
+        "multiplicative_path_count": multiplicative_path_count,
+    }
+
+
 def stage_cachegrind(
     args: argparse.Namespace, prereqs: dict, targets: list[str], out_dir: Path
 ) -> dict[str, Any]:
@@ -686,7 +707,12 @@ def stage_callgrind(
     (tier2_dir / "callgrind_annotated.txt").write_text(ann_r.stdout)
 
     _log("  -> callgrind: done")
-    return _parse_callgrind_output(ann_r.stdout)
+    result = _parse_callgrind_output(ann_r.stdout)
+    try:
+        result.update(_parse_callgrind_raw(outfile.read_text(), args.valgrind_size))
+    except OSError:
+        result["raw_parse_error"] = "cannot read callgrind.out"
+    return result
 
 
 # ---------------------------------------------------------------------------
@@ -1011,6 +1037,14 @@ def _fit_exponent(sizes: list[int], times: list[float]) -> float:
 def score_algorithmic_scaling(
     tier1: dict, tier234: dict, args: argparse.Namespace
 ) -> dict[str, Any]:
+    required_sub_checks = {
+        "complexity_exponent",
+        "call_amplification",
+        "data_reuse",
+        "write_amplification",
+        "allocation_churn",
+        "multiplicative_paths",
+    }
     sub_checks: dict[str, dict] = {}
 
     # H1: Complexity exponent
@@ -1048,10 +1082,9 @@ def score_algorithmic_scaling(
     # H2: Call amplification
     cg = tier234.get("callgrind", {})
     if cg and not cg.get("error") and cg.get("functions"):
-        # Use total_ir / input_size as proxy for amplification
-        if input_size > 0 and cg.get("total_ir", 0) > 0:
-            amp = cg["total_ir"] / input_size
-            tier_val = "PASS" if amp <= 1000 else "WARN" if amp <= 10000 else "FAIL"
+        if input_size > 0 and "total_calls" in cg:
+            amp = cg["total_calls"] / input_size
+            tier_val = "PASS" if amp <= 10 else "WARN" if amp <= 100 else "FAIL"
             sub_checks["call_amplification"] = {"ratio": round(amp, 1), "tier": tier_val}
 
     # H3: Data reuse ratio
@@ -1080,14 +1113,23 @@ def score_algorithmic_scaling(
         sub_checks["allocation_churn"] = {"peaks": peaks, "tier": tier_val}
 
     # H6: Multiplicative paths (simplified: check if top fn Ir >> input_size * 1000)
-    if cg and cg.get("functions") and input_size > 0:
-        top_fn = cg["functions"][0] if cg["functions"] else {}
-        if top_fn.get("Ir", 0) > input_size * 10000:
-            sub_checks["multiplicative_paths"] = {"top_fn_ir": top_fn["Ir"], "tier": "WARN"}
+    if cg and not cg.get("error") and "multiplicative_path_count" in cg:
+        path_count = int(cg.get("multiplicative_path_count", 0))
+        tier_val = "PASS" if path_count == 0 else "WARN" if path_count == 1 else "FAIL"
+        sub_checks["multiplicative_paths"] = {"path_count": path_count, "tier": tier_val}
 
     # Aggregate
     if not sub_checks:
         return {"score": -1, "tier": "N/A", "sub_checks": {}, "note": "Insufficient data for scaling analysis"}
+    missing_sub_checks = sorted(required_sub_checks - set(sub_checks))
+    if missing_sub_checks:
+        return {
+            "score": -1,
+            "tier": "N/A",
+            "sub_checks": sub_checks,
+            "missing_sub_checks": missing_sub_checks,
+            "note": "Incomplete evidence for strict scaling rubric",
+        }
 
     fails = sum(1 for c in sub_checks.values() if c["tier"] == "FAIL")
     warns = sum(1 for c in sub_checks.values() if c["tier"] == "WARN")
@@ -1108,16 +1150,39 @@ def score_wall_time_stability(tier1: dict) -> dict[str, Any]:
         cvs = [b.get("stats", {}).get("stddev", 0) / max(b.get("stats", {}).get("mean", 1e-12), 1e-12) * 100 for b in benchmarks]
         avg_cv = sum(cvs) / len(cvs) if cvs else 0
     else:
-        # Fallback to /usr/bin/time
-        times = [t.get("wall_seconds", 0) for t in tier1.get("time_usage", []) if t.get("wall_seconds")]
-        avg_cv = _cv(times) if times else -1
+        # Fallback to /usr/bin/time. For multi-size explicit targets, score the
+        # worst per-size CV rather than pooling different workloads together.
+        time_usage_by_size = tier1.get("time_usage_by_size", {})
+        if time_usage_by_size:
+            cv_by_size = {
+                int(size): round(
+                    _cv(
+                        [
+                            run.get("wall_seconds", 0.0)
+                            for run in runs
+                            if run.get("wall_seconds")
+                        ]
+                    ),
+                    2,
+                )
+                for size, runs in time_usage_by_size.items()
+                if any(run.get("wall_seconds") for run in runs)
+            }
+            avg_cv = max(cv_by_size.values()) if cv_by_size else -1
+        else:
+            times = [t.get("wall_seconds", 0) for t in tier1.get("time_usage", []) if t.get("wall_seconds")]
+            cv_by_size = None
+            avg_cv = _cv(times) if times else -1
 
     if avg_cv < 0:
         return {"score": -1, "tier": "N/A", "cv": None}
 
     tier_val = "PASS" if avg_cv <= 3 else "WARN" if avg_cv <= 8 else "FAIL"
     score = 4 if tier_val == "PASS" else 2 if tier_val == "WARN" else 0
-    return {"score": score, "tier": tier_val, "cv": round(avg_cv, 2)}
+    result: dict[str, Any] = {"score": score, "tier": tier_val, "cv": round(avg_cv, 2)}
+    if not benchmarks and "cv_by_size" in locals() and cv_by_size is not None:
+        result["cv_by_size"] = cv_by_size
+    return result
 
 
 def score_cpu_efficiency(tier234: dict) -> dict[str, Any]:

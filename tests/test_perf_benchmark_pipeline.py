@@ -7,6 +7,7 @@ from argparse import Namespace
 from pathlib import Path
 from types import SimpleNamespace
 
+import jsonschema
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
 MODULE_PATH = REPO_ROOT / "scripts" / "perf_benchmark_pipeline.py"
@@ -291,7 +292,7 @@ def test_score_algorithmic_scaling_uses_time_usage_by_size_when_pytest_data_miss
 
     result = pipeline.score_algorithmic_scaling(tier1, {}, args)
 
-    assert result["tier"] == "PASS"
+    assert result["tier"] == "N/A"
     assert result["sub_checks"]["complexity_exponent"]["k"] == 1.0
 
 
@@ -447,3 +448,91 @@ def test_build_valgrind_target_cmd_matches_binary_argument_behavior(tmp_path: Pa
     cmd = pipeline._build_valgrind_target_cmd(args, [])
 
     assert cmd == ["/bin/true"]
+
+
+def test_score_algorithmic_scaling_is_na_when_required_subchecks_are_missing(tmp_path: Path) -> None:
+    args = make_args(tmp_path, binary="/bin/true", sizes=[10, 100], expected_complexity="linear")
+    tier1 = {
+        "time_usage_by_size": {
+            10: [{"wall_seconds": 0.01}],
+            100: [{"wall_seconds": 0.1}],
+        }
+    }
+
+    result = pipeline.score_algorithmic_scaling(tier1, {}, args)
+
+    assert result["tier"] == "N/A"
+    assert result["score"] == -1
+    assert "missing_sub_checks" in result
+
+
+def test_parse_callgrind_raw_tracks_total_calls_and_multiplicative_paths() -> None:
+    text = "\n".join(
+        [
+            "events: Ir",
+            "fl=src/mod.c",
+            "fn=parent",
+            "1 10",
+            "cfl=src/mod.c",
+            "cfn=child_a",
+            "calls=150 0",
+            "2 5",
+            "cfl=src/mod.c",
+            "cfn=child_b",
+            "calls=250 0",
+            "3 7",
+        ]
+    )
+
+    result = pipeline._parse_callgrind_raw(text, input_size=100)
+
+    assert result["total_calls"] == 400
+    assert result["multiplicative_path_count"] == 2
+
+
+def test_score_algorithmic_scaling_uses_call_counts_for_call_amplification(tmp_path: Path) -> None:
+    args = make_args(tmp_path, valgrind_size=100)
+    tier234 = {
+        "callgrind": {
+            "functions": [{"Ir": 5000, "file": "src/mod.c", "line": 1, "function": "hot"}],
+            "total_ir": 5000,
+            "total_calls": 5000,
+            "multiplicative_path_count": 0,
+        },
+        "cachegrind": {
+            "summary": {"Dr": 1000, "Dw": 50},
+        },
+        "massif": {"local_maxima_count": 1},
+    }
+
+    result = pipeline.score_algorithmic_scaling({}, tier234, args)
+
+    assert result["sub_checks"]["call_amplification"]["ratio"] == 50.0
+    assert result["sub_checks"]["call_amplification"]["tier"] == "WARN"
+    assert result["tier"] == "N/A"
+
+
+def test_score_wall_time_stability_groups_explicit_target_timings_by_size() -> None:
+    tier1 = {
+        "time_usage_by_size": {
+            10: [{"wall_seconds": 0.01}, {"wall_seconds": 0.0101}],
+            1000: [{"wall_seconds": 1.0}, {"wall_seconds": 1.01}],
+        }
+    }
+
+    result = pipeline.score_wall_time_stability(tier1)
+
+    assert result["tier"] == "PASS"
+    assert result["cv"] < 3
+    assert result["cv_by_size"] == {10: round(pipeline._cv([0.01, 0.0101]), 2), 1000: round(pipeline._cv([1.0, 1.01]), 2)}
+
+
+def test_finding_schema_accepts_na_result() -> None:
+    schema = json.loads((REPO_ROOT / "references" / "finding-schema.json").read_text())
+    finding = {
+        "dimension": "Algorithmic Scaling",
+        "score": -1,
+        "tier": "N/A",
+    }
+
+    jsonschema.validate(instance=finding, schema=schema)
