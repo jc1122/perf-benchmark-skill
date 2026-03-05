@@ -52,6 +52,7 @@ The script auto-checks at startup:
 Auto-discovers `pytest.mark.benchmark` tests and `tests/benchmarks/` directories.
 Override with `--target "cmd {SIZE}"` or `--binary ./my_program`.
 Use `--target` or `--binary` for non-pytest repos.
+Multi-size explicit targets must include `{SIZE}`.
 
 ### 3. Run Pipeline
 
@@ -87,6 +88,7 @@ Tier options:
 
 If Dimension 0 (Algorithmic Scaling) is FAIL, the report prints a STOP warning:
 fix algorithmic issues before pursuing hardware optimizations.
+If Dimension 0 is `N/A`, the report lists the missing sub-check evidence.
 
 ### 5. Apply Prescriptions
 

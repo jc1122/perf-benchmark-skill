@@ -87,6 +87,9 @@ Pytest benchmark autodiscovery is a convenience for Python repos. Use
 `--target` or `--binary` when you want the skill to work against an arbitrary
 benchmark entrypoint.
 
+Multi-size explicit targets must include `{SIZE}`. Fixed-size explicit targets
+should omit `--sizes`.
+
 | Flag | Default | Description |
 |------|---------|-------------|
 | `--root` | (required) | Repository root path |
@@ -106,6 +109,9 @@ benchmark entrypoint.
 | `--asm-audit` | off | Enable Tier 4 objdump + Numba ASM |
 | `--valgrind-timeout` | `1800` | Timeout per Valgrind run in seconds |
 | `--env` | none | Environment variable `KEY=VALUE` (repeatable) |
+
+Strict algorithmic `N/A` results list which rubric sub-checks are missing in
+the markdown report.
 
 ## License
 

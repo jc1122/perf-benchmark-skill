@@ -8,6 +8,7 @@ from pathlib import Path
 from types import SimpleNamespace
 
 import jsonschema
+import pytest
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
 MODULE_PATH = REPO_ROOT / "scripts" / "perf_benchmark_pipeline.py"
@@ -536,3 +537,117 @@ def test_finding_schema_accepts_na_result() -> None:
     }
 
     jsonschema.validate(instance=finding, schema=schema)
+
+
+def test_parse_args_requires_size_placeholder_for_multi_size_target(tmp_path: Path) -> None:
+    with pytest.raises(SystemExit):
+        pipeline.parse_args(
+            [
+                "--root",
+                str(tmp_path),
+                "--out-dir",
+                str(tmp_path / "out"),
+                "--target",
+                "python bench.py",
+                "--sizes",
+                "10,100",
+            ]
+        )
+
+
+def test_write_json_summary_uses_per_size_wall_time_metrics(tmp_path: Path) -> None:
+    out_dir = tmp_path / "out"
+    out_dir.mkdir()
+    rubric = {
+        "total": 4,
+        "max_possible": 8,
+        "dimensions": [
+            ("Algorithmic Scaling", {"score": -1, "tier": "N/A"}),
+            ("Wall-Time Stability", {"score": 4, "tier": "PASS", "cv": 2.12, "cv_by_size": {10: 0.7, 1000: 2.12}}),
+        ],
+        "baseline_regressions": [],
+    }
+    tier1 = {
+        "time_usage": [
+            {"wall_seconds": 0.01, "input_size": 10},
+            {"wall_seconds": 0.0101, "input_size": 10},
+            {"wall_seconds": 1.0, "input_size": 1000},
+            {"wall_seconds": 1.01, "input_size": 1000},
+        ],
+        "time_usage_by_size": {
+            10: [{"wall_seconds": 0.01}, {"wall_seconds": 0.0101}],
+            1000: [{"wall_seconds": 1.0}, {"wall_seconds": 1.01}],
+        },
+    }
+    prereqs = {
+        "python_ok": True,
+        "valgrind": "/usr/bin/valgrind",
+        "perf_paranoid": 0,
+        "governor": "performance",
+        "cache_topology": {},
+        "ram_mb": 1024,
+    }
+    args = make_args(tmp_path, tier="fast", sizes=[10, 1000])
+    expected = pipeline.score_wall_time_stability(tier1)
+
+    pipeline.write_json_summary(rubric, tier1, {}, prereqs, args, out_dir)
+
+    summary = json.loads((out_dir / "benchmark_summary.json").read_text())
+
+    assert summary["wall_time_cv"] == expected["cv"]
+    assert summary["wall_time_cv_by_size"] == {"10": 0.7, "1000": 0.7}
+
+
+def test_write_markdown_report_explains_missing_algorithmic_subchecks(tmp_path: Path) -> None:
+    out_dir = tmp_path / "out"
+    out_dir.mkdir()
+    rubric = {
+        "total": 4,
+        "max_possible": 8,
+        "dimensions": [
+            (
+                "Algorithmic Scaling",
+                {
+                    "score": -1,
+                    "tier": "N/A",
+                    "sub_checks": {"complexity_exponent": {"k": 1.0, "tier": "PASS"}},
+                    "missing_sub_checks": [
+                        "call_amplification",
+                        "data_reuse",
+                        "write_amplification",
+                        "allocation_churn",
+                        "multiplicative_paths",
+                    ],
+                    "note": "Incomplete evidence for strict scaling rubric",
+                },
+            ),
+            ("Wall-Time Stability", {"score": 4, "tier": "PASS", "cv": 2.12}),
+        ],
+        "baseline_regressions": [],
+    }
+    prereqs = {
+        "python_ok": True,
+        "valgrind": None,
+        "perf_paranoid": 0,
+        "governor": "performance",
+        "cache_topology": {},
+        "ram_mb": 1024,
+    }
+    args = make_args(tmp_path, tier="fast", sizes=[10, 1000])
+
+    pipeline.write_markdown_report(rubric, {}, {}, prereqs, args, out_dir)
+
+    report = (out_dir / "benchmark_report.md").read_text()
+
+    assert "Incomplete evidence for strict scaling rubric" in report
+    assert "call_amplification" in report
+    assert "data_reuse" in report
+    assert "Run benchmarks at >= 2 input sizes" not in report
+
+
+def test_docs_require_size_placeholder_for_multi_size_explicit_target() -> None:
+    skill_text = (REPO_ROOT / "SKILL.md").read_text()
+    readme_text = (REPO_ROOT / "README.md").read_text()
+
+    assert "Multi-size explicit targets must include `{SIZE}`." in skill_text
+    assert "Multi-size explicit targets must include `{SIZE}`." in readme_text

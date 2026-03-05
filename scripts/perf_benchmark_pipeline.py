@@ -1185,6 +1185,50 @@ def score_wall_time_stability(tier1: dict) -> dict[str, Any]:
     return result
 
 
+def _summarize_wall_time_metrics(tier1: dict) -> dict[str, Any]:
+    """Return summary-friendly wall-time metrics aligned with the scorer."""
+    time_usage_by_size = tier1.get("time_usage_by_size", {})
+    if time_usage_by_size:
+        cv_by_size = {
+            str(int(size)): round(
+                _cv(
+                    [
+                        run.get("wall_seconds", 0.0)
+                        for run in runs
+                        if run.get("wall_seconds")
+                    ]
+                ),
+                2,
+            )
+            for size, runs in time_usage_by_size.items()
+            if any(run.get("wall_seconds") for run in runs)
+        }
+        means_by_size = {
+            str(int(size)): round(
+                sum(run["wall_seconds"] for run in runs if run.get("wall_seconds"))
+                / len([run for run in runs if run.get("wall_seconds")]),
+                4,
+            )
+            for size, runs in time_usage_by_size.items()
+            if any(run.get("wall_seconds") for run in runs)
+        }
+        if cv_by_size:
+            return {
+                "wall_time_cv": max(cv_by_size.values()),
+                "wall_time_cv_by_size": cv_by_size,
+                "wall_time_mean_by_size": means_by_size,
+            }
+
+    time_data = tier1.get("time_usage", [])
+    walls = [t.get("wall_seconds", 0) for t in time_data if t.get("wall_seconds")]
+    if walls:
+        return {
+            "wall_time_cv": round(_cv(walls), 2),
+            "wall_time_mean": round(sum(walls) / len(walls), 4),
+        }
+    return {}
+
+
 def score_cpu_efficiency(tier234: dict) -> dict[str, Any]:
     """Dimension 2: CPU efficiency (hotspot concentration + IPC)."""
     cg = tier234.get("callgrind", {})
@@ -1397,7 +1441,29 @@ def write_markdown_report(
     lines.append("## Algorithmic Scaling Analysis")
     lines.append("")
     if dim0.get("tier") == "N/A":
-        lines.append("*Insufficient data. Run benchmarks at >= 2 input sizes (--sizes).*")
+        lines.append(f"*{dim0.get('note', 'Insufficient data for strict algorithmic scoring.')}*")
+        lines.append("")
+        if dim0.get("sub_checks"):
+            lines.append("| Available Sub-check | Value | Tier |")
+            lines.append("|---------------------|-------|------|")
+            for name, check in dim0["sub_checks"].items():
+                val = (
+                    check.get("k")
+                    or check.get("ratio")
+                    or check.get("peaks")
+                    or check.get("path_count")
+                    or check.get("top_fn_ir", "")
+                )
+                lines.append(f"| {name} | {val} | {check['tier']} |")
+            lines.append("")
+        missing_sub_checks = dim0.get("missing_sub_checks", [])
+        if missing_sub_checks:
+            lines.append("Missing sub-checks:")
+            for name in missing_sub_checks:
+                lines.append(f"- `{name}`")
+            lines.append("")
+            if "complexity_exponent" in missing_sub_checks:
+                lines.append("*Add at least two real input sizes via `--sizes`, and ensure explicit `--target` commands use `{SIZE}`.*")
     else:
         lines.append(f"**Result: {dim0['tier']}** (score: {dim0['score']}/4)")
         lines.append("")
@@ -1520,13 +1586,7 @@ def write_json_summary(
         "regression_blocker": bool(rubric.get("baseline_regressions")),
     }
 
-    # Include raw tier1 metrics
-    time_data = tier1.get("time_usage", [])
-    if time_data:
-        walls = [t.get("wall_seconds", 0) for t in time_data if t.get("wall_seconds")]
-        if walls:
-            summary["wall_time_cv"] = round(_cv(walls), 2)
-            summary["wall_time_mean"] = round(sum(walls) / len(walls), 4)
+    summary.update(_summarize_wall_time_metrics(tier1))
 
     tm = tier1.get("tracemalloc", {})
     if tm and tm.get("peak_bytes"):
@@ -1573,6 +1633,8 @@ def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
         args.sizes = [int(s.strip()) for s in args.sizes.split(",")]
     else:
         args.sizes = []
+    if args.target and len(args.sizes) >= 2 and "{SIZE}" not in args.target:
+        p.error("Explicit --target with multiple --sizes requires a {SIZE} placeholder.")
     args.root = args.root.resolve()
     args.out_dir = args.out_dir.resolve()
     return args
