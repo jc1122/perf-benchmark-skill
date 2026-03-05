@@ -100,6 +100,7 @@ tool selection guidance.
 python scripts/perf_benchmark_pipeline.py \
   --root . \
   --out-dir /tmp/bench \
+  --target "cargo run --release --bin bench -- {SIZE}" \
   --baseline /tmp/previous/benchmark_summary.json
 ```
 

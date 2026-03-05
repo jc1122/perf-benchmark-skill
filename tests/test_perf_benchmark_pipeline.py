@@ -172,6 +172,13 @@ def test_docs_describe_explicit_target_as_repo_agnostic_path() -> None:
     assert "For repo-agnostic use, pass an explicit `--target` or `--binary`." in readme_text
 
 
+def test_skill_regression_example_uses_explicit_target_or_binary() -> None:
+    text = (REPO_ROOT / "SKILL.md").read_text()
+
+    assert "--baseline /tmp/previous/benchmark_summary.json" in text
+    assert '--target "cargo run --release --bin bench -- {SIZE}" --baseline' in text
+
+
 def test_main_requires_real_benchmark_target(monkeypatch, tmp_path: Path) -> None:
     args = make_args(tmp_path, tier="fast")
     called: dict[str, bool] = {}
@@ -202,6 +209,35 @@ def test_main_requires_real_benchmark_target(monkeypatch, tmp_path: Path) -> Non
     assert called == {}
 
 
+def test_main_returns_error_when_stage_reports_failure(monkeypatch, tmp_path: Path) -> None:
+    args = make_args(tmp_path, tier="deep", binary="/bin/true")
+
+    monkeypatch.setattr(pipeline, "parse_args", lambda argv=None: args)
+    monkeypatch.setattr(
+        pipeline,
+        "check_prerequisites",
+        lambda _args: {
+            "python_ok": True,
+            "valgrind": "/usr/bin/valgrind",
+            "perf_paranoid": 0,
+            "governor": "performance",
+            "cache_topology": {},
+            "ram_mb": 16_384,
+        },
+    )
+    monkeypatch.setattr(pipeline, "stage_tier1", lambda *a, **k: {"time_usage": []})
+    monkeypatch.setattr(
+        pipeline,
+        "run_parallel_tiers",
+        lambda *_args, **_kwargs: {"perf_stat": {"error": "exit 2"}},
+    )
+    monkeypatch.setattr(pipeline, "score_rubric", lambda *a, **k: {"dimensions": [], "total": 0, "max_possible": 0})
+    monkeypatch.setattr(pipeline, "write_markdown_report", lambda *a, **k: None)
+    monkeypatch.setattr(pipeline, "write_json_summary", lambda *a, **k: None)
+
+    assert pipeline.main([]) == 1
+
+
 def test_stage_tier1_tracemalloc_measures_child_python_process(tmp_path: Path) -> None:
     script_path = tmp_path / "alloc.py"
     script_path.write_text(
@@ -217,6 +253,60 @@ def test_stage_tier1_tracemalloc_measures_child_python_process(tmp_path: Path) -
     results = pipeline.stage_tier1(args, {}, [], tmp_path / "out")
 
     assert results["tracemalloc"]["peak_bytes"] > 10_000_000
+
+
+def test_stage_tier1_times_explicit_binary_for_each_size(monkeypatch, tmp_path: Path) -> None:
+    args = make_args(
+        tmp_path,
+        root=tmp_path,
+        out_dir=tmp_path / "out",
+        binary="/bin/true",
+        sizes=[10, 20],
+        time_repeats=1,
+    )
+    seen_targets: list[list[str]] = []
+
+    def fake_run(cmd, capture_output, text, cwd=None, env=None, timeout=None):
+        if cmd[0] == "/usr/bin/time":
+            seen_targets.append(cmd[2:])
+            return SimpleNamespace(returncode=0, stderr="Elapsed (wall clock) time (h:mm:ss or m:ss): 0:00.01\n", stdout="")
+        return SimpleNamespace(returncode=0, stderr="", stdout="")
+
+    monkeypatch.setattr(pipeline.subprocess, "run", fake_run)
+
+    results = pipeline.stage_tier1(args, {}, [], tmp_path / "out")
+
+    assert seen_targets == [["/bin/true", "10"], ["/bin/true", "20"]]
+    assert sorted(results["time_usage_by_size"]) == [10, 20]
+
+
+def test_score_algorithmic_scaling_uses_time_usage_by_size_when_pytest_data_missing(tmp_path: Path) -> None:
+    args = make_args(tmp_path, binary="/bin/true", sizes=[10, 100], expected_complexity="linear")
+    tier1 = {
+        "time_usage_by_size": {
+            10: [{"wall_seconds": 0.01}],
+            100: [{"wall_seconds": 0.1}],
+        }
+    }
+
+    result = pipeline.score_algorithmic_scaling(tier1, {}, args)
+
+    assert result["tier"] == "PASS"
+    assert result["sub_checks"]["complexity_exponent"]["k"] == 1.0
+
+
+def test_stage_tier1_marks_tracemalloc_error_for_python_interpreter_flags(tmp_path: Path) -> None:
+    script_path = tmp_path / "alloc.py"
+    script_path.write_text("print('ok')\n")
+    args = make_args(
+        tmp_path,
+        target=f"{sys.executable} -O alloc.py",
+        time_repeats=1,
+    )
+
+    results = pipeline.stage_tier1(args, {}, [], tmp_path / "out")
+
+    assert "error" in results["tracemalloc"]
 
 
 def test_stage_cachegrind_annotation_uses_timeout(monkeypatch, tmp_path: Path) -> None:

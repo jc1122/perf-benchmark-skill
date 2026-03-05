@@ -228,17 +228,22 @@ def _missing_target_error() -> ValueError:
     )
 
 
-def _build_target_cmd(args: argparse.Namespace, targets: list[str]) -> list[str]:
+def _build_target_cmd(
+    args: argparse.Namespace, targets: list[str], size_override: int | None = None
+) -> list[str]:
     """Build the command to run for benchmarking."""
+    size_value = size_override
+    if size_value is None and args.sizes:
+        size_value = args.sizes[-1]
     if args.binary:
         cmd = [args.binary]
-        if args.sizes:
-            cmd.append(str(args.sizes[-1]))
+        if size_value is not None:
+            cmd.append(str(size_value))
         return cmd
     if args.target:
         expanded = args.target
-        if args.sizes and "{SIZE}" in expanded:
-            expanded = expanded.replace("{SIZE}", str(args.sizes[-1]))
+        if size_value is not None and "{SIZE}" in expanded:
+            expanded = expanded.replace("{SIZE}", str(size_value))
         return shlex.split(expanded)
     if targets:
         return [args.python, "-m", "pytest", "-x", "-q", "--benchmark-disable"] + targets
@@ -378,6 +383,35 @@ raise SystemExit(status)
     return Path(tmp.name), cmd_list
 
 
+def _tracemalloc_target_error(cmd_list: list[str]) -> str | None:
+    exe = os.path.basename(cmd_list[0]).lower()
+    if "python" not in exe:
+        return "tracemalloc requires a Python target command"
+
+    argv = cmd_list[1:]
+    unsupported: list[str] = []
+    i = 0
+    while i < len(argv) and argv[i].startswith("-") and argv[i] not in {"-m", "-c"}:
+        flag = argv[i]
+        unsupported.append(flag)
+        i += 1
+        if flag in {"-X", "-W"} and i < len(argv):
+            i += 1
+    if unsupported:
+        return "tracemalloc does not support Python interpreter flags: " + " ".join(unsupported)
+    return None
+
+
+def _stage_has_error(value: Any) -> bool:
+    if isinstance(value, dict):
+        if value.get("error"):
+            return True
+        return any(_stage_has_error(item) for item in value.values())
+    if isinstance(value, list):
+        return any(_stage_has_error(item) for item in value)
+    return False
+
+
 def stage_tier1(
     args: argparse.Namespace, prereqs: dict, targets: list[str], out_dir: Path
 ) -> dict[str, Any]:
@@ -410,36 +444,61 @@ def stage_tier1(
         tracemalloc_out = tier1_dir / "tracemalloc.json"
         wrapper_path, wrapper_cmd = _generate_tracemalloc_wrapper(args, targets)
         try:
-            _log("  -> tracemalloc wrapper...")
-            subprocess.run(
-                [
-                    args.python, str(wrapper_path), str(tracemalloc_out),
-                    json.dumps(str(args.root)),
-                    json.dumps(wrapper_cmd),
-                ],
-                capture_output=True, text=True, cwd=str(args.root), env=env, timeout=300,
-            )
-            if tracemalloc_out.exists():
-                results["tracemalloc"] = json.loads(tracemalloc_out.read_text())
+            target_error = _tracemalloc_target_error(wrapper_cmd)
+            if target_error:
+                results["tracemalloc"] = {"error": target_error}
+            else:
+                _log("  -> tracemalloc wrapper...")
+                r = subprocess.run(
+                    [
+                        args.python, str(wrapper_path), str(tracemalloc_out),
+                        json.dumps(str(args.root)),
+                        json.dumps(wrapper_cmd),
+                    ],
+                    capture_output=True, text=True, cwd=str(args.root), env=env, timeout=300,
+                )
+                if r.returncode != 0:
+                    results["tracemalloc"] = {"error": f"exit {r.returncode}", "stderr": r.stderr[:500]}
+                elif tracemalloc_out.exists():
+                    results["tracemalloc"] = json.loads(tracemalloc_out.read_text())
+                else:
+                    results["tracemalloc"] = {"error": "missing tracemalloc output"}
         except (subprocess.TimeoutExpired, json.JSONDecodeError, OSError) as e:
             results["tracemalloc"] = {"error": str(e)}
         finally:
             wrapper_path.unlink(missing_ok=True)
 
     # 3. /usr/bin/time -v (repeated for CV)
-    target_cmd = _build_target_cmd(args, targets)
     time_results: list[dict] = []
+    time_usage_by_size: dict[int, list[dict[str, Any]]] = {}
     repeats = args.time_repeats
+    size_runs = args.sizes if (args.target or args.binary) and args.sizes else [None]
     _log(f"  -> /usr/bin/time -v x{repeats}...")
-    for _ in range(repeats):
-        r = subprocess.run(
-            ["/usr/bin/time", "-v"] + target_cmd,
-            capture_output=True, text=True, cwd=str(args.root), env=env,
-        )
-        parsed = _parse_gnu_time(r.stderr)
-        if parsed:
-            time_results.append(parsed)
+    for size_value in size_runs:
+        target_cmd = _build_target_cmd(args, targets, size_override=size_value)
+        for _ in range(repeats):
+            r = subprocess.run(
+                ["/usr/bin/time", "-v"] + target_cmd,
+                capture_output=True, text=True, cwd=str(args.root), env=env,
+            )
+            if r.returncode != 0:
+                results["time_error"] = {
+                    "error": f"exit {r.returncode}",
+                    "stderr": r.stderr[:500],
+                    "input_size": size_value,
+                }
+                break
+            parsed = _parse_gnu_time(r.stderr)
+            if parsed:
+                if size_value is not None:
+                    parsed["input_size"] = size_value
+                    time_usage_by_size.setdefault(size_value, []).append(parsed)
+                time_results.append(parsed)
+        if results.get("time_error"):
+            break
     results["time_usage"] = time_results
+    if time_usage_by_size:
+        results["time_usage_by_size"] = time_usage_by_size
 
     # Write raw time output
     if time_results:
@@ -785,6 +844,8 @@ def stage_perf_stat(
         timeout=args.valgrind_timeout,
     )
     (tier3_dir / "perf_stat.txt").write_text(r.stderr)
+    if r.returncode != 0:
+        return {"error": f"perf stat failed (exit {r.returncode})", "stderr": r.stderr[:500]}
 
     _log("  -> perf stat: done")
     return _parse_perf_stat(r.stderr)
@@ -957,13 +1018,19 @@ def score_algorithmic_scaling(
     if sizes and len(sizes) >= 2:
         pb = tier1.get("pytest_benchmark", {})
         benchmarks = pb.get("benchmarks", [])
+        times_by_size: dict[int, list[float]] = {}
         if benchmarks:
-            times_by_size: dict[int, list[float]] = {}
             for b in benchmarks:
                 params = b.get("params", {}) or {}
                 size = params.get("size") or b.get("extra_info", {}).get("input_size")
                 if size is not None:
                     times_by_size.setdefault(int(size), []).append(b.get("stats", {}).get("mean", 0))
+        else:
+            for size, runs in tier1.get("time_usage_by_size", {}).items():
+                walls = [run.get("wall_seconds", 0.0) for run in runs if run.get("wall_seconds")]
+                if walls:
+                    times_by_size[int(size)] = walls
+        if times_by_size:
             matched_sizes, matched_times = [], []
             for s in sorted(sizes):
                 if s in times_by_size:
@@ -1489,6 +1556,10 @@ def main(argv: list[str] | None = None) -> int:
     rubric = score_rubric(tier1_results, tier234_results, args)
     write_markdown_report(rubric, tier1_results, tier234_results, prereqs, args, out_dir)
     write_json_summary(rubric, tier1_results, tier234_results, prereqs, args, out_dir)
+
+    if _stage_has_error(tier1_results) or _stage_has_error(tier234_results):
+        _log("One or more stages reported errors.")
+        return 1
 
     _log(f"\nScore: {rubric['total']}/{rubric['max_possible']}")
     total_dims = len([d for _, d in rubric["dimensions"] if d.get("tier") != "N/A"])
