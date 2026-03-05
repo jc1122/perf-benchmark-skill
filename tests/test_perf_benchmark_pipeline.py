@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import importlib.util
 import json
+import sys
 from argparse import Namespace
 from pathlib import Path
 from types import SimpleNamespace
@@ -82,7 +83,7 @@ def test_stage_perf_stat_uses_augmented_environment(monkeypatch, tmp_path: Path)
     monkeypatch.setattr(pipeline.shutil, "which", lambda name: "/usr/bin/perf" if name == "perf" else None)
     monkeypatch.setattr(pipeline, "_build_target_cmd", lambda *_args: ["/bin/true"])
 
-    def fake_run(cmd, capture_output, text, cwd, env=None):
+    def fake_run(cmd, capture_output, text, cwd, env=None, timeout=None):
         captured["cmd"] = cmd
         captured["env"] = env
         return SimpleNamespace(stderr="", stdout="", returncode=0)
@@ -160,3 +161,148 @@ def test_skill_markdown_examples_reference_real_script_names() -> None:
     text = (REPO_ROOT / "SKILL.md").read_text()
     assert "perf-benchmark-skill/scripts/perf_benchmark_pipeline.py" not in text
     assert "python pipeline.py" not in text
+
+
+def test_stage_tier1_tracemalloc_measures_child_python_process(tmp_path: Path) -> None:
+    script_path = tmp_path / "alloc.py"
+    script_path.write_text(
+        "payload = [bytearray(4096) for _ in range(5000)]\n"
+        "print(len(payload))\n"
+    )
+    args = make_args(
+        tmp_path,
+        target=f"{sys.executable} alloc.py",
+        time_repeats=1,
+    )
+
+    results = pipeline.stage_tier1(args, {}, [], tmp_path / "out")
+
+    assert results["tracemalloc"]["peak_bytes"] > 10_000_000
+
+
+def test_stage_cachegrind_annotation_uses_timeout(monkeypatch, tmp_path: Path) -> None:
+    args = make_args(tmp_path, root=tmp_path, out_dir=tmp_path / "out", source_prefix="src/pkg/")
+    captured: list[int | None] = []
+
+    def fake_run(cmd, capture_output, text, cwd=None, env=None, timeout=None):
+        if cmd[0] == "valgrind":
+            (tmp_path / "out" / "tier2").mkdir(parents=True, exist_ok=True)
+            (tmp_path / "out" / "tier2" / "cachegrind.out").write_text("cachegrind")
+            return SimpleNamespace(returncode=0, stderr="", stdout="")
+        captured.append(timeout)
+        return SimpleNamespace(returncode=0, stderr="", stdout="")
+
+    monkeypatch.setattr(pipeline.subprocess, "run", fake_run)
+
+    pipeline.stage_cachegrind(args, {"cache_topology": {}}, [], tmp_path / "out")
+
+    assert captured == [args.valgrind_timeout]
+
+
+def test_stage_callgrind_annotation_uses_timeout(monkeypatch, tmp_path: Path) -> None:
+    args = make_args(tmp_path, root=tmp_path, out_dir=tmp_path / "out", source_prefix="src/pkg/")
+    captured: list[int | None] = []
+
+    def fake_run(cmd, capture_output, text, cwd=None, env=None, timeout=None):
+        if cmd[0] == "valgrind":
+            (tmp_path / "out" / "tier2").mkdir(parents=True, exist_ok=True)
+            (tmp_path / "out" / "tier2" / "callgrind.out").write_text("callgrind")
+            return SimpleNamespace(returncode=0, stderr="", stdout="")
+        captured.append(timeout)
+        return SimpleNamespace(returncode=0, stderr="", stdout="")
+
+    monkeypatch.setattr(pipeline.subprocess, "run", fake_run)
+
+    pipeline.stage_callgrind(args, {"cache_topology": {}}, [], tmp_path / "out")
+
+    assert captured == [args.valgrind_timeout]
+
+
+def test_stage_massif_post_processing_uses_timeout(monkeypatch, tmp_path: Path) -> None:
+    args = make_args(tmp_path, root=tmp_path, out_dir=tmp_path / "out")
+    captured: list[int | None] = []
+
+    def fake_run(cmd, capture_output, text, cwd=None, env=None, timeout=None):
+        if cmd[0] == "valgrind":
+            (tmp_path / "out" / "tier3").mkdir(parents=True, exist_ok=True)
+            (tmp_path / "out" / "tier3" / "massif.out").write_text("snapshot=0\nmem_heap_B=1\n")
+            return SimpleNamespace(returncode=0, stderr="", stdout="")
+        captured.append(timeout)
+        return SimpleNamespace(returncode=0, stderr="", stdout="")
+
+    monkeypatch.setattr(pipeline.subprocess, "run", fake_run)
+
+    pipeline.stage_massif(args, {"cache_topology": {}}, [], tmp_path / "out")
+
+    assert captured == [args.valgrind_timeout]
+
+
+def test_stage_perf_stat_uses_timeout(monkeypatch, tmp_path: Path) -> None:
+    args = make_args(tmp_path, env=["FOO=bar"], binary="/bin/true")
+    captured: list[int | None] = []
+
+    monkeypatch.setattr(pipeline.shutil, "which", lambda name: "/usr/bin/perf" if name == "perf" else None)
+    monkeypatch.setattr(pipeline, "_build_target_cmd", lambda *_args: ["/bin/true"])
+
+    def fake_run(cmd, capture_output, text, cwd, env=None, timeout=None):
+        captured.append(timeout)
+        return SimpleNamespace(stderr="", stdout="", returncode=0)
+
+    monkeypatch.setattr(pipeline.subprocess, "run", fake_run)
+
+    pipeline.stage_perf_stat(args, {"perf_paranoid": 0}, [], tmp_path / "out")
+
+    assert captured == [args.valgrind_timeout]
+
+
+def test_stage_objdump_uses_timeout(monkeypatch, tmp_path: Path) -> None:
+    root = tmp_path / "repo"
+    so_file = root / "build" / "pkg" / "module.so"
+    so_file.parent.mkdir(parents=True)
+    so_file.write_bytes(b"ELF")
+    args = make_args(root, root=root, out_dir=root / "out", source_prefix="src/pkg/", tier="asm")
+    captured: list[int | None] = []
+
+    def fake_run(*_args, **kwargs):
+        captured.append(kwargs.get("timeout"))
+        return SimpleNamespace(stdout="asm", stderr="", returncode=0)
+
+    monkeypatch.setattr(pipeline.subprocess, "run", fake_run)
+
+    pipeline.stage_objdump(args, {}, [], root / "out")
+
+    assert captured == [args.valgrind_timeout]
+
+
+def test_parse_cachegrind_summary_handles_decimal_totals() -> None:
+    text = "\n".join(
+        [
+            "Ir I1mr D1mr",
+            "123.456 7 8 PROGRAM TOTALS",
+        ]
+    )
+
+    result = pipeline._parse_cachegrind_summary(text)
+
+    assert result["summary"]["Ir"] == 123
+    assert result["summary"]["I1mr"] == 7
+
+
+def test_fit_exponent_ignores_non_positive_sizes() -> None:
+    assert pipeline._fit_exponent([0, 100, 1000], [1.0, 10.0, 100.0]) == 1.0
+
+
+def test_build_valgrind_target_cmd_does_not_assume_pytest_name_filter(tmp_path: Path) -> None:
+    args = make_args(tmp_path)
+
+    cmd = pipeline._build_valgrind_target_cmd(args, ["tests/benchmarks"])
+
+    assert "-k" not in cmd
+
+
+def test_build_valgrind_target_cmd_matches_binary_argument_behavior(tmp_path: Path) -> None:
+    args = make_args(tmp_path, binary="/bin/true", sizes=[], valgrind_size=123)
+
+    cmd = pipeline._build_valgrind_target_cmd(args, [])
+
+    assert cmd == ["/bin/true"]

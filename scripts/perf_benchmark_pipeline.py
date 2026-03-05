@@ -243,7 +243,8 @@ def _build_valgrind_target_cmd(args: argparse.Namespace, targets: list[str]) -> 
     """Build target command sized for Valgrind (smaller input)."""
     if args.binary:
         cmd = [args.binary]
-        cmd.append(str(args.valgrind_size))
+        if args.sizes:
+            cmd.append(str(args.valgrind_size))
         return cmd
     if args.target:
         expanded = args.target
@@ -254,7 +255,6 @@ def _build_valgrind_target_cmd(args: argparse.Namespace, targets: list[str]) -> 
         return [
             args.python, "-m", "pytest", "-x", "-q",
             "--benchmark-enable", "--benchmark-only",
-            "-k", f"n{args.valgrind_size}",
         ] + targets
     return [args.python, "-c", "pass"]
 
@@ -295,7 +295,7 @@ def _parse_gnu_time(stderr: str) -> dict[str, Any]:
 def _generate_tracemalloc_wrapper(
     args: argparse.Namespace, targets: list[str]
 ) -> tuple[Path, list[str]]:
-    """Generate a temporary script that wraps tracemalloc around a subprocess call.
+    """Generate a temporary script that injects tracemalloc into a child Python process.
 
     Returns (wrapper_path, target_cmd_list).  The target command is passed via
     a JSON-encoded argv list in sys.argv[3] to avoid code injection through
@@ -310,25 +310,61 @@ def _generate_tracemalloc_wrapper(
         cmd_list = [args.python, "-c", "pass"]
 
     wrapper_code = '''\
-import tracemalloc, json, sys, os, subprocess
+import json, os, runpy, sys, tracemalloc
 os.chdir(json.loads(sys.argv[2]))
 cmd = json.loads(sys.argv[3])
+trace_out = sys.argv[1]
+exe = os.path.basename(cmd[0]).lower()
+if "python" not in exe:
+    with open(trace_out, "w") as f:
+        json.dump({"error": "tracemalloc requires a Python target command"}, f, indent=2)
+    raise SystemExit(0)
+
+python_argv = cmd[1:]
+status = 0
 tracemalloc.start(25)
-subprocess.run(cmd, check=False)
-current, peak = tracemalloc.get_traced_memory()
-snapshot = tracemalloc.take_snapshot()
-top = snapshot.statistics("lineno")[:20]
-result = {
-    "current_bytes": current,
-    "peak_bytes": peak,
-    "top_allocators": [
-        {"traceback": str(s.traceback), "size_bytes": s.size, "count": s.count}
-        for s in top
-    ]
-}
-tracemalloc.stop()
-with open(sys.argv[1], "w") as f:
-    json.dump(result, f, indent=2)
+old_argv = sys.argv[:]
+
+try:
+    if not python_argv:
+        status = 0
+    elif python_argv[0] == "-m" and len(python_argv) >= 2:
+        sys.argv = [python_argv[1]] + python_argv[2:]
+        runpy.run_module(python_argv[1], run_name="__main__", alter_sys=True)
+    elif python_argv[0] == "-c" and len(python_argv) >= 2:
+        sys.argv = ["-c"] + python_argv[2:]
+        exec(python_argv[1], {"__name__": "__main__", "__file__": "<string>"})
+    else:
+        sys.argv = python_argv
+        runpy.run_path(python_argv[0], run_name="__main__")
+except SystemExit as exc:
+    code = exc.code
+    status = code if isinstance(code, int) else 0
+finally:
+    current, peak = tracemalloc.get_traced_memory()
+    snapshot = tracemalloc.take_snapshot()
+    top = snapshot.statistics("lineno")[:20]
+    with open(trace_out, "w") as f:
+        json.dump(
+            {
+                "current_bytes": current,
+                "peak_bytes": peak,
+                "top_allocators": [
+                    {
+                        "traceback": str(s.traceback),
+                        "size_bytes": s.size,
+                        "count": s.count,
+                    }
+                    for s in top
+                ],
+            },
+            f,
+            indent=2,
+        )
+    tracemalloc.stop()
+    sys.argv = old_argv
+
+raise SystemExit(status)
 '''
     tmp = tempfile.NamedTemporaryFile(mode="w", suffix="_tracemalloc.py", delete=False)
     tmp.write(wrapper_code)
@@ -426,10 +462,15 @@ def _parse_cachegrind_summary(text: str) -> dict[str, Any]:
     for line in lines:
         if "PROGRAM TOTALS" in line:
             parts = line.replace(",", "").split()
-            nums = [p for p in parts if p.replace(".", "").isdigit()]
-            if len(nums) >= 9 and headers:
+            nums: list[int] = []
+            for part in parts:
+                try:
+                    nums.append(int(float(part)))
+                except ValueError:
+                    continue
+            if nums and headers:
                 for h, v in zip(headers[:len(nums)], nums):
-                    result["summary"][h] = int(v)
+                    result["summary"][h] = v
             break
 
     # Parse per-file lines (lines with file paths containing /)
@@ -531,7 +572,12 @@ def stage_cachegrind(
     if args.source_prefix:
         ann_cmd += [f"--include={args.source_prefix}"]
     ann_cmd.append(str(outfile))
-    ann_r = subprocess.run(ann_cmd, capture_output=True, text=True)
+    ann_r = subprocess.run(
+        ann_cmd,
+        capture_output=True,
+        text=True,
+        timeout=args.valgrind_timeout,
+    )
     annotated_path = tier2_dir / "cachegrind_annotated.txt"
     annotated_path.write_text(ann_r.stdout)
 
@@ -566,7 +612,12 @@ def stage_callgrind(
     if args.source_prefix:
         ann_cmd += [f"--include={args.source_prefix}"]
     ann_cmd.append(str(outfile))
-    ann_r = subprocess.run(ann_cmd, capture_output=True, text=True)
+    ann_r = subprocess.run(
+        ann_cmd,
+        capture_output=True,
+        text=True,
+        timeout=args.valgrind_timeout,
+    )
     (tier2_dir / "callgrind_annotated.txt").write_text(ann_r.stdout)
 
     _log("  -> callgrind: done")
@@ -654,7 +705,12 @@ def stage_massif(
 
     # Generate ms_print as human artifact
     if outfile.exists():
-        ms_r = subprocess.run(["ms_print", str(outfile)], capture_output=True, text=True)
+        ms_r = subprocess.run(
+            ["ms_print", str(outfile)],
+            capture_output=True,
+            text=True,
+            timeout=args.valgrind_timeout,
+        )
         (tier3_dir / "massif_ms_print.txt").write_text(ms_r.stdout)
 
     _log("  -> massif: done")
@@ -714,7 +770,14 @@ def stage_perf_stat(
     cmd = ["perf", "stat", "-r", str(args.perf_repeats), "-e", events, "--"] + target_cmd
 
     _log("  -> perf stat: running...")
-    r = subprocess.run(cmd, capture_output=True, text=True, cwd=str(args.root), env=env)
+    r = subprocess.run(
+        cmd,
+        capture_output=True,
+        text=True,
+        cwd=str(args.root),
+        env=env,
+        timeout=args.valgrind_timeout,
+    )
     (tier3_dir / "perf_stat.txt").write_text(r.stderr)
 
     _log("  -> perf stat: done")
@@ -734,14 +797,24 @@ def stage_objdump(
 
     if args.binary:
         outpath = tier4_dir / f"objdump_{Path(args.binary).name}.txt"
-        r = subprocess.run(["objdump", "-dS", args.binary], capture_output=True, text=True)
+        r = subprocess.run(
+            ["objdump", "-dS", args.binary],
+            capture_output=True,
+            text=True,
+            timeout=args.valgrind_timeout,
+        )
         outpath.write_text(r.stdout)
         generated.append(str(outpath))
     else:
         root = args.root
         for so_file in _discover_objdump_targets(root, args.source_prefix):
             outpath = tier4_dir / f"objdump_{so_file.name}.txt"
-            r = subprocess.run(["objdump", "-dS", str(so_file)], capture_output=True, text=True)
+            r = subprocess.run(
+                ["objdump", "-dS", str(so_file)],
+                capture_output=True,
+                text=True,
+                timeout=args.valgrind_timeout,
+            )
             outpath.write_text(r.stdout)
             generated.append(str(outpath))
 
@@ -851,8 +924,11 @@ def _fit_exponent(sizes: list[int], times: list[float]) -> float:
     """Fit time = a * N^k via log-log linear regression. Returns k."""
     if len(sizes) < 2 or len(times) < 2:
         return 1.0
-    log_n = [math.log(n) for n in sizes]
-    log_t = [math.log(max(t, 1e-12)) for t in times]
+    filtered_pairs = [(n, t) for n, t in zip(sizes, times) if n > 0 and t > 0]
+    if len(filtered_pairs) < 2:
+        return 1.0
+    log_n = [math.log(n) for n, _ in filtered_pairs]
+    log_t = [math.log(t) for _, t in filtered_pairs]
     n = len(log_n)
     sum_x = sum(log_n)
     sum_y = sum(log_t)
@@ -1015,11 +1091,10 @@ def score_cpu_efficiency(tier234: dict) -> dict[str, Any]:
     return {"score": score, "tier": tier_val, **evidence}
 
 
-def score_cache_dim(tier234: dict, metric_key: str, pass_t: float, warn_t: float, fail_t: float) -> dict[str, Any]:
+def score_cache_dim(tier234: dict, metric_key: str, pass_t: float, warn_t: float) -> dict[str, Any]:
     """Generic cache dimension scorer.
 
     Thresholds: <= pass_t → PASS, <= warn_t → WARN, > warn_t → FAIL.
-    (fail_t is kept for API compatibility but warn_t is the WARN/FAIL boundary.)
     """
     ch = tier234.get("cachegrind", {})
     if not ch or ch.get("error"):
@@ -1128,9 +1203,9 @@ def score_rubric(
         ("Algorithmic Scaling", score_algorithmic_scaling(tier1, tier234, args)),
         ("Wall-Time Stability", score_wall_time_stability(tier1)),
         ("CPU Efficiency", score_cpu_efficiency(tier234)),
-        ("L1 Cache Efficiency", score_cache_dim(tier234, "L1d_miss_pct", 1.0, 5.0, 5.0)),
-        ("Last-Level Cache", score_cache_dim(tier234, "LL_miss_pct", 0.5, 2.0, 2.0)),
-        ("Branch Prediction", score_cache_dim(tier234, "branch_mispred_pct", 1.0, 3.0, 3.0)),
+        ("L1 Cache Efficiency", score_cache_dim(tier234, "L1d_miss_pct", 1.0, 5.0)),
+        ("Last-Level Cache", score_cache_dim(tier234, "LL_miss_pct", 0.5, 2.0)),
+        ("Branch Prediction", score_cache_dim(tier234, "branch_mispred_pct", 1.0, 3.0)),
         ("Memory Profile", score_memory_profile(tier1, tier234, baseline)),
     ]
 
