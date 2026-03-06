@@ -32,7 +32,7 @@ entrypoint explicitly. Pytest benchmark autodiscovery is a convenience for Pytho
 2. `benchmark_summary.json` — machine-readable scores and raw metrics for baseline/regression.
 3. `tier1/` — pytest-benchmark JSON, tracemalloc JSON, GNU time output.
 4. `tier2/` — cachegrind + callgrind annotated outputs.
-5. `tier3/` — massif heap profile, perf stat counters.
+5. `tier3/` — massif heap profile, perf stat counters, and opt-in native `perf record/report` artifacts.
 6. `tier4/` — objdump disassembly, Numba ASM (if `--asm-audit`).
 
 ## Workflow
@@ -50,7 +50,7 @@ The script auto-checks at startup:
 ### 2. Discover or Specify Targets
 
 Auto-discovers `pytest.mark.benchmark` tests and `tests/benchmarks/` directories.
-Override with `--target "cmd {SIZE}"` or `--binary ./my_program`.
+Override with `--target "cmd {SIZE}"` or `--binary ./path/to/program`.
 Use `--target` or `--binary` for non-pytest repos.
 Multi-size explicit targets must include `{SIZE}`.
 Single-size explicit targets must also include `{SIZE}` when `--sizes` is present; otherwise omit `--sizes`.
@@ -60,8 +60,8 @@ Single-size explicit targets must also include `{SIZE}` when `--sizes` is presen
 ```bash
 python /path/to/perf-benchmark/scripts/perf_benchmark_pipeline.py \
   --root /path/to/repo \
-  --target "python -m mypkg.bench {SIZE}" \
-  --source-prefix src/pkg/ \
+  --target "python -m benchmark_entrypoint {SIZE}" \
+  --source-prefix path/to/source/ \
   --tier medium \
   --sizes 10000,100000 \
   --out-dir /tmp/perf-bench
@@ -72,6 +72,10 @@ Tier options:
 - `medium`: Tiers 1-2 (+ cachegrind + callgrind). Minutes.
 - `deep`: Tiers 1-3 (+ massif + perf stat). Minutes.
 - `asm`: All tiers including Tier 4 ASM audit.
+
+Native sampled hotspots are opt-in via `--perf-record`. When enabled and `perf`
+is available, Tier 3 also runs `perf record` + `perf report --stdio` and writes
+raw artifacts plus a compact hotspot summary.
 
 ### 4. Review Rubric Scores
 
@@ -98,14 +102,28 @@ Each FAIL/WARN dimension maps to concrete optimization patterns.
 See `references/rubric.md` for thresholds and `references/tool-guide.md` for
 tool selection guidance.
 
+### Algorithm Diagnosis Playbook
+
+Use this advisory checklist before dropping into cache, branch, or ASM work:
+
+- Confirm measured growth matches the expected complexity class before tuning constants.
+- Prefer a lower asymptotic class or smaller search space before hardware-level work.
+- Replace full recomputation with incremental maintenance when updates are local.
+- Process the delta, not the full retained history; bound per-update work to changed inputs.
+- Remove redundant passes, rereads, and copies of unchanged data.
+- Add indexes, partitions, caches, or summaries so queries touch only required state.
+- For streaming workloads, check whether per-update work scales with delta size or total state size.
+
+Use `references/question-bank.md` for the fuller advisory diagnosis prompts.
+
 ### 6. Regression Comparison (Optional)
 
 ```bash
 python scripts/perf_benchmark_pipeline.py \
   --root . \
   --out-dir /tmp/bench \
-  --target "cargo run --release --bin bench -- {SIZE}" \
-  --baseline /tmp/previous/benchmark_summary.json
+  --target "./path/to/benchmark {SIZE}" \
+  --baseline /path/to/previous/benchmark_summary.json
 ```
 
 Any scored dimension dropping >= 1 tier from baseline is surfaced in the
@@ -138,23 +156,26 @@ Sub-agents return structured findings matching `references/finding-schema.json`.
 
 - **Numba**: Pass `--env NUMBA_DISABLE_JIT=1` for coverage; omit for actual JIT benchmarks.
 - **ctypes/CFFI**: C extensions loaded via Python — use `--source-prefix` to filter Valgrind noise.
-- **Standalone C**: Use `--binary ./my_program` to skip Python entirely.
+- **Standalone C**: Use `--binary ./path/to/program` to skip Python entirely.
 - **Hybrid CPUs** (Intel Alder/Raptor Lake): cachegrind simulates P-core cache hierarchy.
 
 ## Quick Reference
 
 ```bash
 # Fast check (seconds)
-python scripts/perf_benchmark_pipeline.py --root . --out-dir /tmp/b --tier fast --target "python -m mypkg.bench {SIZE}" --sizes 10000,100000
+python scripts/perf_benchmark_pipeline.py --root . --out-dir /tmp/b --tier fast --target "python -m benchmark_entrypoint {SIZE}" --sizes 10000,100000
 
 # Medium with source filtering
-python scripts/perf_benchmark_pipeline.py --root . --out-dir /tmp/b --tier medium --target "./bench.sh {SIZE}" --source-prefix src/pkg/ --sizes 10000,100000
+python scripts/perf_benchmark_pipeline.py --root . --out-dir /tmp/b --tier medium --target "./path/to/benchmark {SIZE}" --source-prefix path/to/source/ --sizes 10000,100000
 
 # Deep with regression baseline
-python scripts/perf_benchmark_pipeline.py --root . --out-dir /tmp/b --tier deep --target "cargo run --release --bin bench -- {SIZE}" --baseline /tmp/prev/benchmark_summary.json --sizes 10000,100000
+python scripts/perf_benchmark_pipeline.py --root . --out-dir /tmp/b --tier deep --target "./path/to/benchmark {SIZE}" --baseline /path/to/previous/benchmark_summary.json --sizes 10000,100000
+
+# Deep with opt-in native hotspot sampling
+python scripts/perf_benchmark_pipeline.py --root . --out-dir /tmp/b --tier deep --target "./path/to/benchmark {SIZE}" --sizes 10000,100000 --perf-record
 
 # ASM audit for C binary
-python scripts/perf_benchmark_pipeline.py --root . --out-dir /tmp/b --tier asm --binary ./build/my_program --asm-audit
+python scripts/perf_benchmark_pipeline.py --root . --out-dir /tmp/b --tier asm --binary ./path/to/program --asm-audit
 ```
 
 ## References
@@ -171,6 +192,7 @@ python scripts/perf_benchmark_pipeline.py --root . --out-dir /tmp/b --tier asm -
 - Valgrind cachegrind simulates 2-level cache (L1 -> LL). No separate L2.
 - Valgrind adds 20-50x slowdown. Use `--valgrind-size` for large inputs.
 - `perf stat` requires `perf_event_paranoid <= 1`.
+- `--perf-record` is opt-in and also requires `perf_event_paranoid <= 1`.
 - `tracemalloc` is Python-only. C memory uses massif exclusively.
 - Dimension 0 requires benchmarks at >= 2 input sizes.
 - callgrind heuristics cannot determine argument identity (memoization needs manual check).

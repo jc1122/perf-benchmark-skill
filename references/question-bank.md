@@ -8,12 +8,31 @@ Performance audit questions organized by category. Use these during analysis to 
 
 - Is the hot function memory-bound or compute-bound?
 - What is the expected algorithmic complexity? Does measured scaling match?
+- Is there a lower-complexity algorithm or data structure for the same result?
+- Can the search space be pruned, partitioned, indexed, or short-circuited earlier?
 - Can any inner loop computation be hoisted or precomputed?
+- Can repeated subproblems be memoized, cached, or maintained incrementally?
 - Are there redundant traversals of the same data structure?
+- Are queries scanning full state where an index, summary, or cached partial result would suffice?
+- Is the code doing work proportional to all candidates instead of only the needed matches?
 - Does the call graph show multiplicative paths (e.g., O(n) calls each doing O(n) work)?
 - Is call amplification (calls per input element) within expected bounds?
 - Are there unnecessary copies of large data structures inside loops?
+- Is unchanged data being reread or recomputed even though the current result depends on only a subset?
 - Can a more efficient algorithm or data structure reduce the complexity class?
+
+---
+
+## Streaming and Incremental Workloads
+
+- Should per-update work scale with delta size or with total retained state? What does the benchmark show?
+- Is each update or batch recomputing results over the full historical dataset?
+- Which prior-state fields are actually needed for one update, and which are touched anyway?
+- Is unchanged historical data being reread, reparsed, rehashed, resorted, or recopied?
+- Can derived state be maintained incrementally instead of rebuilt from scratch?
+- Can append-only history be summarized once so old records are not repeatedly reprocessed?
+- Can state be partitioned, windowed, compacted, or checkpointed so cold history stays untouched?
+- Can prefix aggregates, sketches, materialized indexes, or caches bound per-update work?
 
 ---
 

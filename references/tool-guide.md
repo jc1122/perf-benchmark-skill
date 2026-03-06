@@ -67,6 +67,18 @@ When to use each tool, what it measures, and its limitations.
 - **When to use:** Dimension 2 (IPC), Dimension 5 (branch misprediction from hardware). Ground truth for hardware counters.
 - **Limitations:** Requires `perf_event_paranoid <= 1` (`sysctl kernel.perf_event_paranoid`). Not available in all container environments. Process-level counters by default; per-function requires `perf record` + `perf report`.
 
+### perf record
+
+- **What it measures:** Low-overhead sampled native hotspots and optional call stacks while the workload runs.
+- **When to use:** Opt-in native hotspot confirmation after wall-time triage, especially before trusting Valgrind-distorted instruction distribution.
+- **Limitations:** Requires `perf_event_paranoid <= 1`, working symbols for best results, and adds some sampling overhead. Keep it opt-in for the pipeline.
+
+### perf report --stdio
+
+- **What it measures:** Human-readable and parseable hotspot summary from `perf.data`, including sampled overhead per command/DSO/symbol.
+- **When to use:** After `perf record` to confirm top native functions and libraries under realistic runtime conditions.
+- **Limitations:** Output format varies across perf versions; prefer stable flat output (`--stdio --no-children --sort overhead,comm,dso,symbol`) for automation.
+
 ### objdump -dS
 
 - **What it measures:** Disassembles binary with interleaved source (if debug info present).
@@ -130,6 +142,14 @@ START
   |     YES --> Tier 3: perf stat
   |     |         - Check: sysctl kernel.perf_event_paranoid <= 1
   |     |         - perf stat -e cycles,instructions,cache-misses,branch-misses <program>
+  |     |
+  |     NO --> continue
+  |
+  +-- Need low-overhead native hotspot confirmation?
+  |     |
+  |     YES --> Tier 3 (opt-in): perf record + perf report
+  |     |         - perf record -o perf.data --call-graph dwarf -- <program>
+  |     |         - perf report --stdio --no-children --sort overhead,comm,dso,symbol -i perf.data
   |     |
   |     NO --> continue
   |

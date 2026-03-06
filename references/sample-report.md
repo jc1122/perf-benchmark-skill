@@ -1,6 +1,6 @@
 # Sample Performance Benchmark Report
 
-**Target:** graphcore library -- `compute_shortest_paths()` on adjacency list graph
+**Target:** graph_workload library -- `compute_shortest_paths()` on adjacency list graph
 **Date:** 2026-03-05
 **Analyst:** perf-benchmark-skill (automated)
 
@@ -23,8 +23,8 @@
 
 | Target | Function | Input Sizes |
 |--------|----------|-------------|
-| Primary | `graphcore.compute_shortest_paths()` | N=1000, N=5000 |
-| Entry point | `bench_shortest_paths` in `tests/benchmarks/test_bench_graph.py` |
+| Primary | `graph_workload.compute_shortest_paths()` | N=1000, N=5000 |
+| Entry point | `benchmark_shortest_paths` in `tests/benchmarks/test_benchmark_graph.py` |
 
 ---
 
@@ -84,7 +84,7 @@ Expected complexity: O(n log n) (default `--expected-complexity nlogn`, FAIL thr
   "tier": "WARN",
   "evidence": [
     {
-      "file": "src/graphcore/pathfinder.py",
+      "file": "src/graph_workload/pathfinder.py",
       "line": 87,
       "function": "compute_shortest_paths",
       "metric": "complexity_exponent",
@@ -94,7 +94,7 @@ Expected complexity: O(n log n) (default `--expected-complexity nlogn`, FAIL thr
       "threshold_fail": 1.8
     },
     {
-      "file": "src/graphcore/pathfinder.py",
+      "file": "src/graph_workload/pathfinder.py",
       "line": 112,
       "function": "_relax_edges",
       "metric": "call_amplification",
@@ -117,8 +117,8 @@ Expected complexity: O(n log n) (default `--expected-complexity nlogn`, FAIL thr
   "tier": "PASS",
   "evidence": [
     {
-      "file": "tests/benchmarks/test_bench_graph.py",
-      "function": "bench_shortest_paths",
+      "file": "tests/benchmarks/test_benchmark_graph.py",
+      "function": "benchmark_shortest_paths",
       "metric": "wall_time_cv",
       "value": 2.1,
       "unit": "%",
@@ -139,7 +139,7 @@ Expected complexity: O(n log n) (default `--expected-complexity nlogn`, FAIL thr
   "tier": "WARN",
   "evidence": [
     {
-      "file": "src/graphcore/pathfinder.py",
+      "file": "src/graph_workload/pathfinder.py",
       "line": 112,
       "function": "_relax_edges",
       "metric": "instruction_share",
@@ -170,7 +170,7 @@ Expected complexity: O(n log n) (default `--expected-complexity nlogn`, FAIL thr
   "tier": "FAIL",
   "evidence": [
     {
-      "file": "src/graphcore/graph.py",
+      "file": "src/graph_workload/graph.py",
       "line": 45,
       "function": "AdjacencyList.__getitem__",
       "metric": "L1d_miss_rate",
@@ -180,7 +180,7 @@ Expected complexity: O(n log n) (default `--expected-complexity nlogn`, FAIL thr
       "threshold_fail": 5
     },
     {
-      "file": "src/graphcore/graph.py",
+      "file": "src/graph_workload/graph.py",
       "line": 62,
       "function": "AdjacencyList.neighbors",
       "metric": "L1d_miss_rate",
@@ -203,7 +203,7 @@ Expected complexity: O(n log n) (default `--expected-complexity nlogn`, FAIL thr
   "tier": "PASS",
   "evidence": [
     {
-      "file": "src/graphcore/graph.py",
+      "file": "src/graph_workload/graph.py",
       "function": "AdjacencyList.__getitem__",
       "metric": "LL_miss_rate",
       "value": 0.3,
@@ -225,7 +225,7 @@ Expected complexity: O(n log n) (default `--expected-complexity nlogn`, FAIL thr
   "tier": "PASS",
   "evidence": [
     {
-      "file": "src/graphcore/pathfinder.py",
+      "file": "src/graph_workload/pathfinder.py",
       "function": "_relax_edges",
       "metric": "branch_mispred_rate",
       "value": 0.8,
@@ -247,7 +247,7 @@ Expected complexity: O(n log n) (default `--expected-complexity nlogn`, FAIL thr
   "tier": "WARN",
   "evidence": [
     {
-      "file": "src/graphcore/pathfinder.py",
+      "file": "src/graph_workload/pathfinder.py",
       "function": "compute_shortest_paths",
       "metric": "heap_peak_ratio",
       "value": 1.3,
@@ -284,7 +284,7 @@ LL:  8388608 B, 16-way, 64 B lines
 
 Note: Cachegrind uses a 2-level cache model (L1 + LL). There is no separate L2 simulation. The LL parameters approximate L3 behavior. L1 miss rates are reliable; LL miss rates should be cross-validated with `perf stat` hardware counters if precise L2/L3 distinction is needed.
 
-All cachegrind metrics were scored per-file using `cg_annotate --include=src/graphcore/` to exclude interpreter and library overhead.
+All cachegrind metrics were scored per-file using `cg_annotate --include=src/graph_workload/` to exclude interpreter and library overhead.
 
 ---
 

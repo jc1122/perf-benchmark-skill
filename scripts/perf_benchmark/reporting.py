@@ -21,6 +21,19 @@ def _first_present_metric(check: dict[str, Any], keys: list[str]) -> Any:
     return ""
 
 
+def _dimension_by_name(rubric: dict, name: str) -> dict[str, Any]:
+    for dimension_name, dimension in rubric.get("dimensions", []):
+        if dimension_name == name:
+            return dimension
+    return {"score": -1, "tier": "N/A", "sub_checks": {}, "note": f"Missing dimension: {name}"}
+
+
+def _format_cache_model(prefix: str, cache: dict[str, Any]) -> str:
+    return (
+        f"{prefix}: D1={cache.get('D1', '?')}, I1={cache.get('I1', '?')}, LL={cache.get('LL', '?')}"
+    )
+
+
 def _summarize_wall_time_metrics(tier1: dict, cv_fn) -> dict[str, Any]:
     """Return summary-friendly wall-time metrics aligned with the scorer."""
     pytest_benchmark = tier1.get("pytest_benchmark", {})
@@ -53,13 +66,7 @@ def _summarize_wall_time_metrics(tier1: dict, cv_fn) -> dict[str, Any]:
     if time_usage_by_size:
         cv_by_size = {
             str(int(size)): round(
-                cv_fn(
-                    [
-                        run.get("wall_seconds", 0.0)
-                        for run in runs
-                        if run.get("wall_seconds")
-                    ]
-                ),
+                cv_fn([run.get("wall_seconds", 0.0) for run in runs if run.get("wall_seconds")]),
                 2,
             )
             for size, runs in time_usage_by_size.items()
@@ -110,6 +117,12 @@ def write_markdown_report(
     if args.sizes:
         lines.append(f"**Sizes**: {args.sizes}")
     lines.append("")
+    perf_status = "perf available"
+    if prereqs["perf_paranoid"] > 1:
+        perf_status = "perf UNAVAILABLE, run: sudo sysctl kernel.perf_event_paranoid=1"
+    governor_status = "OK"
+    if prereqs["governor"] != "performance":
+        governor_status = "WARNING, set to performance for stable results"
 
     lines.extend(
         [
@@ -117,22 +130,17 @@ def write_markdown_report(
             "",
             f"- Python: {sys.version.split()[0]} ({'OK' if prereqs['python_ok'] else 'FAIL'})",
             f"- Valgrind: {'found' if prereqs['valgrind'] else 'not found'}",
-            (
-                f"- perf_event_paranoid: {prereqs['perf_paranoid']} "
-                f"({'perf available' if prereqs['perf_paranoid'] <= 1 else 'perf UNAVAILABLE — run: sudo sysctl kernel.perf_event_paranoid=1'})"
-            ),
-            f"- CPU governor: {prereqs['governor']} ({'OK' if prereqs['governor'] == 'performance' else 'WARNING — set to performance for stable results'})",
+            (f"- perf_event_paranoid: {prereqs['perf_paranoid']} ({perf_status})"),
+            f"- CPU governor: {prereqs['governor']} ({governor_status})",
             f"- RAM: {prereqs['ram_mb']}MB",
         ]
     )
     cache = prereqs.get("cache_topology", {})
     if cache:
-        lines.append(
-            f"- Cache model: D1={cache.get('D1', '?')}, I1={cache.get('I1', '?')}, LL={cache.get('LL', '?')}"
-        )
+        lines.append(_format_cache_model("- Cache model", cache))
     lines.append("")
 
-    dim0 = rubric["dimensions"][0][1]
+    dim0 = _dimension_by_name(rubric, "Algorithmic Scaling")
     lines.extend(["## Algorithmic Scaling Analysis", ""])
     if dim0.get("tier") == "N/A":
         lines.append(f"*{dim0.get('note', 'Insufficient data for strict algorithmic scoring.')}*")
@@ -145,7 +153,9 @@ def write_markdown_report(
                 ]
             )
             for name, check in dim0["sub_checks"].items():
-                val = _first_present_metric(check, ["k", "ratio", "peaks", "path_count", "top_fn_ir"])
+                val = _first_present_metric(
+                    check, ["k", "ratio", "peaks", "path_count", "top_fn_ir"]
+                )
                 lines.append(f"| {name} | {val} | {check['tier']} |")
             lines.append("")
         missing_sub_checks = dim0.get("missing_sub_checks", [])
@@ -156,7 +166,8 @@ def write_markdown_report(
             lines.append("")
             if "complexity_exponent" in missing_sub_checks:
                 lines.append(
-                    "*Add at least two real input sizes via `--sizes`, and ensure explicit `--target` commands use `{SIZE}`.*"
+                    "*Add at least two real input sizes via `--sizes`, and ensure "
+                    "explicit `--target` commands use `{SIZE}`.*"
                 )
     else:
         lines.extend(
@@ -168,7 +179,9 @@ def write_markdown_report(
         if dim0.get("sub_checks"):
             lines.extend(["| Sub-check | Value | Tier |", "|-----------|-------|------|"])
             for name, check in dim0["sub_checks"].items():
-                val = _first_present_metric(check, ["k", "ratio", "peaks", "path_count", "top_fn_ir"])
+                val = _first_present_metric(
+                    check, ["k", "ratio", "peaks", "path_count", "top_fn_ir"]
+                )
                 lines.append(f"| {name} | {val} | {check['tier']} |")
         if dim0["tier"] == "FAIL":
             lines.extend(
@@ -176,7 +189,8 @@ def write_markdown_report(
                     "",
                     "> **STOP**: Fix algorithmic scaling before hardware-level optimization.",
                     "> Expected impact: 10-1000x improvement.",
-                    "> Hardware optimizations (cache, branch, ASM) are irrelevant until this is resolved.",
+                    "> Hardware optimizations (cache, branch, ASM) are irrelevant "
+                    "until this is resolved.",
                 ]
             )
     lines.append("")
@@ -187,21 +201,26 @@ def write_markdown_report(
         if regressions:
             lines.extend(
                 [
-                    "> **Regression blocker**: one or more scored dimensions dropped versus the baseline.",
+                    "> **Regression blocker**: one or more scored dimensions "
+                    "dropped versus the baseline.",
                     "",
                     "| Dimension | Baseline | Current | Tier Drop |",
                     "|-----------|----------|---------|-----------|",
                 ]
             )
             for regression in regressions:
-                lines.append(
-                    f"| {regression['dimension']} | {regression['baseline_tier']} | {regression['current_tier']} | {regression['drop']} |"
+                regression_row = (
+                    f"| {regression['dimension']} | {regression['baseline_tier']} | "
+                    f"{regression['current_tier']} | {regression['drop']} |"
                 )
+                lines.append(regression_row)
         else:
             lines.append("No scored dimension regressed against the supplied baseline.")
         lines.append("")
 
-    lines.extend(["## Rubric Scorecard", "", f"**Total: {rubric['total']}/{rubric['max_possible']}**", ""])
+    lines.extend(
+        ["## Rubric Scorecard", "", f"**Total: {rubric['total']}/{rubric['max_possible']}**", ""]
+    )
     lines.extend(["| # | Dimension | Score | Tier |", "|---|-----------|-------|------|"])
     for index, (name, dimension) in enumerate(rubric["dimensions"]):
         score_str = f"{dimension['score']}/4" if dimension.get("tier") != "N/A" else "N/A"
@@ -218,19 +237,71 @@ def write_markdown_report(
                         lines.append(f"- **{key}**: {value}")
                 lines.append("")
 
-    lines.extend(["## Prescriptions", "", "*Priority order: Algorithmic > Data Layout > Execution > Micro*", ""])
+    perf_record = tier234.get("perf_record")
+    if perf_record:
+        lines.extend(["## Native Hotspots", ""])
+        if not perf_record.get("available", True):
+            lines.append(f"*Unavailable: {perf_record.get('reason', 'unknown reason')}*")
+        else:
+            hotspots = perf_record.get("hotspots", [])
+            if hotspots:
+                lines.extend(
+                    [
+                        "| Overhead | Command | Shared Object | Symbol |",
+                        "|----------|---------|---------------|--------|",
+                    ]
+                )
+                for hotspot in hotspots[:5]:
+                    row = (
+                        f"| {hotspot.get('overhead_pct', 0)} | "
+                        f"{hotspot.get('command', '')} | "
+                        f"{hotspot.get('shared_object', '')} | "
+                        f"{hotspot.get('symbol', '')} |"
+                    )
+                    lines.append(row)
+            else:
+                error_message = (
+                    perf_record.get("parse_error")
+                    or perf_record.get("report_error")
+                    or "No hotspots parsed."
+                )
+                lines.append(f"*{error_message}*")
+
+            artifact_lines: list[str] = []
+            if perf_record.get("data_path"):
+                artifact_lines.append(f"- perf.data: `{perf_record['data_path']}`")
+            if perf_record.get("report_path"):
+                artifact_lines.append(f"- perf report: `{perf_record['report_path']}`")
+            if artifact_lines:
+                lines.append("")
+                lines.extend(artifact_lines)
+        lines.append("")
+
+    lines.extend(
+        [
+            "## Prescriptions",
+            "",
+            "*Priority order: Algorithmic > Data Layout > Execution > Micro*",
+            "",
+        ]
+    )
     prescriptions = {
         "Algorithmic": "Review scaling sub-checks. Memoize, precompute, or restructure hot paths.",
         "L1": "Improve data locality: struct-of-arrays, cache-line alignment, sequential access.",
         "Last-Level": "Reduce working set size or improve spatial locality.",
-        "Branch": "Replace unpredictable branches with cmov, lookup tables, or branchless arithmetic.",
+        "Branch": (
+            "Replace unpredictable branches with cmov, lookup tables, or branchless arithmetic."
+        ),
         "CPU": "Reduce hotspot concentration. Consider splitting large functions.",
         "Memory": "Pre-allocate buffers, use object pools, reduce allocation churn.",
         "Wall": "Reduce measurement noise: set governor=performance, increase rounds.",
     }
     for name, dimension in rubric["dimensions"]:
         if dimension.get("tier") in ("FAIL", "WARN"):
-            advice = next((value for key, value in prescriptions.items() if key in name), "See rubric for details.")
+            advice = next(
+                (value for key, value in prescriptions.items() if key in name),
+                "See rubric for details.",
+            )
             lines.append(f"- **{name}**: {advice}")
     lines.append("")
 
@@ -242,9 +313,7 @@ def write_markdown_report(
         ]
     )
     if cache:
-        lines.append(
-            f"Simulated: D1={cache.get('D1', '?')}, I1={cache.get('I1', '?')}, LL={cache.get('LL', '?')}"
-        )
+        lines.append(_format_cache_model("Simulated", cache))
     lines.extend(
         [
             "On hybrid CPUs (Intel Alder/Raptor Lake), P-core cache hierarchy is simulated.",
@@ -294,6 +363,16 @@ def write_json_summary(
     massif = tier234.get("massif", {})
     if massif and massif.get("peak_bytes"):
         summary["massif_peak_bytes"] = massif["peak_bytes"]
+
+    perf_record = tier234.get("perf_record", {})
+    if perf_record:
+        perf_record_summary = {"available": perf_record.get("available", True)}
+        for key in ("reason", "data_path", "report_path", "report_error", "parse_error"):
+            if key in perf_record:
+                perf_record_summary[key] = perf_record[key]
+        if "hotspots" in perf_record:
+            perf_record_summary["hotspots"] = perf_record.get("hotspots", [])[:5]
+        summary["perf_record"] = perf_record_summary
 
     (out_dir / "benchmark_summary.json").write_text(json.dumps(summary, indent=2))
     _log(f"  -> Wrote {out_dir / 'benchmark_summary.json'}")

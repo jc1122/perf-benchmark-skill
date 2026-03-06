@@ -6,7 +6,6 @@ import math
 from pathlib import Path
 from typing import Any
 
-
 TIER_RANK = {"FAIL": 0, "WARN": 1, "PASS": 2}
 __all__ = [
     "TIER_RANK",
@@ -207,13 +206,7 @@ def score_wall_time_stability(tier1: dict) -> dict[str, Any]:
         if time_usage_by_size:
             cv_by_size = {
                 int(size): round(
-                    _cv(
-                        [
-                            run.get("wall_seconds", 0.0)
-                            for run in runs
-                            if run.get("wall_seconds")
-                        ]
-                    ),
+                    _cv([run.get("wall_seconds", 0.0) for run in runs if run.get("wall_seconds")]),
                     2,
                 )
                 for size, runs in time_usage_by_size.items()
@@ -412,7 +405,9 @@ def score_rubric(tier1: dict, tier234: dict, args: argparse.Namespace) -> dict[s
         ("Memory Profile", score_memory_profile(tier1, tier234, baseline)),
     ]
 
-    available = [(name, dimension) for name, dimension in dimensions if dimension.get("tier") != "N/A"]
+    available = [
+        (name, dimension) for name, dimension in dimensions if dimension.get("tier") != "N/A"
+    ]
     total = sum(dimension["score"] for _, dimension in available)
     max_possible = len(available) * 4
     baseline_regressions = _collect_baseline_regressions(dimensions, baseline)
