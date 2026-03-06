@@ -26,6 +26,7 @@ Runs a 4-tier profiling pipeline and scores results against a **7-dimension rubr
 | 6 | Memory Profile | 5-20x | Valgrind massif + tracemalloc |
 
 Algorithmic issues are always prioritized over hardware micro-optimizations.
+Full Algorithmic Scaling scoring requires `deep` or `asm` because allocation churn comes from massif.
 
 ## Requirements
 
@@ -87,8 +88,8 @@ Pytest benchmark autodiscovery is a convenience for Python repos. Use
 `--target` or `--binary` when you want the skill to work against an arbitrary
 benchmark entrypoint.
 
-Multi-size explicit targets must include `{SIZE}`. Fixed-size explicit targets
-should omit `--sizes`.
+Multi-size explicit targets must include `{SIZE}`.
+Single-size explicit targets must also include `{SIZE}` when `--sizes` is present; otherwise omit `--sizes`.
 
 | Flag | Default | Description |
 |------|---------|-------------|
@@ -112,6 +113,8 @@ should omit `--sizes`.
 
 Strict algorithmic `N/A` results list which rubric sub-checks are missing in
 the markdown report.
+
+Tier 1 stays isolated because timing and tracemalloc measurements are noise-sensitive.
 
 ## License
 

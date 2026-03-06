@@ -746,3 +746,121 @@ def test_write_markdown_report_preserves_zero_algorithmic_values(tmp_path: Path)
     report = (out_dir / "benchmark_report.md").read_text()
 
     assert "| multiplicative_paths | 0 | PASS |" in report
+
+
+def test_main_writes_report_and_summary_artifacts(tmp_path: Path) -> None:
+    out_dir = tmp_path / "out"
+
+    exit_code = pipeline.main(
+        [
+            "--root",
+            str(tmp_path),
+            "--out-dir",
+            str(out_dir),
+            "--tier",
+            "fast",
+            "--target",
+            f'{sys.executable} -c "print(1)"',
+        ]
+    )
+
+    assert exit_code == 0
+    assert (out_dir / "benchmark_report.md").exists()
+    assert (out_dir / "benchmark_summary.json").exists()
+
+
+def test_main_report_contains_scorecard_sections(tmp_path: Path) -> None:
+    out_dir = tmp_path / "out"
+
+    pipeline.main(
+        [
+            "--root",
+            str(tmp_path),
+            "--out-dir",
+            str(out_dir),
+            "--tier",
+            "fast",
+            "--target",
+            f'{sys.executable} -c "print(1)"',
+        ]
+    )
+
+    report = (out_dir / "benchmark_report.md").read_text()
+
+    assert "## Rubric Scorecard" in report
+    assert "## Algorithmic Scaling Analysis" in report
+
+
+def test_pipeline_module_re_exports_existing_tested_api() -> None:
+    for name in [
+        "main",
+        "parse_args",
+        "stage_tier1",
+        "score_algorithmic_scaling",
+        "write_markdown_report",
+        "write_json_summary",
+    ]:
+        assert hasattr(pipeline, name)
+
+
+def test_score_algorithmic_scaling_uses_hotspot_level_data_reuse(tmp_path: Path) -> None:
+    args = make_args(tmp_path, valgrind_size=10)
+    tier234 = {
+        "callgrind": {
+            "functions": [{"Ir": 1, "file": "src/mod.c", "line": 1, "function": "hot"}],
+            "total_calls": 1,
+            "multiplicative_path_count": 0,
+        },
+        "cachegrind": {
+            "summary": {"Dr": 120, "Dw": 12},
+            "files": [
+                {"file": "a.c", "Dr": 60, "Dw": 6},
+                {"file": "b.c", "Dr": 60, "Dw": 6},
+            ],
+        },
+        "massif": {"local_maxima_count": 0},
+    }
+
+    result = pipeline.score_algorithmic_scaling({}, tier234, args)
+
+    assert result["sub_checks"]["data_reuse"]["ratio"] == 6.0
+    assert result["sub_checks"]["data_reuse"]["tier"] == "PASS"
+
+
+def test_score_algorithmic_scaling_uses_hotspot_level_write_amplification(tmp_path: Path) -> None:
+    args = make_args(tmp_path, valgrind_size=10)
+    tier234 = {
+        "callgrind": {
+            "functions": [{"Ir": 1, "file": "src/mod.c", "line": 1, "function": "hot"}],
+            "total_calls": 1,
+            "multiplicative_path_count": 0,
+        },
+        "cachegrind": {
+            "summary": {"Dr": 10100, "Dw": 100},
+            "files": [
+                {"file": "hot.c", "Dr": 100, "Dw": 100},
+                {"file": "cold.c", "Dr": 10000, "Dw": 0},
+            ],
+        },
+        "massif": {"local_maxima_count": 0},
+    }
+
+    result = pipeline.score_algorithmic_scaling({}, tier234, args)
+
+    assert result["sub_checks"]["write_amplification"]["ratio"] == 1.0
+    assert result["sub_checks"]["write_amplification"]["tier"] == "FAIL"
+
+
+def test_docs_state_dimension_zero_requires_deep_for_full_score() -> None:
+    skill_text = (REPO_ROOT / "SKILL.md").read_text()
+    readme_text = (REPO_ROOT / "README.md").read_text()
+
+    assert "Full Algorithmic Scaling scoring requires `deep` or `asm` because allocation churn comes from massif." in skill_text
+    assert "Full Algorithmic Scaling scoring requires `deep` or `asm` because allocation churn comes from massif." in readme_text
+
+
+def test_docs_describe_safe_parallelization_boundaries() -> None:
+    skill_text = (REPO_ROOT / "SKILL.md").read_text()
+
+    assert "Tier 1 stays isolated because timing and tracemalloc measurements are noise-sensitive." in skill_text
+    assert "Preferred subagent split: per-artifact or per-rubric-dimension after the pipeline finishes." in skill_text

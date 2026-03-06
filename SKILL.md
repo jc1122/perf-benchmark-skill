@@ -53,6 +53,7 @@ Auto-discovers `pytest.mark.benchmark` tests and `tests/benchmarks/` directories
 Override with `--target "cmd {SIZE}"` or `--binary ./my_program`.
 Use `--target` or `--binary` for non-pytest repos.
 Multi-size explicit targets must include `{SIZE}`.
+Single-size explicit targets must also include `{SIZE}` when `--sizes` is present; otherwise omit `--sizes`.
 
 ### 3. Run Pipeline
 
@@ -89,6 +90,7 @@ Tier options:
 If Dimension 0 (Algorithmic Scaling) is FAIL, the report prints a STOP warning:
 fix algorithmic issues before pursuing hardware optimizations.
 If Dimension 0 is `N/A`, the report lists the missing sub-check evidence.
+Full Algorithmic Scaling scoring requires `deep` or `asm` because allocation churn comes from massif.
 
 ### 5. Apply Prescriptions
 
@@ -112,6 +114,9 @@ report and summary as a regression blocker.
 ## Agent Parallelism Opportunities
 
 After the script completes, analysis can be parallelized across sub-agents:
+
+Tier 1 stays isolated because timing and tracemalloc measurements are noise-sensitive.
+Preferred subagent split: per-artifact or per-rubric-dimension after the pipeline finishes.
 
 **Phase 1** (before script): prerequisites check || target discovery
 
