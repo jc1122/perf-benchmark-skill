@@ -1,5 +1,6 @@
 ---
 name: perf-benchmark
+version: 0.2.0
 description: >
   Use when profiling Linux Python or C workloads for algorithmic scaling,
   cache, branch, memory, or ASM bottlenecks, or when comparing a new benchmark
@@ -34,6 +35,8 @@ entrypoint explicitly. Pytest benchmark autodiscovery is a convenience for Pytho
 4. `tier2/` — cachegrind + callgrind annotated outputs.
 5. `tier3/` — massif heap profile, perf stat counters, and opt-in native `perf record/report` artifacts.
 6. `tier4/` — objdump disassembly, Numba ASM (if `--asm-audit`).
+7. `perf_findings.json` — shared-schema PERF findings (when `--findings-out` is set).
+8. `baseline_ledger.jsonl` — append-only run history with vs-last/vs-best regression checks (when `--baseline-ledger` is set).
 
 ## Workflow
 
@@ -64,7 +67,10 @@ python /path/to/perf-benchmark/scripts/perf_benchmark_pipeline.py \
   --source-prefix path/to/source/ \
   --tier medium \
   --sizes 10000,100000 \
-  --out-dir /tmp/perf-bench
+  --out-dir /tmp/perf-bench \
+  --max-cv 5.0 \
+  --findings-out /tmp/perf-findings.json \
+  --baseline-ledger /tmp/perf-ledger.jsonl
 ```
 
 Tier options:
@@ -72,6 +78,21 @@ Tier options:
 - `medium`: Tiers 1-2 (+ cachegrind + callgrind). Minutes.
 - `deep`: Tiers 1-3 (+ massif + perf stat). Minutes.
 - `asm`: All tiers including Tier 4 ASM audit.
+
+**New flags (v0.2.0):**
+
+- `--max-cv` (default 5.0): Noise gate. Any timing-derived dimension whose
+  coefficient of variation exceeds this percentage is scored `N/A (noise)`
+  instead of a number. Refusing to score noise is the statistical-rigor
+  policy (median-of-repeats, SPEC/JMH-style methodology).
+- `--findings-out`: Write shared-schema PERF findings JSON to the given path.
+  One finding per FAIL/WARN rubric dimension, with `signal: "PERF"` and
+  deterministic SHA1-based IDs. Byte-identical across runs.
+- `--baseline-ledger`: Append-only JSONL run history. Before appending the
+  current run, compares against the last entry (vs_last) and the best-ever
+  entry by rubric total (vs_best); reports any dimension that dropped >= 1
+  tier. Corrupt lines are skipped with a warning. Can be used together with
+  `--baseline` (single-file, point-in-time comparison).
 
 Native sampled hotspots are opt-in via `--perf-record`. When enabled and `perf`
 is available, Tier 3 also runs `perf record` + `perf report --stdio` and writes
@@ -118,6 +139,8 @@ Use `references/question-bank.md` for the fuller advisory diagnosis prompts.
 
 ### 6. Regression Comparison (Optional)
 
+#### Point-in-Time Baseline
+
 ```bash
 python scripts/perf_benchmark_pipeline.py \
   --root . \
@@ -126,8 +149,24 @@ python scripts/perf_benchmark_pipeline.py \
   --baseline /path/to/previous/benchmark_summary.json
 ```
 
-Any scored dimension dropping >= 1 tier from baseline is surfaced in the
-report and summary as a regression blocker.
+Any scored dimension dropping >= 1 tier from the baseline summary is surfaced
+in the report and summary as a regression blocker.
+
+#### Trend Ledger (`--baseline-ledger`)
+
+```bash
+python scripts/perf_benchmark_pipeline.py \
+  --root . \
+  --out-dir /tmp/bench \
+  --target "./path/to/benchmark {SIZE}" \
+  --baseline-ledger /tmp/perf-history.jsonl
+```
+
+`--baseline-ledger` maintains an append-only JSONL run history. Before
+appending the current run, it compares against the last entry (`vs_last`)
+and the best-ever entry by rubric total (`vs_best`), flagging any dimension
+that dropped >= 1 tier. Corrupt lines are skipped with a warning. Use
+alongside `--baseline` for both point-in-time and trend regression checks.
 
 ## Agent Parallelism Opportunities
 
@@ -176,6 +215,12 @@ python scripts/perf_benchmark_pipeline.py --root . --out-dir /tmp/b --tier deep 
 
 # ASM audit for C binary
 python scripts/perf_benchmark_pipeline.py --root . --out-dir /tmp/b --tier asm --binary ./path/to/program --asm-audit
+
+# Deep with noise gate and findings bridge
+python scripts/perf_benchmark_pipeline.py --root . --out-dir /tmp/b --tier deep --target "./path/to/benchmark {SIZE}" --sizes 10000,100000 --max-cv 5.0 --findings-out /tmp/perf-findings.json
+
+# Fast with baseline trend ledger
+python scripts/perf_benchmark_pipeline.py --root . --out-dir /tmp/b --tier fast --target "./path/to/benchmark {SIZE}" --sizes 10000,100000 --baseline-ledger /tmp/perf-history.jsonl --max-cv 5.0
 ```
 
 ## References
@@ -186,6 +231,7 @@ python scripts/perf_benchmark_pipeline.py --root . --out-dir /tmp/b --tier asm -
 4. [`references/question-bank.md`](references/question-bank.md): performance audit questions.
 5. [`references/finding-schema.json`](references/finding-schema.json): sub-agent return format.
 6. [`references/sample-report.md`](references/sample-report.md): annotated example output.
+7. [`references/perf-remediation-playbook.md`](references/perf-remediation-playbook.md): measure/change/re-measure ratchet for acting on findings.
 
 ## Known Limitations
 
