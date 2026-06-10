@@ -36,6 +36,7 @@ def make_args(tmp_path: Path, **overrides: object) -> Namespace:
         "asm_audit": False,
         "valgrind_timeout": 30,
         "env": [],
+        "findings_out": None,
     }
     defaults.update(overrides)
     return Namespace(**defaults)

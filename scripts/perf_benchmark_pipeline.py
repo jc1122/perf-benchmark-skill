@@ -31,6 +31,7 @@ SCRIPT_DIR = Path(__file__).resolve().parent
 if str(SCRIPT_DIR) not in sys.path:
     sys.path.insert(0, str(SCRIPT_DIR))
 
+_findings = importlib.import_module("perf_benchmark.findings")
 _reporting = importlib.import_module("perf_benchmark.reporting")
 _scoring = importlib.import_module("perf_benchmark.scoring")
 _stage_helpers = importlib.import_module("perf_benchmark.stage_helpers")
@@ -693,6 +694,12 @@ def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
         help="Timeout per Valgrind run in seconds (default 1800)",
     )
     p.add_argument("--env", action="append", default=[], help="Environment variable KEY=VALUE")
+    p.add_argument(
+        "--findings-out",
+        type=Path,
+        default=None,
+        help="Write shared-schema PERF findings JSON here",
+    )
 
     args = p.parse_args(argv)
     if args.sizes:
@@ -749,6 +756,10 @@ def main(argv: list[str] | None = None) -> int:
     rubric = score_rubric(tier1_results, tier234_results, args)
     write_markdown_report(rubric, tier1_results, tier234_results, prereqs, args, out_dir)
     write_json_summary(rubric, tier1_results, tier234_results, prereqs, args, out_dir)
+
+    if args.findings_out:
+        findings_list = _findings.to_shared_findings(rubric, root=str(args.root))
+        args.findings_out.write_text(json.dumps(findings_list, indent=2, sort_keys=True) + "\n")
 
     if _stage_has_error(tier1_results) or _stage_has_error(tier234_results):
         _log("One or more stages reported errors.")
