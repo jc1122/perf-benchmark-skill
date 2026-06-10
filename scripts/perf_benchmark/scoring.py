@@ -189,8 +189,8 @@ def score_algorithmic_scaling(
     return {"score": 4, "tier": "PASS", "sub_checks": sub_checks}
 
 
-def score_wall_time_stability(tier1: dict) -> dict[str, Any]:
-    """Dimension 1: wall-time CV."""
+def score_wall_time_stability(tier1: dict, max_cv: float = 5.0) -> dict[str, Any]:
+    """Dimension 1: wall-time CV.  CV > *max_cv* ⇒ tier ``N/A (noise)``, excluded from total."""
     pb = tier1.get("pytest_benchmark", {})
     benchmarks = pb.get("benchmarks", [])
     if benchmarks:
@@ -224,6 +224,9 @@ def score_wall_time_stability(tier1: dict) -> dict[str, Any]:
 
     if avg_cv < 0:
         return {"score": -1, "tier": "N/A", "cv": None}
+
+    if avg_cv > max_cv:
+        return {"score": -1, "tier": "N/A (noise)", "cv": round(avg_cv, 2)}
 
     tier_val = "PASS" if avg_cv <= 3 else "WARN" if avg_cv <= 8 else "FAIL"
     score = 4 if tier_val == "PASS" else 2 if tier_val == "WARN" else 0
@@ -395,9 +398,11 @@ def score_rubric(tier1: dict, tier234: dict, args: argparse.Namespace) -> dict[s
         except (OSError, json.JSONDecodeError):
             baseline = None
 
+    max_cv = getattr(args, "max_cv", 5.0)
+
     dimensions: list[tuple[str, dict]] = [
         ("Algorithmic Scaling", score_algorithmic_scaling(tier1, tier234, args)),
-        ("Wall-Time Stability", score_wall_time_stability(tier1)),
+        ("Wall-Time Stability", score_wall_time_stability(tier1, max_cv=max_cv)),
         ("CPU Efficiency", score_cpu_efficiency(tier234)),
         ("L1 Cache Efficiency", score_cache_dim(tier234, "L1d_miss_pct", 1.0, 5.0)),
         ("Last-Level Cache", score_cache_dim(tier234, "LL_miss_pct", 0.5, 2.0)),
@@ -406,7 +411,9 @@ def score_rubric(tier1: dict, tier234: dict, args: argparse.Namespace) -> dict[s
     ]
 
     available = [
-        (name, dimension) for name, dimension in dimensions if dimension.get("tier") != "N/A"
+        (name, dimension)
+        for name, dimension in dimensions
+        if dimension.get("tier") not in ("N/A", "N/A (noise)")
     ]
     total = sum(dimension["score"] for _, dimension in available)
     max_possible = len(available) * 4

@@ -475,3 +475,62 @@ def test_score_algorithmic_scaling_uses_hotspot_level_write_amplification(tmp_pa
 
     assert result["sub_checks"]["write_amplification"]["ratio"] == 1.0
     assert result["sub_checks"]["write_amplification"]["tier"] == "FAIL"
+
+
+def test_wall_time_stability_noise_gate_excludes_from_total(tmp_path: Path) -> None:
+    """CV > max_cv → tier "N/A (noise)", score excluded from rubric total."""
+    args = make_args(tmp_path, max_cv=5.0)
+    # tier234: only L1 cache is scorable (PASS=4); all other dims stay N/A.
+    tier234: dict = {
+        "cachegrind": {
+            "summary": {"Dr": 0},
+            "files": [
+                {"file": "a.c", "Dr": 5000, "D1mr": 25, "L1d_miss_pct": 0.5},
+            ],
+        }
+    }
+
+    # ── noise case ──────────────────────────────────────────────────────
+    noisy_tier1: dict = {
+        "time_usage": [
+            {"wall_seconds": 1.0},
+            {"wall_seconds": 1.0},
+            {"wall_seconds": 1.0},
+            {"wall_seconds": 3.0},
+        ]
+    }
+    noisy_wall = pipeline.score_wall_time_stability(noisy_tier1, max_cv=5.0)
+    assert noisy_wall["tier"] == "N/A (noise)"
+    assert noisy_wall["score"] == -1  # excluded from total
+    # Verify CV was measured
+    assert "cv" in noisy_wall and noisy_wall["cv"] is not None
+    assert noisy_wall["cv"] > 5.0  # CV ≈ 66.67%
+
+    noisy_rubric = pipeline.score_rubric(noisy_tier1, tier234, args)
+    wall_dim = dict(noisy_rubric["dimensions"])["Wall-Time Stability"]
+    assert wall_dim["tier"] == "N/A (noise)"
+    # Only L1 Cache contributes (score=4); wall-time must NOT count.
+    scorable = [
+        d for _, d in noisy_rubric["dimensions"] if d.get("tier") not in ("N/A", "N/A (noise)")
+    ]
+    assert noisy_rubric["total"] == sum(d["score"] for d in scorable)
+    assert noisy_rubric["max_possible"] == len(scorable) * 4
+    assert noisy_rubric["total"] == 4  # L1 Cache = PASS (4)
+
+    # ── clean case (same max_cv, normal CV) ─────────────────────────────
+    clean_tier1: dict = {
+        "time_usage": [
+            {"wall_seconds": 1.0},
+            {"wall_seconds": 1.01},
+            {"wall_seconds": 0.99},
+            {"wall_seconds": 1.0},
+        ]
+    }
+    clean_wall = pipeline.score_wall_time_stability(clean_tier1, max_cv=5.0)
+    assert clean_wall["tier"] == "PASS"
+    assert clean_wall["score"] == 4
+    assert clean_wall["cv"] is not None and clean_wall["cv"] < 3  # CV ≈ 0.82%
+
+    clean_rubric = pipeline.score_rubric(clean_tier1, tier234, args)
+    # L1 Cache PASS (4) + Wall-Time PASS (4) = 8
+    assert clean_rubric["total"] == 8

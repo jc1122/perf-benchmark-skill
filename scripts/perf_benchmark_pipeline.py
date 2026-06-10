@@ -679,6 +679,12 @@ def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
         help="Enable opt-in native hotspot sampling via perf record/report",
     )
     p.add_argument("--time-repeats", type=int, default=5, help="/usr/bin/time iterations")
+    p.add_argument(
+        "--max-cv",
+        type=float,
+        default=5.0,
+        help="CV%% above which timing-based dimensions score N/A (noise)",
+    )
     p.add_argument("--asm-audit", action="store_true", help="Enable Tier 4 ASM audit")
     p.add_argument(
         "--valgrind-timeout",

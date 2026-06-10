@@ -122,3 +122,60 @@ The `--expected-complexity` flag adjusts the complexity exponent thresholds:
 | >= 22/28 | Strong performance profile |
 | 15-21/28 | Workable baseline, targeted improvements recommended |
 | < 15/28 | High risk, algorithmic or structural issues likely |
+
+---
+
+## Measurement Policy (v0.2.0)
+
+### Aggregation
+
+- **Median-of-repeats** is the scored statistic for every timing-based dimension.
+  Wall-time repeats are collected via `/usr/bin/time -v` × `--time-repeats` (or
+  pytest-benchmark rounds); the median wall-time per size is used for scaling
+  fits and percentile reporting.
+
+### CV Reporting
+
+- **CV is always reported** in the dimension payload (`cv` field, rounded to
+  two decimal places) for every timing-based dimension, regardless of whether
+  the dimension scores.
+
+### CV Noise Gate
+
+- When `CV > --max-cv` (default **5%**) the affected dimension receives tier
+  **`"N/A (noise)"`** and is **never scored** — its score is excluded from
+  `rubric["total"]` and `rubric["max_possible"]`.
+- Rationale: this follows the **SPEC CPU run-rule** spirit (multiple runs,
+  median selected) and **JMH / pyperf** methodology where high run-to-run
+  variance invalidates a timing result.
+- The gate applies to every dimension whose primary input consists of timing
+  repeats (currently Wall-Time Stability).  Benchmark-derived sub-dimensions
+  (e.g., complexity exponent from per-size means) are not gated directly
+  because they consume aggregated medians.
+
+### Environment Fingerprint
+
+- Every benchmark disclosure includes the **environment fingerprint** collected
+  by Task 5 (prerequisites snapshot): CPU governor, `perf_event_paranoid`, RAM,
+  cache topology, and kernel version.  This fingerprint is recorded in
+  `benchmark_summary.json` and the markdown report header.
+
+### ISO/IEC 25010 Performance-Efficiency Mapping
+
+Each rubric dimension maps to a sub-characteristic of ISO/IEC 25010
+*performance efficiency*:
+
+| Dimension | ISO 25010 Sub-characteristic |
+|---|---|
+| Algorithmic Scaling | Time behaviour |
+| Wall-Time Stability | Time behaviour |
+| CPU Efficiency | Time behaviour |
+| Branch Prediction | Time behaviour |
+| L1 Cache Efficiency | Resource utilization |
+| Last-Level Cache | Resource utilization |
+| Memory Profile | Resource utilization |
+| (Percentile / tail latency — playbook note) | Time behaviour |
+
+**Capacity** (the third sub-characteristic) is not directly covered by this
+rubric; throughput-at-load benchmarking is out of scope — see the remediation
+playbook for capacity-testing guidance.

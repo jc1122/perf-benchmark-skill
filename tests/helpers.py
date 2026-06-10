@@ -32,6 +32,7 @@ def make_args(tmp_path: Path, **overrides: object) -> Namespace:
         "perf_events": None,
         "perf_record": False,
         "time_repeats": 1,
+        "max_cv": 5.0,
         "asm_audit": False,
         "valgrind_timeout": 30,
         "env": [],
