@@ -304,3 +304,28 @@ suite green; else record evaluated-no-win with numbers. Evidence doc committed.
 DEFINITION OF DONE: plan's DoD, all 9 items, each with evidence (final test count, gate
 outputs, summary keys, findings file, ledger tail, batch table, v0.2.0). Nothing pushed.
 ```
+
+---
+
+## Launch (Codex variant — GPT-5.5 xhigh orchestrator, native-Codex-subagent fallback)
+
+```
+You are the ORCHESTRATOR (Codex, model gpt-5.5, reasoning effort xhigh) for the SP6 perf-benchmark v0.2.0 run, in /home/jakub/projects/perf-benchmark-skill. Coordinate ONLY, never implement: dispatch MULTIPLE OpenCode DeepSeek v4 Pro Max workers in parallel (one packet each, own git worktree), keep the pool SATURATED at the cap of 4, verify every gate yourself by reading real output, own all merges. Commit locally per task/round; do NOT push, tag, or release — human reviews.
+
+READ FIRST, authoritative: docs/plans/2026-06-10-sp6-perf-bench-v0.2.md. Workers implement plan tasks VERBATIM via TDD — code, commands, and Expected outputs are in the plan. Ignore the plan header's Claude-specific sub-skill notes (superpowers:*); implement tasks directly from the plan text. A worker's "green" is NOT evidence — re-run gates yourself.
+
+WORKERS: PRIMARY = OpenCode DeepSeek v4 pro max via the opencode-worker-bridge skill: file-backed bounded worker runs, one task packet per worker carrying the plan task text verbatim, validate the bridge's JSON artifacts after each run. FALLBACK (automatic, one-way, logged) ONLY on infrastructure dispatch failure (credits/quota, auth/billing, bridge unreachable): NATIVE CODEX SUBAGENTS (spawned by you, isolated git worktree each, same packet + gates) for that and all later packets, no pause. A gate-failing CHANGE is a normal discard/retry, NOT a backend switch.
+
+PRE-FLIGHT (any failure -> STOP and report): repo clean; python3 -m pytest tests/ -q shows EXACTLY 60 passed, 1 failed (test_stage_massif_post_processing_uses_timeout — environment-dependent, T1 fixes it); valgrind ABSENT is expected on this machine; /home/jakub/projects/repo-audit-refactor-optimize clean (python3 -m pytest tests/ -q = 53 passed); opencode-worker-bridge loads and its transport check passes.
+
+WAVES (saturate, don't serialize):
+  Wave 1: T1 (massif test fix) || T2 (CI workflow) || T3 (perf-remediation-playbook) || T4 (--max-cv noise gate, TDD) — 4 workers, disjoint files.
+  Wave 2: T5 (env fingerprint + p50/p95/p99) || T6 (--findings-out shared-schema PERF bridge) || T8 (repo-B docs: /home/jakub/projects/repo-audit-refactor-optimize, PERF rows in playbook + prioritization) — 3 workers.
+  Wave 2b: T7 (JSONL baseline ledger) AFTER T6 merged — both touch the pipeline argparse block, serialize.
+  Then: T9 (SKILL.md v0.2.0 + README).
+Per-merge gate: full suite green in the worker's worktree AND re-run by you after merge (T1 alone takes the suite 60+1 -> 61 passed). Any divergence from a plan Expected line = STOP and surface; do not improvise.
+
+PHASE 2 — SELF-BENCH RATCHET (do not skip or summarize away): create benchmarks/bench_parse_massif.py per the plan, baseline run at --tier fast (valgrind absent — record it) with --baseline-ledger and --findings-out, then max 2 optimization batches on _parse_massif_out per references/perf-remediation-playbook.md: ACCEPT only >=5% median wall-time win at both sizes, CV <= 5% in both runs, matching environment fingerprints, suite green; one worker per batch, serialized merges. If no candidate clears the bar, record "evaluated, no feasible low-risk win" with both runs' numbers — a valid terminal outcome. Commit docs/dogfood/2026-06-10-sp6-self-bench.md.
+
+DEFINITION OF DONE: the plan's DoD, all 9 items, each with evidence in your final report: exact final test count; CI workflow committed + statically validated (post-push verification is the human's); noise-gate test output; summary's environment + wall_time_percentiles keys; byte-deterministic PERF findings file; ledger tail with vs-last/vs-best; repo-B suite still 53 passed; Phase 2 batch table or documented no-win; SKILL.md v0.2.0. Nothing pushed, tagged, or released in either repo.
+```
