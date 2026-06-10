@@ -68,6 +68,21 @@ alongside `--baseline` for point-in-time comparison.
 See [SKILL.md](SKILL.md) for the full workflow, tier behavior, agent guidance,
 and reference links.
 
+## Related Skills
+
+### perf-optimization (v0.1.0)
+
+The [`perf-optimization/`](perf-optimization/) directory contains a companion
+skill that consumes `perf-benchmark` findings and applies an iterative
+measure -> change -> re-measure ratchet to systematically resolve diagnosed
+bottlenecks. It selects the highest-impact candidate per iteration, makes one
+bounded change, re-runs profiling under identical conditions, and records
+accepted wins in an append-only ledger. Algorithmic scaling failures gate all
+constant-factor work.
+
+See [perf-optimization/SKILL.md](perf-optimization/SKILL.md) for workflow details
+and verification requirements.
+
 ## License
 
 MIT
