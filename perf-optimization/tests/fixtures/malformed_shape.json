@@ -1,0 +1,19 @@
+[
+  {
+    "id": "abc1230000000099",
+    "leaf": "perf-benchmark",
+    "signal": "PERF",
+    "path": "/src/broken.py",
+    "location": {
+      "line_start": 0,
+      "line_end": 0,
+      "symbol": "<workload>"
+    },
+    "metric": {
+      "value": 1.0,
+      "threshold": 2.0
+    },
+    "evidence": [],
+    "confidence": "high"
+  }
+]

@@ -1,0 +1,62 @@
+[
+  {
+    "id": "abc1230000000009",
+    "leaf": "perf-benchmark",
+    "signal": "PERF",
+    "severity": "high",
+    "path": "/src/bravo.py",
+    "location": {
+      "line_start": 0,
+      "line_end": 0,
+      "symbol": "<workload>"
+    },
+    "metric": {
+      "name": "l1_miss_rate",
+      "value": 5.0,
+      "threshold": 5.0
+    },
+    "evidence": [],
+    "confidence": "high",
+    "suggested_action": "Improve data locality"
+  },
+  {
+    "id": "abc1230000000010",
+    "leaf": "perf-benchmark",
+    "signal": "PERF",
+    "severity": "high",
+    "path": "/src/alpha.py",
+    "location": {
+      "line_start": 0,
+      "line_end": 0,
+      "symbol": "<workload>"
+    },
+    "metric": {
+      "name": "l1_miss_rate",
+      "value": 5.0,
+      "threshold": 5.0
+    },
+    "evidence": [],
+    "confidence": "high",
+    "suggested_action": "Improve data locality"
+  },
+  {
+    "id": "abc1230000000011",
+    "leaf": "perf-benchmark",
+    "signal": "PERF",
+    "severity": "high",
+    "path": "/src/alpha.py",
+    "location": {
+      "line_start": 0,
+      "line_end": 0,
+      "symbol": "<workload>"
+    },
+    "metric": {
+      "name": "branch_mispred_rate",
+      "value": 5.0,
+      "threshold": 5.0
+    },
+    "evidence": [],
+    "confidence": "high",
+    "suggested_action": "Replace unpredictable branches"
+  }
+]
