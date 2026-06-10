@@ -326,6 +326,7 @@ def test_stage_massif_post_processing_uses_timeout(monkeypatch, tmp_path: Path) 
         return SimpleNamespace(returncode=0, stderr="", stdout="")
 
     monkeypatch.setattr(pipeline.subprocess, "run", fake_run)
+    monkeypatch.setattr(pipeline.shutil, "which", lambda name: f"/usr/bin/{name}")
 
     pipeline.stage_massif(args, {"cache_topology": {}}, [], tmp_path / "out")
 
