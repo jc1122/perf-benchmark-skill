@@ -15,7 +15,7 @@ jobs:
         with:
           python-version: "3.12"
       - name: Install dependencies
-        run: pip install pytest ruff
+        run: pip install pytest ruff jsonschema
       - name: Lint (ruff check)
         run: ruff check scripts/ tests/
       - name: Format (ruff format --check)
