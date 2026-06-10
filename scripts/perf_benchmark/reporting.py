@@ -419,3 +419,4 @@ def write_json_summary(
 
     (out_dir / "benchmark_summary.json").write_text(json.dumps(summary, indent=2))
     _log(f"  -> Wrote {out_dir / 'benchmark_summary.json'}")
+    return summary

@@ -32,6 +32,7 @@ if str(SCRIPT_DIR) not in sys.path:
     sys.path.insert(0, str(SCRIPT_DIR))
 
 _findings = importlib.import_module("perf_benchmark.findings")
+_ledger = importlib.import_module("perf_benchmark.ledger")
 _reporting = importlib.import_module("perf_benchmark.reporting")
 _scoring = importlib.import_module("perf_benchmark.scoring")
 _stage_helpers = importlib.import_module("perf_benchmark.stage_helpers")
@@ -628,9 +629,9 @@ def write_json_summary(
     prereqs: dict,
     args: argparse.Namespace,
     out_dir: Path,
-) -> None:
+) -> dict:
     """Compatibility wrapper around the extracted reporting module."""
-    _write_json_summary(rubric, tier1, tier234, prereqs, args, out_dir, _cv)
+    return _write_json_summary(rubric, tier1, tier234, prereqs, args, out_dir, _cv)
 
 
 # ---------------------------------------------------------------------------
@@ -671,6 +672,12 @@ def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
     )
     p.add_argument(
         "--baseline", default=None, help="Previous benchmark_summary.json for regression"
+    )
+    p.add_argument(
+        "--baseline-ledger",
+        type=Path,
+        default=None,
+        help="Append-only JSONL run history; enables vs-last and vs-best regression checks",
     )
     p.add_argument("--perf-repeats", type=int, default=5, help="perf stat iterations")
     p.add_argument("--perf-events", default=None, help="Custom perf event list")
@@ -755,7 +762,19 @@ def main(argv: list[str] | None = None) -> int:
     _log("\nStage 4: Scoring rubric + generating report...")
     rubric = score_rubric(tier1_results, tier234_results, args)
     write_markdown_report(rubric, tier1_results, tier234_results, prereqs, args, out_dir)
-    write_json_summary(rubric, tier1_results, tier234_results, prereqs, args, out_dir)
+    summary = write_json_summary(rubric, tier1_results, tier234_results, prereqs, args, out_dir)
+
+    if args.baseline_ledger:
+        ledger_regressions = _ledger.compare(args.baseline_ledger, summary)
+        summary["ledger_regressions"] = ledger_regressions
+        (out_dir / "benchmark_summary.json").write_text(json.dumps(summary, indent=2))
+        _ledger.append_run(args.baseline_ledger, summary)
+        _log(
+            f"  -> Ledger updated: {args.baseline_ledger}"
+            f" (vs_last={len(ledger_regressions.get('vs_last', []))}"
+            f" vs_best={len(ledger_regressions.get('vs_best', []))}"
+            f" warnings={len(ledger_regressions.get('warnings', []))})"
+        )
 
     if args.findings_out:
         findings_list = _findings.to_shared_findings(rubric, root=str(args.root))

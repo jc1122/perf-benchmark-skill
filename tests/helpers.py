@@ -28,6 +28,7 @@ def make_args(tmp_path: Path, **overrides: object) -> Namespace:
         "max_valgrind_parallel": 2,
         "expected_complexity": "nlogn",
         "baseline": None,
+        "baseline_ledger": None,
         "perf_repeats": 1,
         "perf_events": None,
         "perf_record": False,
