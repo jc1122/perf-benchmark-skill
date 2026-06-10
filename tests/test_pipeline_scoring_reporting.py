@@ -534,3 +534,70 @@ def test_wall_time_stability_noise_gate_excludes_from_total(tmp_path: Path) -> N
     clean_rubric = pipeline.score_rubric(clean_tier1, tier234, args)
     # L1 Cache PASS (4) + Wall-Time PASS (4) = 8
     assert clean_rubric["total"] == 8
+
+
+# ── T5: environment fingerprint + wall-time percentiles ──────────────
+
+
+def test_write_json_summary_includes_environment_fingerprint(tmp_path: Path) -> None:
+    out_dir = tmp_path / "out"
+    out_dir.mkdir()
+    rubric = {"total": 0, "max_possible": 0, "dimensions": [], "baseline_regressions": []}
+    prereqs = {
+        "python_ok": True,
+        "valgrind": None,
+        "perf_paranoid": 0,
+        "governor": "performance",
+        "cache_topology": {},
+        "ram_mb": 1024,
+    }
+    args = make_args(tmp_path, tier="fast")
+    tier1 = {"time_usage": [{"wall_seconds": 0.01}]}
+
+    pipeline.write_json_summary(rubric, tier1, {}, prereqs, args, out_dir)
+    summary = json.loads((out_dir / "benchmark_summary.json").read_text())
+
+    env = summary["environment"]
+    assert isinstance(env, dict)
+    assert "cpu_model" in env
+    assert "kernel" in env
+    assert "governor" in env
+    assert "smt" in env
+    assert "load_avg_1m" in env
+    assert "python_version" in env
+    assert "timestamp_utc" in env
+    # Type checks
+    assert isinstance(env["cpu_model"], str)
+    assert isinstance(env["kernel"], str)
+    assert isinstance(env["governor"], str)
+    assert isinstance(env["smt"], str)
+    assert isinstance(env["load_avg_1m"], float)
+    assert isinstance(env["python_version"], str)
+    assert isinstance(env["timestamp_utc"], str)
+
+
+def test_write_json_summary_includes_wall_time_percentiles(tmp_path: Path) -> None:
+    out_dir = tmp_path / "out"
+    out_dir.mkdir()
+    rubric = {"total": 0, "max_possible": 0, "dimensions": [], "baseline_regressions": []}
+    prereqs = {
+        "python_ok": True,
+        "valgrind": None,
+        "perf_paranoid": 0,
+        "governor": "performance",
+        "cache_topology": {},
+        "ram_mb": 1024,
+    }
+    args = make_args(tmp_path, tier="fast")
+    values = [1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0, 9.0, 10.0]
+    tier1 = {"time_usage": [{"wall_seconds": v} for v in values]}
+
+    pipeline.write_json_summary(rubric, tier1, {}, prereqs, args, out_dir)
+    summary = json.loads((out_dir / "benchmark_summary.json").read_text())
+
+    pcts = summary["wall_time_percentiles"]
+    assert isinstance(pcts, dict)
+    # Exact values per plan: statistics.quantiles(values, n=100) indices 49/94/98
+    assert pcts["p50"] == 5.5
+    assert pcts["p95"] == 10.45
+    assert pcts["p99"] == 10.89

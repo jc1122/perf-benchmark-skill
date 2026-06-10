@@ -1,6 +1,9 @@
 from __future__ import annotations
 
 import json
+import os
+import platform
+import statistics
 import sys
 from datetime import datetime, timezone
 from pathlib import Path
@@ -11,6 +14,28 @@ __all__ = ["write_markdown_report", "write_json_summary"]
 
 def _log(msg: str) -> None:
     print(msg, file=sys.stderr, flush=True)
+
+
+def _environment_fingerprint() -> dict[str, Any]:
+    cpu_model = ""
+    try:
+        for line in Path("/proc/cpuinfo").read_text().splitlines():
+            if line.lower().startswith("model name"):
+                cpu_model = line.split(":", 1)[1].strip()
+                break
+    except OSError:
+        pass
+    governor_path = Path("/sys/devices/system/cpu/cpu0/cpufreq/scaling_governor")
+    smt_path = Path("/sys/devices/system/cpu/smt/active")
+    return {
+        "cpu_model": cpu_model,
+        "kernel": platform.release(),
+        "governor": governor_path.read_text().strip() if governor_path.exists() else "unknown",
+        "smt": smt_path.read_text().strip() if smt_path.exists() else "unknown",
+        "load_avg_1m": round(os.getloadavg()[0], 2),
+        "python_version": platform.python_version(),
+        "timestamp_utc": datetime.now(timezone.utc).isoformat(timespec="seconds"),
+    }
 
 
 def _first_present_metric(check: dict[str, Any], keys: list[str]) -> Any:
@@ -355,6 +380,24 @@ def write_json_summary(
         "regression_blocker": bool(rubric.get("baseline_regressions")),
     }
     summary.update(_summarize_wall_time_metrics(tier1, cv_fn))
+
+    # ── environment fingerprint ───────────────────────────────────────
+    summary["environment"] = _environment_fingerprint()
+
+    # ── wall-time percentiles (p50/p95/p99) from raw repeats ──────────
+    time_data = tier1.get("time_usage", [])
+    walls = [item.get("wall_seconds", 0.0) for item in time_data if item.get("wall_seconds")]
+    if not walls:
+        time_usage_by_size = tier1.get("time_usage_by_size", {})
+        for size, runs in time_usage_by_size.items():
+            walls.extend(run.get("wall_seconds", 0.0) for run in runs if run.get("wall_seconds"))
+    if len(walls) >= 2:
+        q = statistics.quantiles(walls, n=100)
+        summary["wall_time_percentiles"] = {
+            "p50": q[49],
+            "p95": q[94],
+            "p99": q[98],
+        }
 
     tracemalloc = tier1.get("tracemalloc", {})
     if tracemalloc and tracemalloc.get("peak_bytes"):
