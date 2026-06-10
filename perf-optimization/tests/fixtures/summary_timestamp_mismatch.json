@@ -1,0 +1,44 @@
+{
+  "generated_at": "2025-01-15T12:00:00+00:00",
+  "root": "/tmp/bench",
+  "tier": "deep",
+  "rubric": {
+    "total": 24,
+    "max_possible": 28,
+    "dimensions": {
+      "Algorithmic Scaling": {"score": 4, "tier": "PASS"},
+      "Wall-Time Stability": {"score": 4, "tier": "PASS", "cv": 2.30},
+      "CPU Efficiency": {"score": 4, "tier": "PASS", "top_fn_pct": 14.0, "IPC": 2.2},
+      "L1 Cache Efficiency": {"score": 4, "tier": "PASS", "l1_miss_rate": 0.4},
+      "Last-Level Cache": {"score": 4, "tier": "PASS", "ll_miss_rate": 0.18},
+      "Branch Prediction": {"score": 4, "tier": "PASS", "branch_mispred_rate": 0.7},
+      "Memory Profile": {"score": 0, "tier": "FAIL", "peak_bytes": 524288000}
+    }
+  },
+  "prerequisites": {
+    "python_ok": true,
+    "valgrind": true,
+    "perf_paranoid": 1,
+    "governor": "performance",
+    "cache_topology": {"D1": "32K", "I1": "32K", "LL": "256K"},
+    "ram_mb": 16000
+  },
+  "baseline_regressions": [],
+  "regression_blocker": false,
+  "wall_time_cv": 2.30,
+  "wall_time_mean": 0.0018,
+  "wall_time_percentiles": {
+    "p50": 1.8,
+    "p95": 1.95,
+    "p99": 2.05
+  },
+  "environment": {
+    "cpu_model": "Intel(R) Core(TM) i7-10750H CPU @ 2.60GHz",
+    "kernel": "6.1.0",
+    "governor": "performance",
+    "smt": "1",
+    "load_avg_1m": 5.67,
+    "python_version": "3.11.2",
+    "timestamp_utc": "2025-01-16T12:00:00+00:00"
+  }
+}

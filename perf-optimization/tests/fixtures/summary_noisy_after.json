@@ -1,0 +1,80 @@
+{
+  "generated_at": "2025-01-15T10:05:00+00:00",
+  "root": "/tmp/bench",
+  "tier": "deep",
+  "rubric": {
+    "total": 20,
+    "max_possible": 24,
+    "dimensions": {
+      "Algorithmic Scaling": {
+        "score": 4,
+        "tier": "PASS",
+        "sub_checks": {
+          "complexity_exponent": {"k": 1.1, "tier": "PASS"},
+          "call_amplification": {"ratio": 5.0, "tier": "PASS"},
+          "data_reuse": {"ratio": 3.0, "tier": "PASS"},
+          "write_amplification": {"ratio": 0.1, "tier": "PASS"},
+          "allocation_churn": {"peaks": 1, "tier": "PASS"},
+          "multiplicative_paths": {"path_count": 0, "tier": "PASS"}
+        }
+      },
+      "Wall-Time Stability": {
+        "score": -1,
+        "tier": "N/A (noise)",
+        "cv": 12.5
+      },
+      "CPU Efficiency": {
+        "score": 4,
+        "tier": "PASS",
+        "top_fn_pct": 14.0,
+        "IPC": 2.2
+      },
+      "L1 Cache Efficiency": {
+        "score": 4,
+        "tier": "PASS",
+        "l1_miss_rate": 0.4
+      },
+      "Last-Level Cache": {
+        "score": 4,
+        "tier": "PASS",
+        "ll_miss_rate": 0.18
+      },
+      "Branch Prediction": {
+        "score": 4,
+        "tier": "PASS",
+        "branch_mispred_rate": 0.7
+      },
+      "Memory Profile": {
+        "score": 0,
+        "tier": "FAIL",
+        "peak_bytes": 524288000
+      }
+    }
+  },
+  "prerequisites": {
+    "python_ok": true,
+    "valgrind": true,
+    "perf_paranoid": 1,
+    "governor": "performance",
+    "cache_topology": {"D1": "32K", "I1": "32K", "LL": "256K"},
+    "ram_mb": 16000
+  },
+  "baseline_regressions": [],
+  "regression_blocker": false,
+  "wall_time_cv": 12.5,
+  "wall_time_mean": 0.0018,
+  "wall_time_percentiles": {
+    "p50": 1.8,
+    "p95": 2.1,
+    "p99": 2.5
+  },
+  "environment": {
+    "cpu_model": "Intel(R) Core(TM) i7-10750H CPU @ 2.60GHz",
+    "kernel": "6.1.0",
+    "governor": "performance",
+    "smt": "1",
+    "load_avg_1m": 0.42,
+    "python_version": "3.11.2",
+    "timestamp_utc": "2025-01-15T10:05:00+00:00"
+  }
+}
