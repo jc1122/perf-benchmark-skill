@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.3.2 - 2026-06-11
+
+- Split scoring wall-time CV collection into focused helpers.
+- Split cache metric collection into file-level, summary-derived, and fallback
+  helpers.
+- Ratcheted the wave baseline from 41 to 39 normalized identities.
+
 ## 0.3.1 - 2026-06-11
 
 - Added counted security trusted-subprocess policy support to the repo wave
