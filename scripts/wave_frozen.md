@@ -54,14 +54,30 @@
   `function_nloc` identities.
 - Current baseline has 39 raw findings and 39 normalized identities.
 
+## SP11 iteration 2 C-6 hotspot re-anchor
+
+- Ratchet timestamp: 2026-06-11T22:18:00Z
+- Advanced `scripts/wave_anchor.txt` to
+  `b5ed162ef4224340a7776e913321c38ec38bcf90`.
+- Added the ratchet ledger pair
+  `scripts/wave_baseline.json<->scripts/wave_frozen.md` to
+  `scripts/hotspot_audit_config.json`; the hotspot leaf counts the suppression
+  under `declared_coupling`.
+- Re-anchor surfaced two loop-induced churn rows:
+  `scripts/perf_benchmark/scoring.py` from accepted security/constant work and
+  `scripts/wave_baseline.json` from repeated ratchets. Per SP11 pre-flight rule
+  5, both are recorded as real re-anchor residue for the next iteration rather
+  than hidden or treated as unfixable growth.
+- Current baseline has 41 raw findings and 41 normalized identities.
+
 ## Residual findings
 
 The machine-readable authority is `scripts/wave_baseline.json`. The residual
-baseline now contains only structural code-health debt and the two real
+baseline now contains only structural code-health debt and the four real
 churn-complexity hotspot rows that must be reduced by future complexity work or
 honestly recorded as residue if no bounded win remains.
 
 | Leaf | Count | Class | Residue |
 | --- | ---: | --- | --- |
 | complexity | 37 | deferred-structural | Function complexity, function length, module maintainability, and parameter-count rows across the perf benchmark pipeline, reporting, scoring, ledger, support, stage helpers, and perf-optimization helpers. |
-| hotspot | 2 | deferred-structural | `scripts/perf_benchmark/reporting.py` and `scripts/perf_benchmark_pipeline.py` still carry `churn_complexity_product`; policy config deliberately does not suppress churn-complexity rows. |
+| hotspot | 4 | deferred-structural / loop-reanchor-residue | `scripts/perf_benchmark/reporting.py`, `scripts/perf_benchmark/scoring.py`, `scripts/perf_benchmark_pipeline.py`, and `scripts/wave_baseline.json` still carry `churn_complexity_product`; policy config deliberately does not suppress churn-complexity rows. |

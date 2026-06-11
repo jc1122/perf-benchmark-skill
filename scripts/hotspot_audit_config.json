@@ -2,7 +2,8 @@
   "coupling_allow_pairs": [
     ["README.md", "SKILL.md"],
     ["README.md", "scripts/perf_benchmark_pipeline.py"],
-    ["SKILL.md", "scripts/perf_benchmark_pipeline.py"]
+    ["SKILL.md", "scripts/perf_benchmark_pipeline.py"],
+    ["scripts/wave_baseline.json", "scripts/wave_frozen.md"]
   ],
   "single_maintainer": true
 }

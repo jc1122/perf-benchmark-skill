@@ -229,8 +229,20 @@
   },
   {
     "leaf": "hotspot",
+    "path": "scripts/perf_benchmark/scoring.py",
+    "symbol": "scripts/perf_benchmark/scoring.py",
+    "metric": "churn_complexity_product"
+  },
+  {
+    "leaf": "hotspot",
     "path": "scripts/perf_benchmark_pipeline.py",
     "symbol": "scripts/perf_benchmark_pipeline.py",
+    "metric": "churn_complexity_product"
+  },
+  {
+    "leaf": "hotspot",
+    "path": "scripts/wave_baseline.json",
+    "symbol": "scripts/wave_baseline.json",
     "metric": "churn_complexity_product"
   }
 ]
