@@ -81,6 +81,16 @@
   identity.
 - Current baseline has 40 raw findings and 40 normalized identities.
 
+## SP11 iteration 3 scoring cache ratchet
+
+- Ratchet timestamp: 2026-06-11T23:14:43Z
+- Split cache metric collection in `scripts/perf_benchmark/scoring.py` into
+  private helpers for file-level metrics, summary-derived metrics, and fallback
+  source selection while preserving `score_cache_dim` thresholds and result
+  shape.
+- Removed the stale `score_cache_dim` `cyclomatic_complexity` identity.
+- Current baseline has 39 raw findings and 39 normalized identities.
+
 ## Residual findings
 
 The machine-readable authority is `scripts/wave_baseline.json`. The residual
@@ -90,5 +100,5 @@ honestly recorded as residue if no bounded win remains.
 
 | Leaf | Count | Class | Residue |
 | --- | ---: | --- | --- |
-| complexity | 36 | deferred-structural | Function complexity, function length, module maintainability, and parameter-count rows across the perf benchmark pipeline, reporting, scoring, ledger, support, stage helpers, and perf-optimization helpers. |
+| complexity | 35 | deferred-structural | Function complexity, function length, module maintainability, and parameter-count rows across the perf benchmark pipeline, reporting, scoring, ledger, support, stage helpers, and perf-optimization helpers. |
 | hotspot | 4 | deferred-structural / loop-reanchor-residue | `scripts/perf_benchmark/reporting.py`, `scripts/perf_benchmark/scoring.py`, `scripts/perf_benchmark_pipeline.py`, and `scripts/wave_baseline.json` still carry `churn_complexity_product`; policy config deliberately does not suppress churn-complexity rows. |

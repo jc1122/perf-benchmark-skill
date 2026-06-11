@@ -297,27 +297,39 @@ def score_cpu_efficiency(tier234: dict) -> dict[str, Any]:
     return {"score": score, "tier": tier_val, **evidence}
 
 
+def _cache_file_metric_values(cachegrind: dict[str, Any], metric_key: str) -> list[float]:
+    return [
+        file_data.get(metric_key, 0)
+        for file_data in cachegrind.get("files", [])
+        if file_data.get(metric_key) is not None
+    ]
+
+
+def _cache_summary_metric_values(summary: dict[str, Any], metric_key: str) -> list[float]:
+    if metric_key == "L1d_miss_pct" and summary.get("Dr", 0) > 0:
+        return [100.0 * summary.get("D1mr", 0) / summary["Dr"]]
+    if metric_key == "LL_miss_pct" and (summary.get("Dr", 0) + summary.get("Dw", 0)) > 0:
+        total = summary.get("Dr", 0) + summary.get("Dw", 0)
+        return [100.0 * (summary.get("DLmr", 0) + summary.get("DLmw", 0)) / total]
+    if metric_key == "branch_mispred_pct" and summary.get("Bc", 0) > 0:
+        return [100.0 * summary.get("Bcm", 0) / summary["Bc"]]
+    return []
+
+
+def _cache_metric_values(cachegrind: dict[str, Any], metric_key: str) -> list[float]:
+    values = _cache_file_metric_values(cachegrind, metric_key)
+    if values:
+        return values
+    return _cache_summary_metric_values(cachegrind.get("summary", {}), metric_key)
+
+
 def score_cache_dim(tier234: dict, metric_key: str, pass_t: float, warn_t: float) -> dict[str, Any]:
     """Generic cache dimension scorer."""
     cachegrind = tier234.get("cachegrind", {})
     if not cachegrind or cachegrind.get("error"):
         return {"score": -1, "tier": "N/A"}
 
-    values = [
-        file_data.get(metric_key, 0)
-        for file_data in cachegrind.get("files", [])
-        if file_data.get(metric_key) is not None
-    ]
-    if not values:
-        summary = cachegrind.get("summary", {})
-        if metric_key == "L1d_miss_pct" and summary.get("Dr", 0) > 0:
-            values = [100.0 * summary.get("D1mr", 0) / summary["Dr"]]
-        elif metric_key == "LL_miss_pct" and (summary.get("Dr", 0) + summary.get("Dw", 0)) > 0:
-            total = summary.get("Dr", 0) + summary.get("Dw", 0)
-            values = [100.0 * (summary.get("DLmr", 0) + summary.get("DLmw", 0)) / total]
-        elif metric_key == "branch_mispred_pct" and summary.get("Bc", 0) > 0:
-            values = [100.0 * summary.get("Bcm", 0) / summary["Bc"]]
-
+    values = _cache_metric_values(cachegrind, metric_key)
     if not values:
         return {"score": -1, "tier": "N/A"}
 

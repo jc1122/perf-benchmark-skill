@@ -110,12 +110,6 @@
   {
     "leaf": "complexity",
     "path": "scripts/perf_benchmark/scoring.py",
-    "symbol": "score_cache_dim",
-    "metric": "cyclomatic_complexity"
-  },
-  {
-    "leaf": "complexity",
-    "path": "scripts/perf_benchmark/scoring.py",
     "symbol": "score_memory_profile",
     "metric": "cyclomatic_complexity"
   },
