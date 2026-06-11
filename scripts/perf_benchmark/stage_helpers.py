@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import argparse
+import contextlib
 import os
 import re
 import shlex
@@ -122,9 +123,8 @@ finally:
 
 raise SystemExit(status)
 """
-    tmp = tempfile.NamedTemporaryFile(mode="w", suffix="_tracemalloc.py", delete=False)
-    tmp.write(wrapper_code)
-    tmp.close()
+    with tempfile.NamedTemporaryFile(mode="w", suffix="_tracemalloc.py", delete=False) as tmp:
+        tmp.write(wrapper_code)
     return Path(tmp.name), cmd_list
 
 
@@ -169,7 +169,7 @@ def _parse_cachegrind_summary(text: str) -> dict[str, Any]:
             except ValueError:
                 continue
         if numbers and headers:
-            for header, value in zip(headers[: len(numbers)], numbers):
+            for header, value in zip(headers[: len(numbers)], numbers, strict=False):
                 result["summary"][header] = value
         break
 
@@ -184,11 +184,9 @@ def _parse_cachegrind_summary(text: str) -> dict[str, Any]:
         if "/" not in filepath and not filepath.endswith((".py", ".c", ".h", ".pyx")):
             continue
         entry: dict[str, Any] = {"file": filepath}
-        for header, value in zip(headers[: len(parts) - 1], parts[:-1]):
-            try:
-                entry[header] = int(value)
-            except ValueError:
-                pass
+        for header, part in zip(headers[: len(parts) - 1], parts[:-1], strict=False):
+            with contextlib.suppress(ValueError):
+                entry[header] = int(part)
         if entry.get("Dr", 0) > 0:
             entry["L1d_miss_pct"] = round(100.0 * entry.get("D1mr", 0) / entry["Dr"], 3)
         if entry.get("Dr", 0) + entry.get("Dw", 0) > 0:
@@ -321,10 +319,8 @@ def _parse_perf_stat(stderr: str) -> dict[str, Any]:
             continue
         value_str = match.group(1).replace(",", "")
         name = match.group(2)
-        try:
+        with contextlib.suppress(ValueError):
             result["counters"][name] = float(value_str) if "." in value_str else int(value_str)
-        except ValueError:
-            pass
 
     counters = result["counters"]
     if counters.get("instructions") and counters.get("cycles"):

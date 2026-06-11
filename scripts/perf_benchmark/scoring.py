@@ -35,7 +35,7 @@ def _fit_exponent(sizes: list[int], times: list[float]) -> float:
     """Fit time = a * N^k via log-log linear regression. Returns k."""
     if len(sizes) < 2 or len(times) < 2:
         return 1.0
-    filtered_pairs = [(n, t) for n, t in zip(sizes, times) if n > 0 and t > 0]
+    filtered_pairs = [(n, t) for n, t in zip(sizes, times, strict=False) if n > 0 and t > 0]
     if len(filtered_pairs) < 2:
         return 1.0
     log_n = [math.log(n) for n, _ in filtered_pairs]
@@ -43,7 +43,7 @@ def _fit_exponent(sizes: list[int], times: list[float]) -> float:
     count = len(log_n)
     sum_x = sum(log_n)
     sum_y = sum(log_t)
-    sum_xy = sum(x * y for x, y in zip(log_n, log_t))
+    sum_xy = sum(x * y for x, y in zip(log_n, log_t, strict=False))
     sum_x2 = sum(x * x for x in log_n)
     denom = count * sum_x2 - sum_x * sum_x
     if abs(denom) < 1e-12:
@@ -103,11 +103,16 @@ def score_algorithmic_scaling(
 
     input_size = args.valgrind_size
     callgrind = tier234.get("callgrind", {})
-    if callgrind and not callgrind.get("error") and callgrind.get("functions"):
-        if input_size > 0 and "total_calls" in callgrind:
-            amp = callgrind["total_calls"] / input_size
-            tier_val = "PASS" if amp <= 10 else "WARN" if amp <= 100 else "FAIL"
-            sub_checks["call_amplification"] = {"ratio": round(amp, 1), "tier": tier_val}
+    if (
+        callgrind
+        and not callgrind.get("error")
+        and callgrind.get("functions")
+        and input_size > 0
+        and "total_calls" in callgrind
+    ):
+        amp = callgrind["total_calls"] / input_size
+        tier_val = "PASS" if amp <= 10 else "WARN" if amp <= 100 else "FAIL"
+        sub_checks["call_amplification"] = {"ratio": round(amp, 1), "tier": tier_val}
 
     cachegrind = tier234.get("cachegrind", {})
     if cachegrind and not cachegrind.get("error"):

@@ -70,9 +70,7 @@ def _dimension_tiers(rubric: dict[str, Any]) -> dict[str, str]:
 # ----------------------------------------------------- check logic functions
 
 
-def _check_median(
-    before_p50: float, after_p50: float, min_win: float
-) -> tuple[float, list[str]]:
+def _check_median(before_p50: float, after_p50: float, min_win: float) -> tuple[float, list[str]]:
     """Compute median_win_percent and check against *min_win*."""
     if before_p50 == 0.0:
         return 0.0, ["median"]
@@ -131,9 +129,7 @@ def _check_suite(suite_exit_code: int) -> list[str]:
 # ------------------------------------------------------------ ledger reading
 
 
-def _read_ledger(
-    ledger_path: str, after_dims: dict[str, str]
-) -> tuple[dict[str, Any], list[str]]:
+def _read_ledger(ledger_path: str, after_dims: dict[str, str]) -> tuple[dict[str, Any], list[str]]:
     """Read the JSONL ledger, compare after dimensions against the last entry.
 
     Returns (vs_last_dict, warnings).  vs_last_dict is ALWAYS a dict:
@@ -175,12 +171,14 @@ def _read_ledger(
             continue
         drop = TIER_RANK[ref_tier] - TIER_RANK[after_tier]
         if drop >= 1:
-            regressions.append({
-                "dimension": name,
-                "previous_tier": ref_tier,
-                "current_tier": after_tier,
-                "drop": drop,
-            })
+            regressions.append(
+                {
+                    "dimension": name,
+                    "previous_tier": ref_tier,
+                    "current_tier": after_tier,
+                    "drop": drop,
+                }
+            )
 
     if regressions:
         return {"regressions": regressions}, warnings
@@ -211,7 +209,9 @@ def _build_verdict(
     tier_reasons = _check_tier_drops(before_dims, after_dims)
     suite_reasons = _check_suite(suite_exit_code)
 
-    all_reasons = median_reasons + noise_reasons + fingerprint_reasons + tier_reasons + suite_reasons
+    all_reasons = (
+        median_reasons + noise_reasons + fingerprint_reasons + tier_reasons + suite_reasons
+    )
 
     verdict = "reject" if all_reasons else "accept"
 
@@ -246,14 +246,21 @@ def _write_output(payload: dict[str, Any], out_path: str) -> str:
 
 
 def main(argv: list[str] | None = None) -> int:
-    parser = argparse.ArgumentParser(
-        description="Deterministic SP6-pipeline win verdict wrapper"
+    parser = argparse.ArgumentParser(description="Deterministic SP6-pipeline win verdict wrapper")
+    parser.add_argument(
+        "--before", required=True, type=str, help="Before-run benchmark_summary.json"
     )
-    parser.add_argument("--before", required=True, type=str, help="Before-run benchmark_summary.json")
     parser.add_argument("--after", required=True, type=str, help="After-run benchmark_summary.json")
     parser.add_argument("--suite-exit-code", required=True, type=int, help="Test suite exit code")
-    parser.add_argument("--min-win", type=float, default=5.0, help="Minimum median win pct (default: 5.0)")
-    parser.add_argument("--ledger", type=str, default=None, help="Optional append-only JSONL ledger")
+    parser.add_argument(
+        "--min-win",
+        type=float,
+        default=5.0,
+        help="Minimum median win pct (default: 5.0)",
+    )
+    parser.add_argument(
+        "--ledger", type=str, default=None, help="Optional append-only JSONL ledger"
+    )
     parser.add_argument("--out", required=True, type=str, help="Path for verdict JSON output")
     args = parser.parse_args(argv)
 
@@ -262,7 +269,13 @@ def main(argv: list[str] | None = None) -> int:
         before = _load_summary(args.before)
     except (OSError, json.JSONDecodeError, ValueError) as exc:
         _write_output(
-            {"verdict": "error", "median_win_percent": 0.0, "reasons": ["malformed"], "vs_last": {}, "warnings": [f"Before summary error: {exc}"]},
+            {
+                "verdict": "error",
+                "median_win_percent": 0.0,
+                "reasons": ["malformed"],
+                "vs_last": {},
+                "warnings": [f"Before summary error: {exc}"],
+            },
             args.out,
         )
         return 2
@@ -272,15 +285,19 @@ def main(argv: list[str] | None = None) -> int:
         after = _load_summary(args.after)
     except (OSError, json.JSONDecodeError, ValueError) as exc:
         _write_output(
-            {"verdict": "error", "median_win_percent": 0.0, "reasons": ["malformed"], "vs_last": {}, "warnings": [f"After summary error: {exc}"]},
+            {
+                "verdict": "error",
+                "median_win_percent": 0.0,
+                "reasons": ["malformed"],
+                "vs_last": {},
+                "warnings": [f"After summary error: {exc}"],
+            },
             args.out,
         )
         return 2
 
     # Build verdict
-    verdict_payload = _build_verdict(
-        before, after, args.suite_exit_code, args.min_win, args.ledger
-    )
+    verdict_payload = _build_verdict(before, after, args.suite_exit_code, args.min_win, args.ledger)
 
     _write_output(verdict_payload, args.out)
 

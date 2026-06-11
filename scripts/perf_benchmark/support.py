@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import argparse
+import contextlib
 import os
 import re
 import shlex
@@ -113,7 +114,7 @@ def _detect_cache_fallback() -> dict[str, str]:
         "  WARNING: sysfs cache detection failed, using getconf (may be inaccurate on hybrid CPUs)"
     )
     result = {}
-    try:
+    with contextlib.suppress(ValueError, OSError):
         result["D1"] = ",".join(
             [
                 str(os.sysconf("SC_LEVEL1_DCACHE_SIZE")),
@@ -121,9 +122,7 @@ def _detect_cache_fallback() -> dict[str, str]:
                 str(os.sysconf("SC_LEVEL1_DCACHE_LINESIZE")),
             ]
         )
-    except (ValueError, OSError):
-        pass
-    try:
+    with contextlib.suppress(ValueError, OSError):
         result["I1"] = ",".join(
             [
                 str(os.sysconf("SC_LEVEL1_ICACHE_SIZE")),
@@ -131,9 +130,7 @@ def _detect_cache_fallback() -> dict[str, str]:
                 str(os.sysconf("SC_LEVEL1_ICACHE_LINESIZE")),
             ]
         )
-    except (ValueError, OSError):
-        pass
-    try:
+    with contextlib.suppress(ValueError, OSError):
         result["LL"] = ",".join(
             [
                 str(os.sysconf("SC_LEVEL3_CACHE_SIZE")),
@@ -141,8 +138,6 @@ def _detect_cache_fallback() -> dict[str, str]:
                 str(os.sysconf("SC_LEVEL3_CACHE_LINESIZE")),
             ]
         )
-    except (ValueError, OSError):
-        pass
     return result
 
 

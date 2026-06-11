@@ -358,7 +358,7 @@ def write_json_summary(
     args,
     out_dir: Path,
     cv_fn,
-) -> None:
+) -> dict[str, Any]:
     summary: dict[str, Any] = {
         "generated_at": datetime.now(timezone.utc).isoformat(),
         "root": str(args.root),
@@ -389,7 +389,7 @@ def write_json_summary(
     walls = [item.get("wall_seconds", 0.0) for item in time_data if item.get("wall_seconds")]
     if not walls:
         time_usage_by_size = tier1.get("time_usage_by_size", {})
-        for size, runs in time_usage_by_size.items():
+        for runs in time_usage_by_size.values():
             walls.extend(run.get("wall_seconds", 0.0) for run in runs if run.get("wall_seconds"))
     if len(walls) >= 2:
         q = statistics.quantiles(walls, n=100)

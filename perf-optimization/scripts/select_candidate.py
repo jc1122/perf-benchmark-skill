@@ -59,9 +59,7 @@ def _validate_finding(finding: Any) -> None:
         raise ValueError("finding.metric is not a JSON object")
     missing_metric = _REQUIRED_METRIC_KEYS - set(metric)
     if missing_metric:
-        raise ValueError(
-            f"finding.metric missing required keys: {sorted(missing_metric)}"
-        )
+        raise ValueError(f"finding.metric missing required keys: {sorted(missing_metric)}")
     # Validate types
     for key in ("id", "path"):
         if not isinstance(finding[key], str):
@@ -117,7 +115,8 @@ def select_candidate(findings: list[dict[str, Any]]) -> dict[str, Any]:
                 "ratio": round(ratio, 6),
                 "stop_gate": stop_gate,
                 "_sort_key": (
-                    not stop_gate,  # False (0) sorts before True (1) → stop_gate first
+                    # False (0) sorts before True (1) -> stop_gate first.
+                    not stop_gate,
                     -severity_rank,
                     -ratio,
                     f["path"],
@@ -158,15 +157,11 @@ def _write_output(payload: dict[str, Any], out_path: str | None) -> str:
 
 
 def main(argv: list[str] | None = None) -> int:
-    parser = argparse.ArgumentParser(
-        description="Deterministic PERF candidate selection"
-    )
+    parser = argparse.ArgumentParser(description="Deterministic PERF candidate selection")
     parser.add_argument(
         "--findings", required=True, type=str, help="Path to PERF findings JSON file"
     )
-    parser.add_argument(
-        "--out", required=True, type=str, help="Path for output JSON file"
-    )
+    parser.add_argument("--out", required=True, type=str, help="Path for output JSON file")
     args = parser.parse_args(argv)
 
     # Read input
