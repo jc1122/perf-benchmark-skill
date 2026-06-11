@@ -59,6 +59,11 @@ def _format_cache_model(prefix: str, cache: dict[str, Any]) -> str:
     )
 
 
+def _cv_for_runs(runs: list[dict[str, Any]], cv_fn) -> float:
+    values = [run.get("wall_seconds", 0.0) for run in runs if run.get("wall_seconds")]
+    return round(cv_fn(values), 2)
+
+
 def _summarize_wall_time_metrics(tier1: dict, cv_fn) -> dict[str, Any]:
     """Return summary-friendly wall-time metrics aligned with the scorer."""
     pytest_benchmark = tier1.get("pytest_benchmark", {})
@@ -90,10 +95,7 @@ def _summarize_wall_time_metrics(tier1: dict, cv_fn) -> dict[str, Any]:
     time_usage_by_size = tier1.get("time_usage_by_size", {})
     if time_usage_by_size:
         cv_by_size = {
-            str(int(size)): round(
-                cv_fn([run.get("wall_seconds", 0.0) for run in runs if run.get("wall_seconds")]),
-                2,
-            )
+            str(int(size)): _cv_for_runs(runs, cv_fn)
             for size, runs in time_usage_by_size.items()
             if any(run.get("wall_seconds") for run in runs)
         }

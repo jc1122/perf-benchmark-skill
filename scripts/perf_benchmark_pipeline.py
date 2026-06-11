@@ -25,7 +25,7 @@ import sys
 import threading
 from concurrent.futures import Future, ThreadPoolExecutor
 from pathlib import Path
-from typing import Any
+from typing import Any, NamedTuple
 
 SCRIPT_DIR = Path(__file__).resolve().parent
 if str(SCRIPT_DIR) not in sys.path:
@@ -81,6 +81,12 @@ PERF_EVENT_FAILURE_MARKERS = (
 )
 
 
+class _PerfStageContext(NamedTuple):
+    tier3_dir: Path
+    env: dict[str, str]
+    target_cmd: list[str]
+
+
 def _stage_has_error(value: Any) -> bool:
     if isinstance(value, dict):
         if value.get("error"):
@@ -94,6 +100,56 @@ def _stage_has_error(value: Any) -> bool:
 def _looks_like_unsupported_perf_event(stderr: str) -> bool:
     stderr_lower = stderr.lower()
     return any(marker in stderr_lower for marker in PERF_EVENT_FAILURE_MARKERS)
+
+
+def _run_stage_command(
+    cmd: list[str], args: argparse.Namespace, env: dict[str, str]
+) -> subprocess.CompletedProcess[str]:
+    return subprocess.run(
+        cmd,
+        capture_output=True,
+        text=True,
+        cwd=str(args.root),
+        env=env,
+        timeout=args.valgrind_timeout,
+    )
+
+
+def _valgrind_stage_context(
+    args: argparse.Namespace, targets: list[str], out_dir: Path, outfile_name: str
+) -> tuple[Path, dict[str, str], list[str], Path]:
+    tier2_dir = out_dir / "tier2"
+    tier2_dir.mkdir(parents=True, exist_ok=True)
+    env = _build_env(os.environ.copy(), args.env)
+    target_cmd = _build_valgrind_target_cmd(args, targets)
+    return tier2_dir, env, target_cmd, tier2_dir / outfile_name
+
+
+def _perf_stage_unavailable(prereqs: dict[str, Any]) -> dict[str, Any] | None:
+    if prereqs.get("perf_paranoid", 99) > 1:
+        return {"available": False, "reason": f"perf_event_paranoid={prereqs['perf_paranoid']}"}
+    if not shutil.which("perf"):
+        return {"available": False, "reason": "perf not found"}
+    return None
+
+
+def _perf_stage_context(
+    args: argparse.Namespace, targets: list[str], out_dir: Path
+) -> _PerfStageContext:
+    tier3_dir = out_dir / "tier3"
+    tier3_dir.mkdir(parents=True, exist_ok=True)
+    env = _build_env(os.environ.copy(), args.env)
+    target_cmd = _build_target_cmd(args, targets)
+    return _PerfStageContext(tier3_dir, env, target_cmd)
+
+
+def _perf_stage_setup(
+    args: argparse.Namespace, prereqs: dict[str, Any], targets: list[str], out_dir: Path
+) -> _PerfStageContext | dict[str, Any]:
+    unavailable = _perf_stage_unavailable(prereqs)
+    if unavailable:
+        return unavailable
+    return _perf_stage_context(args, targets, out_dir)
 
 
 def stage_tier1(
@@ -214,13 +270,10 @@ def stage_tier1(
 def stage_cachegrind(
     args: argparse.Namespace, prereqs: dict, targets: list[str], out_dir: Path
 ) -> dict[str, Any]:
-    tier2_dir = out_dir / "tier2"
-    tier2_dir.mkdir(parents=True, exist_ok=True)
-    env = _build_env(os.environ.copy(), args.env)
-
-    target_cmd = _build_valgrind_target_cmd(args, targets)
+    tier2_dir, env, target_cmd, outfile = _valgrind_stage_context(
+        args, targets, out_dir, "cachegrind.out"
+    )
     cache = prereqs.get("cache_topology", {})
-    outfile = tier2_dir / "cachegrind.out"
 
     cmd = ["valgrind", "--tool=cachegrind"]
     if cache.get("I1"):
@@ -232,14 +285,7 @@ def stage_cachegrind(
     cmd += [f"--cachegrind-out-file={outfile}", "--"] + target_cmd
 
     _log("  -> cachegrind: running...")
-    r = subprocess.run(
-        cmd,
-        capture_output=True,
-        text=True,
-        cwd=str(args.root),
-        env=env,
-        timeout=args.valgrind_timeout,
-    )
+    r = _run_stage_command(cmd, args, env)
     if not outfile.exists():
         return {"error": f"cachegrind failed (exit {r.returncode})", "stderr": r.stderr[:500]}
     if "Invalid argument" in r.stderr or "Bad option" in r.stderr:
@@ -266,12 +312,9 @@ def stage_cachegrind(
 def stage_callgrind(
     args: argparse.Namespace, prereqs: dict, targets: list[str], out_dir: Path
 ) -> dict[str, Any]:
-    tier2_dir = out_dir / "tier2"
-    tier2_dir.mkdir(parents=True, exist_ok=True)
-    env = _build_env(os.environ.copy(), args.env)
-
-    target_cmd = _build_valgrind_target_cmd(args, targets)
-    outfile = tier2_dir / "callgrind.out"
+    tier2_dir, env, target_cmd, outfile = _valgrind_stage_context(
+        args, targets, out_dir, "callgrind.out"
+    )
 
     cmd = [
         "valgrind",
@@ -281,14 +324,7 @@ def stage_callgrind(
         *target_cmd,
     ]
     _log("  -> callgrind: running...")
-    r = subprocess.run(
-        cmd,
-        capture_output=True,
-        text=True,
-        cwd=str(args.root),
-        env=env,
-        timeout=args.valgrind_timeout,
-    )
+    r = _run_stage_command(cmd, args, env)
     if not outfile.exists():
         return {"error": f"callgrind failed (exit {r.returncode})", "stderr": r.stderr[:500]}
 
@@ -366,28 +402,23 @@ def stage_massif(
 def stage_perf_stat(
     args: argparse.Namespace, prereqs: dict, targets: list[str], out_dir: Path
 ) -> dict[str, Any]:
-    if prereqs.get("perf_paranoid", 99) > 1:
-        return {"available": False, "reason": f"perf_event_paranoid={prereqs['perf_paranoid']}"}
-    if not shutil.which("perf"):
-        return {"available": False, "reason": "perf not found"}
-
-    tier3_dir = out_dir / "tier3"
-    tier3_dir.mkdir(parents=True, exist_ok=True)
-    env = _build_env(os.environ.copy(), args.env)
-
-    target_cmd = _build_target_cmd(args, targets)
+    setup = _perf_stage_setup(args, prereqs, targets, out_dir)
+    if isinstance(setup, dict):
+        return setup
     events = args.perf_events or DEFAULT_PERF_STAT_EVENTS
 
     def run_perf_stat(event_set: str) -> subprocess.CompletedProcess[str]:
-        cmd = ["perf", "stat", "-r", str(args.perf_repeats), "-e", event_set, "--", *target_cmd]
-        return subprocess.run(
-            cmd,
-            capture_output=True,
-            text=True,
-            cwd=str(args.root),
-            env=env,
-            timeout=args.valgrind_timeout,
-        )
+        cmd = [
+            "perf",
+            "stat",
+            "-r",
+            str(args.perf_repeats),
+            "-e",
+            event_set,
+            "--",
+            *setup.target_cmd,
+        ]
+        return _run_stage_command(cmd, args, setup.env)
 
     _log("  -> perf stat: running...")
     r = run_perf_stat(events)
@@ -406,7 +437,7 @@ def stage_perf_stat(
                 r.stderr,
             ]
         )
-    (tier3_dir / "perf_stat.txt").write_text("".join(stderr_blocks))
+    (setup.tier3_dir / "perf_stat.txt").write_text("".join(stderr_blocks))
     if r.returncode != 0:
         return {"error": f"perf stat failed (exit {r.returncode})", "stderr": r.stderr[:500]}
 
@@ -421,18 +452,11 @@ def stage_perf_stat(
 def stage_perf_record(
     args: argparse.Namespace, prereqs: dict, targets: list[str], out_dir: Path
 ) -> dict[str, Any]:
-    if prereqs.get("perf_paranoid", 99) > 1:
-        return {"available": False, "reason": f"perf_event_paranoid={prereqs['perf_paranoid']}"}
-    if not shutil.which("perf"):
-        return {"available": False, "reason": "perf not found"}
-
-    tier3_dir = out_dir / "tier3"
-    tier3_dir.mkdir(parents=True, exist_ok=True)
-    env = _build_env(os.environ.copy(), args.env)
-
-    target_cmd = _build_target_cmd(args, targets)
-    data_path = tier3_dir / "perf.data"
-    report_path = tier3_dir / "perf_report.txt"
+    context = _perf_stage_setup(args, prereqs, targets, out_dir)
+    if isinstance(context, dict):
+        return context
+    data_path = context.tier3_dir / "perf.data"
+    report_path = context.tier3_dir / "perf_report.txt"
 
     record_cmd = [
         "perf",
@@ -442,17 +466,10 @@ def stage_perf_record(
         "--call-graph",
         "dwarf",
         "--",
-        *target_cmd,
+        *context.target_cmd,
     ]
     _log("  -> perf record: running...")
-    record_r = subprocess.run(
-        record_cmd,
-        capture_output=True,
-        text=True,
-        cwd=str(args.root),
-        env=env,
-        timeout=args.valgrind_timeout,
-    )
+    record_r = _run_stage_command(record_cmd, args, context.env)
     if record_r.returncode != 0 or not data_path.exists():
         return {
             "error": f"perf record failed (exit {record_r.returncode})",
@@ -476,7 +493,7 @@ def stage_perf_record(
         capture_output=True,
         text=True,
         cwd=str(args.root),
-        env=env,
+        env=context.env,
         timeout=args.valgrind_timeout,
     )
     report_path.write_text(report_r.stdout)
