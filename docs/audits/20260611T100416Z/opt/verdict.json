@@ -1,0 +1,7 @@
+{
+  "candidate_status": "no_candidates",
+  "selector_exit": 1,
+  "verdict": "evaluated, no feasible low-risk win",
+  "reason": "docs/audits/20260611T100416Z/perf-before/perf_findings.json is empty after the fast-tier baseline; no FAIL or WARN PERF findings were available for the one allowed optimization attempt.",
+  "candidate_file": "docs/audits/20260611T100416Z/opt/candidate.json"
+}
