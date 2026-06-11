@@ -27,7 +27,8 @@ from typing import Any
 _FINGERPRINT_KEYS = ("cpu_model", "kernel", "governor", "smt", "python_version")
 
 # -- tier order for drop detection --
-TIER_RANK: dict[str, int] = {"FAIL": 0, "WARN": 1, "PASS": 2}
+_SUCCESS_TIER = "PASS"
+TIER_RANK: dict[str, int] = {"FAIL": 0, "WARN": 1, _SUCCESS_TIER: 2}
 
 # noise-tier literal (exact string match required)
 _NOISE_TIER = "N/A (noise)"

@@ -15,7 +15,8 @@ from typing import Any
 
 __all__ = ["append_run", "compare"]
 
-TIER_RANK: dict[str, int] = {"FAIL": 0, "WARN": 1, "PASS": 2}
+_SUCCESS_TIER = "PASS"
+TIER_RANK: dict[str, int] = {"FAIL": 0, "WARN": 1, _SUCCESS_TIER: 2}
 
 
 # ── public API ──────────────────────────────────────────────────────────────

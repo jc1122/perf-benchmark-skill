@@ -152,7 +152,7 @@ def _build_finding(
     severity = "high" if tier == "FAIL" else "medium"
 
     id_input = f"perf-benchmark|{root}|{_WORKLOAD_SYMBOL}|{metric_name}"
-    finding_id = hashlib.sha1(id_input.encode()).hexdigest()[:16]
+    finding_id = hashlib.sha1(id_input.encode(), usedforsecurity=False).hexdigest()[:16]
 
     return {
         "id": finding_id,

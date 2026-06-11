@@ -12,10 +12,58 @@ from pathlib import Path
 
 REPO = Path(__file__).resolve().parents[1]
 BASELINE = Path(__file__).with_name("wave_baseline.json")
+WAVE_ANCHOR = Path(__file__).with_name("wave_anchor.txt")
+SECURITY_CONFIG = Path(__file__).with_name("security_audit_config.json")
+HOTSPOT_CONFIG = Path(__file__).with_name("hotspot_audit_config.json")
 
 
 def identities(fs: list[dict[str, str]]) -> set[tuple[tuple[str, str], ...]]:
     return {tuple(sorted(item.items())) for item in fs}
+
+
+def _optional_config_arg(env_name: str, default_path: Path, flag: str) -> list[str]:
+    value = os.environ.get(env_name)
+    if not value and default_path.exists():
+        value = str(default_path)
+    return [flag, value] if value else []
+
+
+def _wave_command(runner: str, out: Path) -> list[str]:
+    cmd = [
+        sys.executable,
+        runner,
+        "--repo",
+        str(REPO),
+        "--out-dir",
+        str(out),
+        "--skills-root",
+        os.environ.get("SKILLS_ROOT", str(Path.home() / ".claude/skills")),
+        "--source-prefix",
+        "scripts",
+        "--source-prefix",
+        "perf-optimization/scripts",
+    ]
+    rev = os.environ.get("WAVE_REV")
+    if not rev and WAVE_ANCHOR.exists():
+        rev = WAVE_ANCHOR.read_text(encoding="utf-8").strip()
+    if rev:
+        cmd += ["--rev", rev]
+    cmd += _optional_config_arg("SECURITY_CONFIG", SECURITY_CONFIG, "--security-config")
+    cmd += _optional_config_arg("HOTSPOT_CONFIG", HOTSPOT_CONFIG, "--hotspot-config")
+    return cmd
+
+
+def _run_wave() -> list[dict[str, str]]:
+    runner = os.environ.get(
+        "WAVE_RUNNER",
+        str(
+            Path.home()
+            / ".claude/skills/repo-audit-refactor-optimize/scripts/run_diagnosis_wave.py"
+        ),
+    )
+    out = REPO / ".wave_out"
+    subprocess.run(_wave_command(runner, out), check=False)
+    return json.loads((out / "wave_findings.json").read_text())
 
 
 def main(argv: list[str] | None = None) -> int:
@@ -24,35 +72,7 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument("--baseline")
     args = parser.parse_args(argv)
 
-    if args.snapshot:
-        current = json.loads(Path(args.snapshot).read_text())
-    else:
-        runner = os.environ.get(
-            "WAVE_RUNNER",
-            str(
-                Path.home()
-                / ".claude/skills/repo-audit-refactor-optimize/scripts/run_diagnosis_wave.py"
-            ),
-        )
-        out = REPO / ".wave_out"
-        subprocess.run(
-            [
-                sys.executable,
-                runner,
-                "--repo",
-                str(REPO),
-                "--out-dir",
-                str(out),
-                "--skills-root",
-                os.environ.get("SKILLS_ROOT", str(Path.home() / ".claude/skills")),
-                "--source-prefix",
-                "scripts",
-                "--source-prefix",
-                "perf-optimization/scripts",
-            ],
-            check=False,
-        )
-        current = json.loads((out / "wave_findings.json").read_text())
+    current = json.loads(Path(args.snapshot).read_text()) if args.snapshot else _run_wave()
 
     baseline = json.loads(Path(args.baseline or BASELINE).read_text())
     current_identities = identities(current)

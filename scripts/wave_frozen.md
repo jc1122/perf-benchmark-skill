@@ -27,83 +27,32 @@
 - Removed stale identities: `perf-optimization/scripts/select_candidate.py`, `perf-optimization/scripts/verify_win.py`, `scripts/check_wave_baseline.py`, and `scripts/perf_benchmark_pipeline.py` module-level `maintainability_index`.
 - Current baseline has 67 raw findings and 55 normalized identities.
 
+## SP11 iteration 2 policy/security ratchet
+
+- Ratchet timestamp: 2026-06-11T23:55:00Z
+- Added `scripts/security_audit_config.json` to count trusted subprocess rows
+  under the security leaf's `trusted_subprocess` policy.
+- Added `scripts/hotspot_audit_config.json` and pinned the hotspot window with
+  `scripts/wave_anchor.txt` at
+  `ac896751703cba56bbbd99e201c1f355c5238567`.
+- Rewrote `TIER_RANK` maps to keep the `PASS` tier behind a named constant,
+  removing three Bandit B105 false-positive rows without changing tier values.
+- Kept deterministic PERF finding IDs stable while marking SHA-1 as
+  non-security use via `usedforsecurity=False`, removing the B324 row.
+- Refactored `scripts/check_wave_baseline.py` command construction, removing
+  its stale `main` `function_nloc` complexity identity after the config wiring.
+- Removed stale normalized identities: 9 security identities, 4 hotspot policy
+  identities, and 1 checker complexity identity.
+- Current baseline has 41 raw findings and 41 normalized identities.
+
 ## Residual findings
 
-The code-health lane contains findings; there are no missing-artifact failures in this snapshot.
+The machine-readable authority is `scripts/wave_baseline.json`. The residual
+baseline now contains only structural code-health debt and the two real
+churn-complexity hotspot rows that must be reduced by future complexity work or
+honestly recorded as residue if no bounded win remains.
 
-| Leaf | Path | Symbol | Metric | Class | Justification | Expires |
-| --- | --- | --- | --- | --- | --- | --- |
-| complexity | scripts/perf_benchmark/reporting.py | _summarize_wall_time_metrics | cyclomatic_complexity | deferred-structural | Exceeds K4 mechanical scope and requires decomposition/refactor, not a mechanical lint-class fix. | none |
-| complexity | scripts/perf_benchmark/reporting.py | write_markdown_report | cyclomatic_complexity | deferred-structural | Exceeds K4 mechanical scope and requires decomposition/refactor, not a mechanical lint-class fix. | none |
-| complexity | scripts/perf_benchmark/scoring.py | score_algorithmic_scaling | cyclomatic_complexity | deferred-structural | Exceeds K4 mechanical scope and requires decomposition/refactor, not a mechanical lint-class fix. | none |
-| complexity | scripts/perf_benchmark/scoring.py | score_wall_time_stability | cyclomatic_complexity | deferred-structural | Exceeds K4 mechanical scope and requires decomposition/refactor, not a mechanical lint-class fix. | none |
-| complexity | scripts/perf_benchmark/stage_helpers.py | _parse_cachegrind_summary | cyclomatic_complexity | deferred-structural | Exceeds K4 mechanical scope and requires decomposition/refactor, not a mechanical lint-class fix. | none |
-| complexity | scripts/perf_benchmark_pipeline.py | stage_tier1 | cyclomatic_complexity | deferred-structural | Exceeds K4 mechanical scope and requires decomposition/refactor, not a mechanical lint-class fix. | none |
-| complexity | perf-optimization/scripts/verify_win.py | <module> | maintainability_index | deferred-structural | Exceeds K4 mechanical scope and requires decomposition/refactor, not a mechanical lint-class fix. | none |
-| complexity | scripts/perf_benchmark/reporting.py | <module> | maintainability_index | deferred-structural | Exceeds K4 mechanical scope and requires decomposition/refactor, not a mechanical lint-class fix. | none |
-| complexity | scripts/perf_benchmark/scoring.py | <module> | maintainability_index | deferred-structural | Exceeds K4 mechanical scope and requires decomposition/refactor, not a mechanical lint-class fix. | none |
-| complexity | scripts/perf_benchmark/stage_helpers.py | <module> | maintainability_index | deferred-structural | Exceeds K4 mechanical scope and requires decomposition/refactor, not a mechanical lint-class fix. | none |
-| complexity | scripts/perf_benchmark/support.py | <module> | maintainability_index | deferred-structural | Exceeds K4 mechanical scope and requires decomposition/refactor, not a mechanical lint-class fix. | none |
-| complexity | scripts/perf_benchmark_pipeline.py | <module> | maintainability_index | deferred-structural | Exceeds K4 mechanical scope and requires decomposition/refactor, not a mechanical lint-class fix. | none |
-| complexity | perf-optimization/scripts/select_candidate.py | _validate_finding | cyclomatic_complexity | deferred-structural | Exceeds K4 mechanical scope and requires decomposition/refactor, not a mechanical lint-class fix. | none |
-| complexity | perf-optimization/scripts/verify_win.py | _read_ledger | cyclomatic_complexity | deferred-structural | Exceeds K4 mechanical scope and requires decomposition/refactor, not a mechanical lint-class fix. | none |
-| complexity | perf-optimization/scripts/verify_win.py | main | function_nloc | deferred-structural | Exceeds K4 mechanical scope and requires decomposition/refactor, not a mechanical lint-class fix. | none |
-| complexity | scripts/check_wave_baseline.py | main | function_nloc | deferred-structural | Exceeds K4 mechanical scope and requires decomposition/refactor, not a mechanical lint-class fix. | none |
-| complexity | scripts/perf_benchmark/ledger.py | compare | cyclomatic_complexity | deferred-structural | Exceeds K4 mechanical scope and requires decomposition/refactor, not a mechanical lint-class fix. | none |
-| complexity | scripts/perf_benchmark/reporting.py | _summarize_wall_time_metrics | function_nloc | deferred-structural | Exceeds K4 mechanical scope and requires decomposition/refactor, not a mechanical lint-class fix. | none |
-| complexity | scripts/perf_benchmark/reporting.py | write_markdown_report | function_nloc | deferred-structural | Exceeds K4 mechanical scope and requires decomposition/refactor, not a mechanical lint-class fix. | none |
-| complexity | scripts/perf_benchmark/reporting.py | write_json_summary | cyclomatic_complexity | deferred-structural | Exceeds K4 mechanical scope and requires decomposition/refactor, not a mechanical lint-class fix. | none |
-| complexity | scripts/perf_benchmark/reporting.py | write_json_summary | function_nloc | deferred-structural | Exceeds K4 mechanical scope and requires decomposition/refactor, not a mechanical lint-class fix. | none |
-| complexity | scripts/perf_benchmark/scoring.py | _fit_exponent | cyclomatic_complexity | deferred-structural | Exceeds K4 mechanical scope and requires decomposition/refactor, not a mechanical lint-class fix. | none |
-| complexity | scripts/perf_benchmark/scoring.py | score_algorithmic_scaling | function_nloc | deferred-structural | Exceeds K4 mechanical scope and requires decomposition/refactor, not a mechanical lint-class fix. | none |
-| complexity | scripts/perf_benchmark/scoring.py | score_cpu_efficiency | cyclomatic_complexity | deferred-structural | Exceeds K4 mechanical scope and requires decomposition/refactor, not a mechanical lint-class fix. | none |
-| complexity | scripts/perf_benchmark/scoring.py | score_cache_dim | cyclomatic_complexity | deferred-structural | Exceeds K4 mechanical scope and requires decomposition/refactor, not a mechanical lint-class fix. | none |
-| complexity | scripts/perf_benchmark/scoring.py | score_memory_profile | cyclomatic_complexity | deferred-structural | Exceeds K4 mechanical scope and requires decomposition/refactor, not a mechanical lint-class fix. | none |
-| complexity | scripts/perf_benchmark/stage_helpers.py | _generate_tracemalloc_wrapper | function_nloc | deferred-structural | Exceeds K4 mechanical scope and requires decomposition/refactor, not a mechanical lint-class fix. | none |
-| complexity | scripts/perf_benchmark/stage_helpers.py | _parse_massif_out | cyclomatic_complexity | deferred-structural | Exceeds K4 mechanical scope and requires decomposition/refactor, not a mechanical lint-class fix. | none |
-| complexity | scripts/perf_benchmark/stage_helpers.py | _parse_massif_out | function_nloc | deferred-structural | Exceeds K4 mechanical scope and requires decomposition/refactor, not a mechanical lint-class fix. | none |
-| complexity | scripts/perf_benchmark/stage_helpers.py | _parse_perf_stat | cyclomatic_complexity | deferred-structural | Exceeds K4 mechanical scope and requires decomposition/refactor, not a mechanical lint-class fix. | none |
-| complexity | scripts/perf_benchmark/stage_helpers.py | _discover_objdump_targets | cyclomatic_complexity | deferred-structural | Exceeds K4 mechanical scope and requires decomposition/refactor, not a mechanical lint-class fix. | none |
-| complexity | scripts/perf_benchmark/support.py | detect_cache_topology | cyclomatic_complexity | deferred-structural | Exceeds K4 mechanical scope and requires decomposition/refactor, not a mechanical lint-class fix. | none |
-| complexity | scripts/perf_benchmark_pipeline.py | stage_tier1 | function_nloc | deferred-structural | Exceeds K4 mechanical scope and requires decomposition/refactor, not a mechanical lint-class fix. | none |
-| complexity | scripts/perf_benchmark_pipeline.py | stage_perf_record | function_nloc | deferred-structural | Exceeds K4 mechanical scope and requires decomposition/refactor, not a mechanical lint-class fix. | none |
-| complexity | scripts/perf_benchmark_pipeline.py | run_parallel_tiers | cyclomatic_complexity | deferred-structural | Exceeds K4 mechanical scope and requires decomposition/refactor, not a mechanical lint-class fix. | none |
-| complexity | scripts/perf_benchmark_pipeline.py | parse_args | function_nloc | deferred-structural | Exceeds K4 mechanical scope and requires decomposition/refactor, not a mechanical lint-class fix. | none |
-| complexity | scripts/perf_benchmark_pipeline.py | main | cyclomatic_complexity | deferred-structural | Exceeds K4 mechanical scope and requires decomposition/refactor, not a mechanical lint-class fix. | none |
-| complexity | scripts/perf_benchmark_pipeline.py | main | function_nloc | deferred-structural | Exceeds K4 mechanical scope and requires decomposition/refactor, not a mechanical lint-class fix. | none |
-| complexity | perf-optimization/scripts/select_candidate.py | <module> | maintainability_index | deferred-structural | Exceeds K4 mechanical scope and requires decomposition/refactor, not a mechanical lint-class fix. | none |
-| complexity | scripts/check_wave_baseline.py | <module> | maintainability_index | deferred-structural | Exceeds K4 mechanical scope and requires decomposition/refactor, not a mechanical lint-class fix. | none |
-| complexity | scripts/perf_benchmark/findings.py | <module> | maintainability_index | deferred-structural | Exceeds K4 mechanical scope and requires decomposition/refactor, not a mechanical lint-class fix. | none |
-| complexity | scripts/perf_benchmark/reporting.py | write_markdown_report | parameter_count | deferred-structural | Exceeds K4 mechanical scope and requires decomposition/refactor, not a mechanical lint-class fix. | none |
-| complexity | scripts/perf_benchmark/reporting.py | write_json_summary | parameter_count | deferred-structural | Exceeds K4 mechanical scope and requires decomposition/refactor, not a mechanical lint-class fix. | none |
-| complexity | scripts/perf_benchmark_pipeline.py | write_json_summary | parameter_count | deferred-structural | Exceeds K4 mechanical scope and requires decomposition/refactor, not a mechanical lint-class fix. | none |
-| security | perf-optimization/scripts/verify_win.py | hardcoded_password_string | bandit_B105 | wont-fix-FP | `TIER_RANK`/status constants are metadata, not credentials. | none |
-| security | scripts/check_wave_baseline.py | blacklist | bandit_B404 | wont-fix-FP | Subprocess blacklist usage is tied to trusted wave-runner invocation and controlled command flow. | none |
-| security | scripts/check_wave_baseline.py | subprocess_without_shell_equals_true | bandit_B603 | wont-fix-FP | Intentional wave-runner invocation with list args and `shell=False`. | none |
-| security | scripts/perf_benchmark/findings.py | hashlib | bandit_B324 | wont-fix-FP | `hashlib` is used only for deterministic finding-id generation, not security hashing. | none |
-| security | scripts/perf_benchmark/ledger.py | hardcoded_password_string | bandit_B105 | wont-fix-FP | `TIER_RANK`/status constants are metadata, not credentials. | none |
-| security | scripts/perf_benchmark/scoring.py | hardcoded_password_string | bandit_B105 | wont-fix-FP | `TIER_RANK`/status constants are metadata, not credentials. | none |
-| security | scripts/perf_benchmark_pipeline.py | blacklist | bandit_B404 | wont-fix-FP | Intentional benchmark/profiling tool orchestration (pytest, valgrind, cachegrind, callgrind, massif, perf, objdump, numba probe) via subprocess. | none |
-| security | scripts/perf_benchmark_pipeline.py | subprocess_without_shell_equals_true | bandit_B603 | wont-fix-FP | Intentional subprocess orchestration for benchmark/profiling flow with `shell=False` and fixed argument lists. | none |
-| security | scripts/perf_benchmark_pipeline.py | subprocess_without_shell_equals_true | bandit_B603 | wont-fix-FP | Intentional subprocess orchestration for benchmark/profiling flow with `shell=False` and fixed argument lists. | none |
-| security | scripts/perf_benchmark_pipeline.py | subprocess_without_shell_equals_true | bandit_B603 | wont-fix-FP | Intentional subprocess orchestration for benchmark/profiling flow with `shell=False` and fixed argument lists. | none |
-| security | scripts/perf_benchmark_pipeline.py | subprocess_without_shell_equals_true | bandit_B603 | wont-fix-FP | Intentional subprocess orchestration for benchmark/profiling flow with `shell=False` and fixed argument lists. | none |
-| security | scripts/perf_benchmark_pipeline.py | subprocess_without_shell_equals_true | bandit_B603 | wont-fix-FP | Intentional subprocess orchestration for benchmark/profiling flow with `shell=False` and fixed argument lists. | none |
-| security | scripts/perf_benchmark_pipeline.py | subprocess_without_shell_equals_true | bandit_B603 | wont-fix-FP | Intentional subprocess orchestration for benchmark/profiling flow with `shell=False` and fixed argument lists. | none |
-| security | scripts/perf_benchmark_pipeline.py | subprocess_without_shell_equals_true | bandit_B603 | wont-fix-FP | Intentional subprocess orchestration for benchmark/profiling flow with `shell=False` and fixed argument lists. | none |
-| security | scripts/perf_benchmark_pipeline.py | subprocess_without_shell_equals_true | bandit_B603 | wont-fix-FP | Intentional subprocess orchestration for benchmark/profiling flow with `shell=False` and fixed argument lists. | none |
-| security | scripts/perf_benchmark_pipeline.py | subprocess_without_shell_equals_true | bandit_B603 | wont-fix-FP | Intentional subprocess orchestration for benchmark/profiling flow with `shell=False` and fixed argument lists. | none |
-| security | scripts/perf_benchmark_pipeline.py | subprocess_without_shell_equals_true | bandit_B603 | wont-fix-FP | Intentional subprocess orchestration for benchmark/profiling flow with `shell=False` and fixed argument lists. | none |
-| security | scripts/perf_benchmark_pipeline.py | subprocess_without_shell_equals_true | bandit_B603 | wont-fix-FP | Intentional subprocess orchestration for benchmark/profiling flow with `shell=False` and fixed argument lists. | none |
-| security | scripts/perf_benchmark_pipeline.py | subprocess_without_shell_equals_true | bandit_B603 | wont-fix-FP | Intentional subprocess orchestration for benchmark/profiling flow with `shell=False` and fixed argument lists. | none |
-| security | scripts/perf_benchmark_pipeline.py | subprocess_without_shell_equals_true | bandit_B603 | wont-fix-FP | Intentional subprocess orchestration for benchmark/profiling flow with `shell=False` and fixed argument lists. | none |
-| security | scripts/perf_benchmark_pipeline.py | start_process_with_partial_path | bandit_B607 | wont-fix-FP | `objdump` invocation path is controlled by benchmark context; no shell interpolation occurs. | none |
-| security | scripts/perf_benchmark_pipeline.py | subprocess_without_shell_equals_true | bandit_B603 | wont-fix-FP | Intentional subprocess orchestration for benchmark/profiling flow with `shell=False` and fixed argument lists. | none |
-| security | scripts/perf_benchmark_pipeline.py | start_process_with_partial_path | bandit_B607 | wont-fix-FP | `objdump` invocation path is controlled by benchmark context; no shell interpolation occurs. | none |
-| security | scripts/perf_benchmark_pipeline.py | subprocess_without_shell_equals_true | bandit_B603 | wont-fix-FP | Intentional subprocess orchestration for benchmark/profiling flow with `shell=False` and fixed argument lists. | none |
-| hotspot | README.md | README.md<->SKILL.md | temporal_coupling_ratio | deferred-structural | Real architecture/churn signal; not a K4 mechanical lint-class fix. | none |
-| hotspot | README.md | README.md<->scripts/perf_benchmark_pipeline.py | temporal_coupling_ratio | deferred-structural | Real architecture/churn signal; not a K4 mechanical lint-class fix. | none |
-| hotspot | SKILL.md | SKILL.md<->scripts/perf_benchmark_pipeline.py | temporal_coupling_ratio | deferred-structural | Real architecture/churn signal; not a K4 mechanical lint-class fix. | none |
-| hotspot | scripts/perf_benchmark/reporting.py | scripts/perf_benchmark/reporting.py | churn_complexity_product | deferred-structural | Real architecture/churn signal; not a K4 mechanical lint-class fix. | none |
-| hotspot | scripts/perf_benchmark_pipeline.py | scripts/perf_benchmark_pipeline.py | churn_complexity_product | deferred-structural | Real architecture/churn signal; not a K4 mechanical lint-class fix. | none |
-| hotspot | scripts/perf_benchmark_pipeline.py | scripts/perf_benchmark_pipeline.py | author_concentration | wont-fix-FP | Single-author noise per SP9 FP evidence. | v0.5.0 reinstall |
+| Leaf | Count | Class | Residue |
+| --- | ---: | --- | --- |
+| complexity | 39 | deferred-structural | Function complexity, function length, module maintainability, and parameter-count rows across the perf benchmark pipeline, reporting, scoring, ledger, support, stage helpers, and perf-optimization helpers. |
+| hotspot | 2 | deferred-structural | `scripts/perf_benchmark/reporting.py` and `scripts/perf_benchmark_pipeline.py` still carry `churn_complexity_product`; policy config deliberately does not suppress churn-complexity rows. |

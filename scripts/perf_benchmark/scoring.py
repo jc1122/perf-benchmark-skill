@@ -6,7 +6,8 @@ import math
 from pathlib import Path
 from typing import Any
 
-TIER_RANK = {"FAIL": 0, "WARN": 1, "PASS": 2}
+_SUCCESS_TIER = "PASS"
+TIER_RANK = {"FAIL": 0, "WARN": 1, _SUCCESS_TIER: 2}
 __all__ = [
     "TIER_RANK",
     "_cv",

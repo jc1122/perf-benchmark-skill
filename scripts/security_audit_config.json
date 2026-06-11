@@ -1,0 +1,7 @@
+{
+  "trusted_subprocess": {
+    "enabled": true,
+    "rules": ["B404", "B603", "B607"],
+    "path_globs": ["scripts/**", "perf-optimization/scripts/**"]
+  }
+}
