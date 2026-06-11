@@ -1,0 +1,458 @@
+[
+  {
+    "leaf": "complexity",
+    "path": "scripts/perf_benchmark/reporting.py",
+    "symbol": "_summarize_wall_time_metrics",
+    "metric": "cyclomatic_complexity"
+  },
+  {
+    "leaf": "complexity",
+    "path": "scripts/perf_benchmark/reporting.py",
+    "symbol": "write_markdown_report",
+    "metric": "cyclomatic_complexity"
+  },
+  {
+    "leaf": "complexity",
+    "path": "scripts/perf_benchmark/scoring.py",
+    "symbol": "score_algorithmic_scaling",
+    "metric": "cyclomatic_complexity"
+  },
+  {
+    "leaf": "complexity",
+    "path": "scripts/perf_benchmark/scoring.py",
+    "symbol": "score_wall_time_stability",
+    "metric": "cyclomatic_complexity"
+  },
+  {
+    "leaf": "complexity",
+    "path": "scripts/perf_benchmark/stage_helpers.py",
+    "symbol": "_parse_cachegrind_summary",
+    "metric": "cyclomatic_complexity"
+  },
+  {
+    "leaf": "complexity",
+    "path": "scripts/perf_benchmark_pipeline.py",
+    "symbol": "stage_tier1",
+    "metric": "cyclomatic_complexity"
+  },
+  {
+    "leaf": "complexity",
+    "path": "perf-optimization/scripts/verify_win.py",
+    "symbol": "<module>",
+    "metric": "maintainability_index"
+  },
+  {
+    "leaf": "complexity",
+    "path": "scripts/perf_benchmark/reporting.py",
+    "symbol": "<module>",
+    "metric": "maintainability_index"
+  },
+  {
+    "leaf": "complexity",
+    "path": "scripts/perf_benchmark/scoring.py",
+    "symbol": "<module>",
+    "metric": "maintainability_index"
+  },
+  {
+    "leaf": "complexity",
+    "path": "scripts/perf_benchmark/stage_helpers.py",
+    "symbol": "<module>",
+    "metric": "maintainability_index"
+  },
+  {
+    "leaf": "complexity",
+    "path": "scripts/perf_benchmark/support.py",
+    "symbol": "<module>",
+    "metric": "maintainability_index"
+  },
+  {
+    "leaf": "complexity",
+    "path": "scripts/perf_benchmark_pipeline.py",
+    "symbol": "<module>",
+    "metric": "maintainability_index"
+  },
+  {
+    "leaf": "complexity",
+    "path": "perf-optimization/scripts/select_candidate.py",
+    "symbol": "_validate_finding",
+    "metric": "cyclomatic_complexity"
+  },
+  {
+    "leaf": "complexity",
+    "path": "perf-optimization/scripts/verify_win.py",
+    "symbol": "_read_ledger",
+    "metric": "cyclomatic_complexity"
+  },
+  {
+    "leaf": "complexity",
+    "path": "perf-optimization/scripts/verify_win.py",
+    "symbol": "main",
+    "metric": "function_nloc"
+  },
+  {
+    "leaf": "complexity",
+    "path": "scripts/check_wave_baseline.py",
+    "symbol": "main",
+    "metric": "function_nloc"
+  },
+  {
+    "leaf": "complexity",
+    "path": "scripts/perf_benchmark/ledger.py",
+    "symbol": "compare",
+    "metric": "cyclomatic_complexity"
+  },
+  {
+    "leaf": "complexity",
+    "path": "scripts/perf_benchmark/reporting.py",
+    "symbol": "_summarize_wall_time_metrics",
+    "metric": "function_nloc"
+  },
+  {
+    "leaf": "complexity",
+    "path": "scripts/perf_benchmark/reporting.py",
+    "symbol": "write_markdown_report",
+    "metric": "function_nloc"
+  },
+  {
+    "leaf": "complexity",
+    "path": "scripts/perf_benchmark/reporting.py",
+    "symbol": "write_json_summary",
+    "metric": "cyclomatic_complexity"
+  },
+  {
+    "leaf": "complexity",
+    "path": "scripts/perf_benchmark/reporting.py",
+    "symbol": "write_json_summary",
+    "metric": "function_nloc"
+  },
+  {
+    "leaf": "complexity",
+    "path": "scripts/perf_benchmark/scoring.py",
+    "symbol": "_fit_exponent",
+    "metric": "cyclomatic_complexity"
+  },
+  {
+    "leaf": "complexity",
+    "path": "scripts/perf_benchmark/scoring.py",
+    "symbol": "score_algorithmic_scaling",
+    "metric": "function_nloc"
+  },
+  {
+    "leaf": "complexity",
+    "path": "scripts/perf_benchmark/scoring.py",
+    "symbol": "score_cpu_efficiency",
+    "metric": "cyclomatic_complexity"
+  },
+  {
+    "leaf": "complexity",
+    "path": "scripts/perf_benchmark/scoring.py",
+    "symbol": "score_cache_dim",
+    "metric": "cyclomatic_complexity"
+  },
+  {
+    "leaf": "complexity",
+    "path": "scripts/perf_benchmark/scoring.py",
+    "symbol": "score_memory_profile",
+    "metric": "cyclomatic_complexity"
+  },
+  {
+    "leaf": "complexity",
+    "path": "scripts/perf_benchmark/stage_helpers.py",
+    "symbol": "_generate_tracemalloc_wrapper",
+    "metric": "function_nloc"
+  },
+  {
+    "leaf": "complexity",
+    "path": "scripts/perf_benchmark/stage_helpers.py",
+    "symbol": "_parse_massif_out",
+    "metric": "cyclomatic_complexity"
+  },
+  {
+    "leaf": "complexity",
+    "path": "scripts/perf_benchmark/stage_helpers.py",
+    "symbol": "_parse_massif_out",
+    "metric": "function_nloc"
+  },
+  {
+    "leaf": "complexity",
+    "path": "scripts/perf_benchmark/stage_helpers.py",
+    "symbol": "_parse_perf_stat",
+    "metric": "cyclomatic_complexity"
+  },
+  {
+    "leaf": "complexity",
+    "path": "scripts/perf_benchmark/stage_helpers.py",
+    "symbol": "_discover_objdump_targets",
+    "metric": "cyclomatic_complexity"
+  },
+  {
+    "leaf": "complexity",
+    "path": "scripts/perf_benchmark/support.py",
+    "symbol": "detect_cache_topology",
+    "metric": "cyclomatic_complexity"
+  },
+  {
+    "leaf": "complexity",
+    "path": "scripts/perf_benchmark_pipeline.py",
+    "symbol": "stage_tier1",
+    "metric": "function_nloc"
+  },
+  {
+    "leaf": "complexity",
+    "path": "scripts/perf_benchmark_pipeline.py",
+    "symbol": "stage_perf_record",
+    "metric": "function_nloc"
+  },
+  {
+    "leaf": "complexity",
+    "path": "scripts/perf_benchmark_pipeline.py",
+    "symbol": "run_parallel_tiers",
+    "metric": "cyclomatic_complexity"
+  },
+  {
+    "leaf": "complexity",
+    "path": "scripts/perf_benchmark_pipeline.py",
+    "symbol": "parse_args",
+    "metric": "function_nloc"
+  },
+  {
+    "leaf": "complexity",
+    "path": "scripts/perf_benchmark_pipeline.py",
+    "symbol": "main",
+    "metric": "cyclomatic_complexity"
+  },
+  {
+    "leaf": "complexity",
+    "path": "scripts/perf_benchmark_pipeline.py",
+    "symbol": "main",
+    "metric": "function_nloc"
+  },
+  {
+    "leaf": "complexity",
+    "path": "perf-optimization/scripts/select_candidate.py",
+    "symbol": "<module>",
+    "metric": "maintainability_index"
+  },
+  {
+    "leaf": "complexity",
+    "path": "scripts/check_wave_baseline.py",
+    "symbol": "<module>",
+    "metric": "maintainability_index"
+  },
+  {
+    "leaf": "complexity",
+    "path": "scripts/perf_benchmark/findings.py",
+    "symbol": "<module>",
+    "metric": "maintainability_index"
+  },
+  {
+    "leaf": "complexity",
+    "path": "scripts/perf_benchmark/reporting.py",
+    "symbol": "write_markdown_report",
+    "metric": "parameter_count"
+  },
+  {
+    "leaf": "complexity",
+    "path": "scripts/perf_benchmark/reporting.py",
+    "symbol": "write_json_summary",
+    "metric": "parameter_count"
+  },
+  {
+    "leaf": "complexity",
+    "path": "scripts/perf_benchmark_pipeline.py",
+    "symbol": "write_json_summary",
+    "metric": "parameter_count"
+  },
+  {
+    "leaf": "security",
+    "path": "perf-optimization/scripts/verify_win.py",
+    "symbol": "hardcoded_password_string",
+    "metric": "bandit_B105"
+  },
+  {
+    "leaf": "security",
+    "path": "scripts/check_wave_baseline.py",
+    "symbol": "blacklist",
+    "metric": "bandit_B404"
+  },
+  {
+    "leaf": "security",
+    "path": "scripts/check_wave_baseline.py",
+    "symbol": "subprocess_without_shell_equals_true",
+    "metric": "bandit_B603"
+  },
+  {
+    "leaf": "security",
+    "path": "scripts/perf_benchmark/findings.py",
+    "symbol": "hashlib",
+    "metric": "bandit_B324"
+  },
+  {
+    "leaf": "security",
+    "path": "scripts/perf_benchmark/ledger.py",
+    "symbol": "hardcoded_password_string",
+    "metric": "bandit_B105"
+  },
+  {
+    "leaf": "security",
+    "path": "scripts/perf_benchmark/scoring.py",
+    "symbol": "hardcoded_password_string",
+    "metric": "bandit_B105"
+  },
+  {
+    "leaf": "security",
+    "path": "scripts/perf_benchmark_pipeline.py",
+    "symbol": "blacklist",
+    "metric": "bandit_B404"
+  },
+  {
+    "leaf": "security",
+    "path": "scripts/perf_benchmark_pipeline.py",
+    "symbol": "subprocess_without_shell_equals_true",
+    "metric": "bandit_B603"
+  },
+  {
+    "leaf": "security",
+    "path": "scripts/perf_benchmark_pipeline.py",
+    "symbol": "subprocess_without_shell_equals_true",
+    "metric": "bandit_B603"
+  },
+  {
+    "leaf": "security",
+    "path": "scripts/perf_benchmark_pipeline.py",
+    "symbol": "subprocess_without_shell_equals_true",
+    "metric": "bandit_B603"
+  },
+  {
+    "leaf": "security",
+    "path": "scripts/perf_benchmark_pipeline.py",
+    "symbol": "subprocess_without_shell_equals_true",
+    "metric": "bandit_B603"
+  },
+  {
+    "leaf": "security",
+    "path": "scripts/perf_benchmark_pipeline.py",
+    "symbol": "subprocess_without_shell_equals_true",
+    "metric": "bandit_B603"
+  },
+  {
+    "leaf": "security",
+    "path": "scripts/perf_benchmark_pipeline.py",
+    "symbol": "subprocess_without_shell_equals_true",
+    "metric": "bandit_B603"
+  },
+  {
+    "leaf": "security",
+    "path": "scripts/perf_benchmark_pipeline.py",
+    "symbol": "subprocess_without_shell_equals_true",
+    "metric": "bandit_B603"
+  },
+  {
+    "leaf": "security",
+    "path": "scripts/perf_benchmark_pipeline.py",
+    "symbol": "subprocess_without_shell_equals_true",
+    "metric": "bandit_B603"
+  },
+  {
+    "leaf": "security",
+    "path": "scripts/perf_benchmark_pipeline.py",
+    "symbol": "subprocess_without_shell_equals_true",
+    "metric": "bandit_B603"
+  },
+  {
+    "leaf": "security",
+    "path": "scripts/perf_benchmark_pipeline.py",
+    "symbol": "subprocess_without_shell_equals_true",
+    "metric": "bandit_B603"
+  },
+  {
+    "leaf": "security",
+    "path": "scripts/perf_benchmark_pipeline.py",
+    "symbol": "subprocess_without_shell_equals_true",
+    "metric": "bandit_B603"
+  },
+  {
+    "leaf": "security",
+    "path": "scripts/perf_benchmark_pipeline.py",
+    "symbol": "subprocess_without_shell_equals_true",
+    "metric": "bandit_B603"
+  },
+  {
+    "leaf": "security",
+    "path": "scripts/perf_benchmark_pipeline.py",
+    "symbol": "subprocess_without_shell_equals_true",
+    "metric": "bandit_B603"
+  },
+  {
+    "leaf": "security",
+    "path": "scripts/perf_benchmark_pipeline.py",
+    "symbol": "start_process_with_partial_path",
+    "metric": "bandit_B607"
+  },
+  {
+    "leaf": "security",
+    "path": "scripts/perf_benchmark_pipeline.py",
+    "symbol": "subprocess_without_shell_equals_true",
+    "metric": "bandit_B603"
+  },
+  {
+    "leaf": "security",
+    "path": "scripts/perf_benchmark_pipeline.py",
+    "symbol": "start_process_with_partial_path",
+    "metric": "bandit_B607"
+  },
+  {
+    "leaf": "security",
+    "path": "scripts/perf_benchmark_pipeline.py",
+    "symbol": "subprocess_without_shell_equals_true",
+    "metric": "bandit_B603"
+  },
+  {
+    "leaf": "docs-consistency",
+    "path": "references/sample-report.md",
+    "symbol": "tests/benchmarks/test_benchmark_graph.py",
+    "metric": "doc_path_missing"
+  },
+  {
+    "leaf": "hotspot",
+    "path": "README.md",
+    "symbol": "README.md<->SKILL.md",
+    "metric": "temporal_coupling_ratio"
+  },
+  {
+    "leaf": "hotspot",
+    "path": "README.md",
+    "symbol": "README.md<->scripts/perf_benchmark_pipeline.py",
+    "metric": "temporal_coupling_ratio"
+  },
+  {
+    "leaf": "hotspot",
+    "path": "SKILL.md",
+    "symbol": "SKILL.md",
+    "metric": "churn_complexity_product"
+  },
+  {
+    "leaf": "hotspot",
+    "path": "SKILL.md",
+    "symbol": "SKILL.md<->scripts/perf_benchmark_pipeline.py",
+    "metric": "temporal_coupling_ratio"
+  },
+  {
+    "leaf": "hotspot",
+    "path": "scripts/perf_benchmark/reporting.py",
+    "symbol": "scripts/perf_benchmark/reporting.py",
+    "metric": "churn_complexity_product"
+  },
+  {
+    "leaf": "hotspot",
+    "path": "scripts/perf_benchmark_pipeline.py",
+    "symbol": "scripts/perf_benchmark_pipeline.py",
+    "metric": "churn_complexity_product"
+  },
+  {
+    "leaf": "hotspot",
+    "path": "scripts/perf_benchmark_pipeline.py",
+    "symbol": "scripts/perf_benchmark_pipeline.py",
+    "metric": "author_concentration"
+  }
+]
