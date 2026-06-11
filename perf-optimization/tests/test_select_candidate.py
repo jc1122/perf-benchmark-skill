@@ -258,9 +258,7 @@ def test_ratio_with_zero_threshold(tmp_path: Path) -> None:
         "algorithmic_scaling_check",
     ],
 )
-def test_each_algorithmic_substring_triggers_stop_gate(
-    tmp_path: Path, metric_name: str
-) -> None:
+def test_each_algorithmic_substring_triggers_stop_gate(tmp_path: Path, metric_name: str) -> None:
     """Each ALGORITHMIC_METRIC_SUBSTRINGS item triggers stop_gate."""
     findings = tmp_path / "findings.json"
     findings.write_text(

@@ -408,12 +408,6 @@
     "metric": "bandit_B603"
   },
   {
-    "leaf": "docs-consistency",
-    "path": "references/sample-report.md",
-    "symbol": "tests/benchmarks/test_benchmark_graph.py",
-    "metric": "doc_path_missing"
-  },
-  {
     "leaf": "hotspot",
     "path": "README.md",
     "symbol": "README.md<->SKILL.md",
@@ -424,12 +418,6 @@
     "path": "README.md",
     "symbol": "README.md<->scripts/perf_benchmark_pipeline.py",
     "metric": "temporal_coupling_ratio"
-  },
-  {
-    "leaf": "hotspot",
-    "path": "SKILL.md",
-    "symbol": "SKILL.md",
-    "metric": "churn_complexity_product"
   },
   {
     "leaf": "hotspot",

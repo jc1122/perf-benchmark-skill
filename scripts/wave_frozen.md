@@ -10,8 +10,15 @@
 | Command | Observed result |
 | --- | --- |
 | `WAVE_RUNNER=/home/jakub/projects/repo-audit-refactor-optimize/scripts/run_diagnosis_wave.py SKILLS_ROOT=~/.claude/skills python3 scripts/check_wave_baseline.py` | Baseline check executed with the seeded hidden wave output; checker compares normalized finding identities and ignores the runner process status. |
-| Wave summary | code-health exit `2`/status `error`/findings `44`; security exit `1`/status `findings`/findings `24`; docs exit `1`/status `findings`/findings `1`; hotspot exit `1`/status `findings`/findings `7`; dependency exit `0`/status `ok`/findings `0`; hygiene exit `0`/status `ok`/findings `0`. |
+| Wave summary | code-health exit `2`/status `error`/findings `44`; security exit `1`/status `findings`/findings `24`; docs exit `0`/status `ok`/findings `0`; hotspot exit `1`/status `findings`/findings `6`; dependency exit `0`/status `ok`/findings `0`; hygiene exit `0`/status `ok`/findings `0`. |
 | Snapshot provenance | Findings snapshot collected in the ignored wave output directory from the same runner with prefixes `scripts` and `perf-optimization/scripts`. |
+
+## T5 shrink-only ratchet
+
+- Ratchet timestamp: 2026-06-11T12:40:49Z
+- Removed stale identity: `docs-consistency|references/sample-report.md|tests/benchmarks/test_benchmark_graph.py|doc_path_missing`.
+- Removed stale identity: `hotspot|SKILL.md|SKILL.md|churn_complexity_product`.
+- Current baseline has 74 raw findings and 59 normalized identities.
 
 ## Residual findings
 
@@ -87,10 +94,8 @@ The code-health lane contains findings; there are no missing-artifact failures i
 | security | scripts/perf_benchmark_pipeline.py | subprocess_without_shell_equals_true | bandit_B603 | wont-fix-FP | Intentional subprocess orchestration for benchmark/profiling flow with `shell=False` and fixed argument lists. | none |
 | security | scripts/perf_benchmark_pipeline.py | start_process_with_partial_path | bandit_B607 | wont-fix-FP | `objdump` invocation path is controlled by benchmark context; no shell interpolation occurs. | none |
 | security | scripts/perf_benchmark_pipeline.py | subprocess_without_shell_equals_true | bandit_B603 | wont-fix-FP | Intentional subprocess orchestration for benchmark/profiling flow with `shell=False` and fixed argument lists. | none |
-| docs-consistency | references/sample-report.md | tests/benchmarks/test_benchmark_graph.py | doc_path_missing | wont-fix-FP | Sample/report fixture reference under installed 0.4.0 docs leaf remains frozen for K5 ratchet/doc-scope cleanup. | v0.5.0 reinstall |
 | hotspot | README.md | README.md<->SKILL.md | temporal_coupling_ratio | deferred-structural | Real architecture/churn signal; not a K4 mechanical lint-class fix. | none |
 | hotspot | README.md | README.md<->scripts/perf_benchmark_pipeline.py | temporal_coupling_ratio | deferred-structural | Real architecture/churn signal; not a K4 mechanical lint-class fix. | none |
-| hotspot | SKILL.md | SKILL.md | churn_complexity_product | deferred-structural | Real architecture/churn signal; not a K4 mechanical lint-class fix. | none |
 | hotspot | SKILL.md | SKILL.md<->scripts/perf_benchmark_pipeline.py | temporal_coupling_ratio | deferred-structural | Real architecture/churn signal; not a K4 mechanical lint-class fix. | none |
 | hotspot | scripts/perf_benchmark/reporting.py | scripts/perf_benchmark/reporting.py | churn_complexity_product | deferred-structural | Real architecture/churn signal; not a K4 mechanical lint-class fix. | none |
 | hotspot | scripts/perf_benchmark_pipeline.py | scripts/perf_benchmark_pipeline.py | churn_complexity_product | deferred-structural | Real architecture/churn signal; not a K4 mechanical lint-class fix. | none |

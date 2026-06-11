@@ -46,10 +46,14 @@ def run_verify(
     cmd = [
         sys.executable,
         str(SCRIPT),
-        "--before", str(before),
-        "--after", str(after),
-        "--suite-exit-code", str(suite_exit_code),
-        "--min-win", str(min_win),
+        "--before",
+        str(before),
+        "--after",
+        str(after),
+        "--suite-exit-code",
+        str(suite_exit_code),
+        "--min-win",
+        str(min_win),
     ]
     if ledger is not None:
         cmd.extend(["--ledger", str(ledger)])
@@ -188,8 +192,9 @@ def test_multiple_reasons_reported(tmp_path: Path) -> None:
 def test_ledger_vs_last_echoed(tmp_path: Path) -> None:
     """Ledger given --> vs_last computed and echoed in verdict JSON."""
     ledger_good = FIXTURES / "ledger_good.jsonl"
-    cp = run_verify(CLEAN_BEFORE, CLEAN_AFTER, suite_exit_code=0,
-                    ledger=ledger_good, tmp_path=tmp_path)
+    cp = run_verify(
+        CLEAN_BEFORE, CLEAN_AFTER, suite_exit_code=0, ledger=ledger_good, tmp_path=tmp_path
+    )
 
     assert cp.returncode == 0
     verdict = json.loads(cp.stdout)
@@ -202,8 +207,9 @@ def test_ledger_vs_last_echoed(tmp_path: Path) -> None:
 def test_ledger_corrupt_line_warns(tmp_path: Path) -> None:
     """Corrupt JSONL line --> warning emitted, no crash."""
     ledger_corrupt = FIXTURES / "ledger_corrupt.jsonl"
-    cp = run_verify(CLEAN_BEFORE, CLEAN_AFTER, suite_exit_code=0,
-                    ledger=ledger_corrupt, tmp_path=tmp_path)
+    cp = run_verify(
+        CLEAN_BEFORE, CLEAN_AFTER, suite_exit_code=0, ledger=ledger_corrupt, tmp_path=tmp_path
+    )
 
     assert cp.returncode == 0
     verdict = json.loads(cp.stdout)
@@ -215,8 +221,9 @@ def test_ledger_corrupt_line_warns(tmp_path: Path) -> None:
 def test_ledger_empty_vs_last_is_empty_object(tmp_path: Path) -> None:
     """Empty ledger --> vs_last is {} (empty object)."""
     ledger_empty = FIXTURES / "ledger_empty.jsonl"
-    cp = run_verify(CLEAN_BEFORE, CLEAN_AFTER, suite_exit_code=0,
-                    ledger=ledger_empty, tmp_path=tmp_path)
+    cp = run_verify(
+        CLEAN_BEFORE, CLEAN_AFTER, suite_exit_code=0, ledger=ledger_empty, tmp_path=tmp_path
+    )
 
     assert cp.returncode == 0
     verdict = json.loads(cp.stdout)
@@ -227,8 +234,7 @@ def test_ledger_empty_vs_last_is_empty_object(tmp_path: Path) -> None:
 def test_ledger_missing_produces_warning(tmp_path: Path) -> None:
     """Missing ledger file --> warning, vs_last is {}, no crash."""
     missing = tmp_path / "nonexistent.jsonl"
-    cp = run_verify(CLEAN_BEFORE, CLEAN_AFTER, suite_exit_code=0,
-                    ledger=missing, tmp_path=tmp_path)
+    cp = run_verify(CLEAN_BEFORE, CLEAN_AFTER, suite_exit_code=0, ledger=missing, tmp_path=tmp_path)
 
     assert cp.returncode == 0
     verdict = json.loads(cp.stdout)
@@ -240,8 +246,7 @@ def test_ledger_missing_produces_warning(tmp_path: Path) -> None:
 
 def test_no_ledger_vs_last_empty_object(tmp_path: Path) -> None:
     """No --ledger flag --> vs_last is {}."""
-    cp = run_verify(CLEAN_BEFORE, CLEAN_AFTER, suite_exit_code=0,
-                    ledger=None, tmp_path=tmp_path)
+    cp = run_verify(CLEAN_BEFORE, CLEAN_AFTER, suite_exit_code=0, ledger=None, tmp_path=tmp_path)
 
     assert cp.returncode == 0
     verdict = json.loads(cp.stdout)
@@ -255,16 +260,21 @@ def test_ledger_vs_last_with_regression(tmp_path: Path) -> None:
     """Ledger shows tier drop in vs_last after dimension regresses."""
     ledger = tmp_path / "ledger.jsonl"
     # Last entry has CPU Efficiency = PASS
-    ledger.write_text(json.dumps({
-        "timestamp_utc": "2025-01-14T09:00:00+00:00",
-        "tier": "deep",
-        "rubric_total": 24,
-        "wall_time_mean": 0.002,
-        "dimensions": {
-            "Algorithmic Scaling": "PASS",
-            "CPU Efficiency": "PASS",
-        }
-    }) + "\n")
+    ledger.write_text(
+        json.dumps(
+            {
+                "timestamp_utc": "2025-01-14T09:00:00+00:00",
+                "tier": "deep",
+                "rubric_total": 24,
+                "wall_time_mean": 0.002,
+                "dimensions": {
+                    "Algorithmic Scaling": "PASS",
+                    "CPU Efficiency": "PASS",
+                },
+            }
+        )
+        + "\n"
+    )
 
     before = tmp_path / "before.json"
     after = tmp_path / "after.json"
@@ -276,7 +286,13 @@ def test_ledger_vs_last_with_regression(tmp_path: Path) -> None:
     base = {
         "rubric": {"dimensions": dims},
         "wall_time_percentiles": {"p50": 2.0, "p95": 3.0, "p99": 4.0},
-        "environment": {"cpu_model": "x", "kernel": "x", "governor": "x", "smt": "1", "python_version": "3.11"}
+        "environment": {
+            "cpu_model": "x",
+            "kernel": "x",
+            "governor": "x",
+            "smt": "1",
+            "python_version": "3.11",
+        },
     }
     before.write_text(json.dumps(base))
     base["wall_time_percentiles"] = {"p50": 1.8, "p95": 2.8, "p99": 3.8}
@@ -301,17 +317,22 @@ def test_ledger_vs_last_with_regression(tmp_path: Path) -> None:
 def test_vs_last_regression_item_shape(tmp_path: Path) -> None:
     """vs_last regression items have exact shape: dimension, previous_tier, current_tier, drop."""
     ledger = tmp_path / "ledger.jsonl"
-    ledger.write_text(json.dumps({
-        "timestamp_utc": "2025-01-14T09:00:00+00:00",
-        "tier": "deep",
-        "rubric_total": 24,
-        "wall_time_mean": 0.002,
-        "dimensions": {
-            "Algorithmic Scaling": "PASS",
-            "CPU Efficiency": "PASS",
-            "Memory Profile": "PASS",
-        }
-    }) + "\n")
+    ledger.write_text(
+        json.dumps(
+            {
+                "timestamp_utc": "2025-01-14T09:00:00+00:00",
+                "tier": "deep",
+                "rubric_total": 24,
+                "wall_time_mean": 0.002,
+                "dimensions": {
+                    "Algorithmic Scaling": "PASS",
+                    "CPU Efficiency": "PASS",
+                    "Memory Profile": "PASS",
+                },
+            }
+        )
+        + "\n"
+    )
 
     before = tmp_path / "before.json"
     after = tmp_path / "after.json"
@@ -324,7 +345,13 @@ def test_vs_last_regression_item_shape(tmp_path: Path) -> None:
     base = {
         "rubric": {"dimensions": dims_same},
         "wall_time_percentiles": {"p50": 2.0, "p95": 3.0, "p99": 4.0},
-        "environment": {"cpu_model": "x", "kernel": "x", "governor": "x", "smt": "1", "python_version": "3.11"}
+        "environment": {
+            "cpu_model": "x",
+            "kernel": "x",
+            "governor": "x",
+            "smt": "1",
+            "python_version": "3.11",
+        },
     }
     before.write_text(json.dumps(base))
     base["wall_time_percentiles"] = {"p50": 1.8, "p95": 2.8, "p99": 3.8}
@@ -349,16 +376,21 @@ def test_vs_last_regression_item_shape(tmp_path: Path) -> None:
 def test_vs_last_no_regressions_returns_empty_object(tmp_path: Path) -> None:
     """Ledger with entries but no tier drops --> vs_last is {}."""
     ledger = tmp_path / "ledger.jsonl"
-    ledger.write_text(json.dumps({
-        "timestamp_utc": "2025-01-14T09:00:00+00:00",
-        "tier": "deep",
-        "rubric_total": 24,
-        "wall_time_mean": 0.002,
-        "dimensions": {
-            "Algorithmic Scaling": "PASS",
-            "CPU Efficiency": "PASS",
-        }
-    }) + "\n")
+    ledger.write_text(
+        json.dumps(
+            {
+                "timestamp_utc": "2025-01-14T09:00:00+00:00",
+                "tier": "deep",
+                "rubric_total": 24,
+                "wall_time_mean": 0.002,
+                "dimensions": {
+                    "Algorithmic Scaling": "PASS",
+                    "CPU Efficiency": "PASS",
+                },
+            }
+        )
+        + "\n"
+    )
 
     before = tmp_path / "before.json"
     after = tmp_path / "after.json"
@@ -370,7 +402,13 @@ def test_vs_last_no_regressions_returns_empty_object(tmp_path: Path) -> None:
     base = {
         "rubric": {"dimensions": dims},
         "wall_time_percentiles": {"p50": 2.0, "p95": 3.0, "p99": 4.0},
-        "environment": {"cpu_model": "x", "kernel": "x", "governor": "x", "smt": "1", "python_version": "3.11"}
+        "environment": {
+            "cpu_model": "x",
+            "kernel": "x",
+            "governor": "x",
+            "smt": "1",
+            "python_version": "3.11",
+        },
     }
     before.write_text(json.dumps(base))
     base["wall_time_percentiles"] = {"p50": 1.8, "p95": 2.8, "p99": 3.8}
@@ -443,11 +481,21 @@ def test_missing_rubric_exit_2(tmp_path: Path) -> None:
 def test_missing_p50_exit_2(tmp_path: Path) -> None:
     """Summary missing wall_time_percentiles.p50 --> exit 2."""
     bad = tmp_path / "bad.json"
-    bad.write_text(json.dumps({
-        "rubric": {"dimensions": {}},
-        "wall_time_percentiles": {"p95": 1.0},
-        "environment": {"cpu_model": "x", "kernel": "x", "governor": "x", "smt": "1", "python_version": "3.11"}
-    }))
+    bad.write_text(
+        json.dumps(
+            {
+                "rubric": {"dimensions": {}},
+                "wall_time_percentiles": {"p95": 1.0},
+                "environment": {
+                    "cpu_model": "x",
+                    "kernel": "x",
+                    "governor": "x",
+                    "smt": "1",
+                    "python_version": "3.11",
+                },
+            }
+        )
+    )
     cp = run_verify(bad, CLEAN_AFTER, suite_exit_code=0, tmp_path=tmp_path)
 
     assert cp.returncode == 2
@@ -509,34 +557,50 @@ def test_exact_win_at_threshold(tmp_path: Path) -> None:
     """win at exactly min-win still accepts (spec says 'below' = strict <)."""
     before = tmp_path / "before.json"
     after = tmp_path / "after.json"
-    before.write_text(json.dumps({
-        "rubric": {
-            "dimensions": {
-                "Algorithmic Scaling": {"score": 4, "tier": "PASS"},
-                "Wall-Time Stability": {"score": 4, "tier": "PASS", "cv": 2.0},
+    before.write_text(
+        json.dumps(
+            {
+                "rubric": {
+                    "dimensions": {
+                        "Algorithmic Scaling": {"score": 4, "tier": "PASS"},
+                        "Wall-Time Stability": {"score": 4, "tier": "PASS", "cv": 2.0},
+                    }
+                },
+                "wall_time_percentiles": {"p50": 2.0, "p95": 2.1, "p99": 2.2},
+                "environment": {
+                    "cpu_model": "Test CPU",
+                    "kernel": "6.1",
+                    "governor": "performance",
+                    "smt": "1",
+                    "python_version": "3.11",
+                    "load_avg_1m": 0.1,
+                    "timestamp_utc": "2025-01-01T00:00:00+00:00",
+                },
             }
-        },
-        "wall_time_percentiles": {"p50": 2.0, "p95": 2.1, "p99": 2.2},
-        "environment": {
-            "cpu_model": "Test CPU", "kernel": "6.1", "governor": "performance",
-            "smt": "1", "python_version": "3.11", "load_avg_1m": 0.1,
-            "timestamp_utc": "2025-01-01T00:00:00+00:00"
-        }
-    }))
-    after.write_text(json.dumps({
-        "rubric": {
-            "dimensions": {
-                "Algorithmic Scaling": {"score": 4, "tier": "PASS"},
-                "Wall-Time Stability": {"score": 4, "tier": "PASS", "cv": 2.0},
+        )
+    )
+    after.write_text(
+        json.dumps(
+            {
+                "rubric": {
+                    "dimensions": {
+                        "Algorithmic Scaling": {"score": 4, "tier": "PASS"},
+                        "Wall-Time Stability": {"score": 4, "tier": "PASS", "cv": 2.0},
+                    }
+                },
+                "wall_time_percentiles": {"p50": 1.9, "p95": 2.0, "p99": 2.1},
+                "environment": {
+                    "cpu_model": "Test CPU",
+                    "kernel": "6.1",
+                    "governor": "performance",
+                    "smt": "1",
+                    "python_version": "3.11",
+                    "load_avg_1m": 0.2,
+                    "timestamp_utc": "2025-01-01T00:00:00+00:00",
+                },
             }
-        },
-        "wall_time_percentiles": {"p50": 1.9, "p95": 2.0, "p99": 2.1},
-        "environment": {
-            "cpu_model": "Test CPU", "kernel": "6.1", "governor": "performance",
-            "smt": "1", "python_version": "3.11", "load_avg_1m": 0.2,
-            "timestamp_utc": "2025-01-01T00:00:00+00:00"
-        }
-    }))
+        )
+    )
 
     cp = run_verify(before, after, suite_exit_code=0, min_win=5.0, tmp_path=tmp_path)
     # win = (2.0-1.9)/2.0*100 = 5.0% --> exactly at threshold --> accept
@@ -549,24 +613,44 @@ def test_median_win_computation(tmp_path: Path) -> None:
     after = tmp_path / "after.json"
 
     # before=10, after=8 --> 20% win
-    before.write_text(json.dumps({
-        "rubric": {
-            "dimensions": {
-                "Algorithmic Scaling": {"score": 4, "tier": "PASS"},
+    before.write_text(
+        json.dumps(
+            {
+                "rubric": {
+                    "dimensions": {
+                        "Algorithmic Scaling": {"score": 4, "tier": "PASS"},
+                    }
+                },
+                "wall_time_percentiles": {"p50": 10.0, "p95": 11.0, "p99": 12.0},
+                "environment": {
+                    "cpu_model": "x",
+                    "kernel": "x",
+                    "governor": "x",
+                    "smt": "1",
+                    "python_version": "3.11",
+                },
             }
-        },
-        "wall_time_percentiles": {"p50": 10.0, "p95": 11.0, "p99": 12.0},
-        "environment": {"cpu_model": "x", "kernel": "x", "governor": "x", "smt": "1", "python_version": "3.11"}
-    }))
-    after.write_text(json.dumps({
-        "rubric": {
-            "dimensions": {
-                "Algorithmic Scaling": {"score": 4, "tier": "PASS"},
+        )
+    )
+    after.write_text(
+        json.dumps(
+            {
+                "rubric": {
+                    "dimensions": {
+                        "Algorithmic Scaling": {"score": 4, "tier": "PASS"},
+                    }
+                },
+                "wall_time_percentiles": {"p50": 8.0, "p95": 9.0, "p99": 10.0},
+                "environment": {
+                    "cpu_model": "x",
+                    "kernel": "x",
+                    "governor": "x",
+                    "smt": "1",
+                    "python_version": "3.11",
+                },
             }
-        },
-        "wall_time_percentiles": {"p50": 8.0, "p95": 9.0, "p99": 10.0},
-        "environment": {"cpu_model": "x", "kernel": "x", "governor": "x", "smt": "1", "python_version": "3.11"}
-    }))
+        )
+    )
 
     cp = run_verify(before, after, suite_exit_code=0, min_win=5.0, tmp_path=tmp_path)
 
@@ -581,16 +665,36 @@ def test_before_p50_zero_rejects(tmp_path: Path) -> None:
     before = tmp_path / "before.json"
     after = tmp_path / "after.json"
 
-    before.write_text(json.dumps({
-        "rubric": {"dimensions": {"Algorithmic Scaling": {"score": 4, "tier": "PASS"}}},
-        "wall_time_percentiles": {"p50": 0.0, "p95": 0.1, "p99": 0.2},
-        "environment": {"cpu_model": "x", "kernel": "x", "governor": "x", "smt": "1", "python_version": "3.11"}
-    }))
-    after.write_text(json.dumps({
-        "rubric": {"dimensions": {"Algorithmic Scaling": {"score": 4, "tier": "PASS"}}},
-        "wall_time_percentiles": {"p50": 0.0, "p95": 0.1, "p99": 0.2},
-        "environment": {"cpu_model": "x", "kernel": "x", "governor": "x", "smt": "1", "python_version": "3.11"}
-    }))
+    before.write_text(
+        json.dumps(
+            {
+                "rubric": {"dimensions": {"Algorithmic Scaling": {"score": 4, "tier": "PASS"}}},
+                "wall_time_percentiles": {"p50": 0.0, "p95": 0.1, "p99": 0.2},
+                "environment": {
+                    "cpu_model": "x",
+                    "kernel": "x",
+                    "governor": "x",
+                    "smt": "1",
+                    "python_version": "3.11",
+                },
+            }
+        )
+    )
+    after.write_text(
+        json.dumps(
+            {
+                "rubric": {"dimensions": {"Algorithmic Scaling": {"score": 4, "tier": "PASS"}}},
+                "wall_time_percentiles": {"p50": 0.0, "p95": 0.1, "p99": 0.2},
+                "environment": {
+                    "cpu_model": "x",
+                    "kernel": "x",
+                    "governor": "x",
+                    "smt": "1",
+                    "python_version": "3.11",
+                },
+            }
+        )
+    )
 
     cp = run_verify(before, after, suite_exit_code=0, tmp_path=tmp_path)
     assert cp.returncode == 1
@@ -603,25 +707,45 @@ def test_accept_with_missing_dimension_in_after(tmp_path: Path) -> None:
     before = tmp_path / "before.json"
     after = tmp_path / "after.json"
 
-    before.write_text(json.dumps({
-        "rubric": {
-            "dimensions": {
-                "Algorithmic Scaling": {"score": 4, "tier": "PASS"},
-                "CPU Efficiency": {"score": 4, "tier": "PASS"},
+    before.write_text(
+        json.dumps(
+            {
+                "rubric": {
+                    "dimensions": {
+                        "Algorithmic Scaling": {"score": 4, "tier": "PASS"},
+                        "CPU Efficiency": {"score": 4, "tier": "PASS"},
+                    }
+                },
+                "wall_time_percentiles": {"p50": 2.0, "p95": 3.0, "p99": 4.0},
+                "environment": {
+                    "cpu_model": "x",
+                    "kernel": "x",
+                    "governor": "x",
+                    "smt": "1",
+                    "python_version": "3.11",
+                },
             }
-        },
-        "wall_time_percentiles": {"p50": 2.0, "p95": 3.0, "p99": 4.0},
-        "environment": {"cpu_model": "x", "kernel": "x", "governor": "x", "smt": "1", "python_version": "3.11"}
-    }))
-    after.write_text(json.dumps({
-        "rubric": {
-            "dimensions": {
-                "Algorithmic Scaling": {"score": 4, "tier": "PASS"},
+        )
+    )
+    after.write_text(
+        json.dumps(
+            {
+                "rubric": {
+                    "dimensions": {
+                        "Algorithmic Scaling": {"score": 4, "tier": "PASS"},
+                    }
+                },
+                "wall_time_percentiles": {"p50": 1.0, "p95": 2.0, "p99": 3.0},
+                "environment": {
+                    "cpu_model": "x",
+                    "kernel": "x",
+                    "governor": "x",
+                    "smt": "1",
+                    "python_version": "3.11",
+                },
             }
-        },
-        "wall_time_percentiles": {"p50": 1.0, "p95": 2.0, "p99": 3.0},
-        "environment": {"cpu_model": "x", "kernel": "x", "governor": "x", "smt": "1", "python_version": "3.11"}
-    }))
+        )
+    )
 
     cp = run_verify(before, after, suite_exit_code=0, min_win=5.0, tmp_path=tmp_path)
     assert cp.returncode == 0
@@ -642,7 +766,13 @@ def test_accept_with_same_tier_keep(tmp_path: Path) -> None:
     base = {
         "rubric": {"dimensions": dims},
         "wall_time_percentiles": {"p50": 2.0, "p95": 3.0, "p99": 4.0},
-        "environment": {"cpu_model": "x", "kernel": "x", "governor": "x", "smt": "1", "python_version": "3.11"}
+        "environment": {
+            "cpu_model": "x",
+            "kernel": "x",
+            "governor": "x",
+            "smt": "1",
+            "python_version": "3.11",
+        },
     }
     before.write_text(json.dumps(base))
     base["wall_time_percentiles"] = {"p50": 1.8, "p95": 2.8, "p99": 3.8}
@@ -662,10 +792,14 @@ def test_fingerprint_all_keys_compared(tmp_path: Path) -> None:
         },
         "wall_time_percentiles": {"p50": 2.0, "p95": 3.0, "p99": 4.0},
         "environment": {
-            "cpu_model": "x", "kernel": "x", "governor": "x", "smt": "1",
-            "python_version": "3.11", "load_avg_1m": 0.1,
-            "timestamp_utc": "2025-01-01T00:00:00+00:00"
-        }
+            "cpu_model": "x",
+            "kernel": "x",
+            "governor": "x",
+            "smt": "1",
+            "python_version": "3.11",
+            "load_avg_1m": 0.1,
+            "timestamp_utc": "2025-01-01T00:00:00+00:00",
+        },
     }
 
     mismatch_keys = {
@@ -687,7 +821,9 @@ def test_fingerprint_all_keys_compared(tmp_path: Path) -> None:
         cp = run_verify(before, after, suite_exit_code=0, tmp_path=tmp_path)
         assert cp.returncode == 1, f"Key {key} mismatch should reject"
         verdict = json.loads(cp.stdout)
-        assert "fingerprint" in verdict["reasons"], f"Key {key} mismatch should produce fingerprint reason"
+        assert "fingerprint" in verdict["reasons"], (
+            f"Key {key} mismatch should produce fingerprint reason"
+        )
 
 
 def test_suite_exit_code_negative(tmp_path: Path) -> None:
@@ -719,8 +855,13 @@ def test_noise_and_median_collected(tmp_path: Path) -> None:
 
 def test_warnings_key_absent_when_no_warnings(tmp_path: Path) -> None:
     """When no ledger or clean ledger, warnings key is absent."""
-    cp = run_verify(CLEAN_BEFORE, CLEAN_AFTER, suite_exit_code=0,
-                    ledger=FIXTURES / "ledger_good.jsonl", tmp_path=tmp_path)
+    cp = run_verify(
+        CLEAN_BEFORE,
+        CLEAN_AFTER,
+        suite_exit_code=0,
+        ledger=FIXTURES / "ledger_good.jsonl",
+        tmp_path=tmp_path,
+    )
     verdict = json.loads(cp.stdout)
     # Good ledger, no corrupt lines --> no warnings key
     assert "warnings" not in verdict

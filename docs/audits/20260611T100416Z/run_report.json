@@ -1,0 +1,189 @@
+{
+  "schema_version": 2,
+  "repo_root": "/home/jakub/projects/perf-benchmark-skill",
+  "started_utc": "2026-06-11T10:04:16Z",
+  "finished_utc": "2026-06-11T12:45:00Z",
+  "orchestrator_skill_version": "perf-benchmark 0.3.0; perf-optimization 0.2.0",
+  "lanes": {
+    "code-health": "error (advisory residuals frozen; 44 findings)",
+    "security": "findings (24 frozen false-positive/security-review items)",
+    "hygiene": "ok (0 findings)",
+    "docs": "ok (0 findings after T5 shrink-only ratchet)",
+    "dependency": "ok (0 findings; pyproject has no [project] table)",
+    "hotspot": "findings (6 frozen churn/coupling items)",
+    "performance": "fast-tier only; 0 PERF findings; selector returned no_candidates",
+    "test-python": "verified by pytest; 154 passed",
+    "format-lint": "verified by ruff check and ruff format --check"
+  },
+  "findings_totals": {
+    "DECOMPOSE": 34,
+    "SIMPLIFY": 12,
+    "RESTRUCTURE": 4,
+    "SECURITY": 24,
+    "PERF": 0,
+    "DOCS": 0,
+    "TEST": 0
+  },
+  "backlog": {
+    "accepted": 0,
+    "deferred": 49,
+    "coverage_gated": 0,
+    "wont_fix": 25
+  },
+  "batches": [
+    {
+      "id": "K4-T1",
+      "signal": "AUDIT",
+      "files": [
+        "docs/audits/20260611T100416Z/backlog.md",
+        "docs/audits/20260611T100416Z/bootstrap/bootstrap_report.json"
+      ],
+      "result": "accepted",
+      "evidence": "Commit ff2127a created the bootstrap/diagnosis backlog and recorded dependency manifest semantics for the pyproject-only repo."
+    },
+    {
+      "id": "K4-T2",
+      "signal": "PERF",
+      "files": [
+        "docs/audits/20260611T100416Z/perf-before/benchmark_summary.json",
+        "docs/perf/baseline_ledger.jsonl"
+      ],
+      "result": "accepted",
+      "evidence": "Commit 5305c1f recorded two fast-tier baseline ledger lines. Valgrind was absent, so medium/deep/asm were out of scope."
+    },
+    {
+      "id": "K4-T3",
+      "signal": "PERF",
+      "files": [
+        "docs/audits/20260611T100416Z/opt/candidate.json",
+        "docs/audits/20260611T100416Z/opt/verdict.json"
+      ],
+      "result": "accepted",
+      "evidence": "Commit 8378a0e recorded selector output {\"status\":\"no_candidates\"} and verdict \"evaluated, no feasible low-risk win\" because perf_findings.json was empty."
+    },
+    {
+      "id": "K4-T4",
+      "signal": "GATE",
+      "files": [
+        "scripts/check_wave_baseline.py",
+        "scripts/wave_baseline.json",
+        "scripts/wave_frozen.md",
+        ".gitignore"
+      ],
+      "result": "accepted",
+      "evidence": "Commits 9db2d75, 290cbbc, and 0cc81ec added mechanical cleanups, the wave baseline checker, and an initial 76-finding freeze."
+    },
+    {
+      "id": "K4-T5",
+      "signal": "DOCS",
+      "files": [
+        "SKILL.md",
+        "perf-optimization/SKILL.md",
+        "references/sample-report.md",
+        "references/tool-guide.md",
+        "CHANGELOG.md",
+        "perf-optimization/CHANGELOG.md"
+      ],
+      "result": "accepted",
+      "evidence": "Brevity/version pass reduced root SKILL.md to 111 lines, perf-optimization/SKILL.md to 109, sample-report to 54, and tool-guide to 46; versions are 0.3.0 and 0.2.0."
+    }
+  ],
+  "verification": [
+    {
+      "command": "python3 -m pytest -q",
+      "exit_code": 0,
+      "output": "154 passed"
+    },
+    {
+      "command": "ruff check .",
+      "exit_code": 0,
+      "output": "All checks passed!"
+    },
+    {
+      "command": "ruff format --check .",
+      "exit_code": 0,
+      "output": "21 files already formatted"
+    },
+    {
+      "command": "WAVE_RUNNER=/home/jakub/projects/repo-audit-refactor-optimize/scripts/run_diagnosis_wave.py SKILLS_ROOT=~/.claude/skills python3 scripts/check_wave_baseline.py",
+      "exit_code": 0,
+      "output": "{\"status\":\"pass\",\"count\":59,\"baseline\":59}; wave summary code-health 44, security 24, hygiene 0, docs 0, dependency 0, hotspot 6"
+    },
+    {
+      "command": "python3 -m json.tool scripts/wave_baseline.json",
+      "exit_code": 0,
+      "output": "valid JSON; 74 raw findings"
+    },
+    {
+      "command": "git diff --check",
+      "exit_code": 0,
+      "output": ""
+    },
+    {
+      "command": "python3 /home/jakub/projects/repo-audit-refactor-optimize/scripts/validate_run_report.py --run-dir docs/audits/20260611T100416Z --schema 2",
+      "exit_code": 0,
+      "output": "{\"status\":\"pass\"}"
+    }
+  ],
+  "warnings": [
+    "code-health exit 2 is the expected advisory GATE state for frozen residual complexity findings, not a crash.",
+    "security findings are frozen as local benchmark/profiling subprocess and metadata false-positive review items.",
+    "T5 removed two stale baseline identities shrink-only: one docs-consistency sample path and one SKILL.md hotspot churn item.",
+    "No optimization win was fabricated; the only allowed attempt ended with an honest no-candidate verdict.",
+    "No push was performed."
+  ],
+  "wave_summary": {
+    "code-health": {
+      "exit": 2,
+      "status": "error",
+      "findings": 44
+    },
+    "security": {
+      "exit": 1,
+      "status": "findings",
+      "findings": 24
+    },
+    "hygiene": {
+      "exit": 0,
+      "status": "ok",
+      "findings": 0
+    },
+    "docs": {
+      "exit": 0,
+      "status": "ok",
+      "findings": 0
+    },
+    "dependency": {
+      "exit": 0,
+      "status": "ok",
+      "findings": 0
+    },
+    "hotspot": {
+      "exit": 1,
+      "status": "findings",
+      "findings": 6
+    }
+  },
+  "wave_baseline": {
+    "path": "scripts/wave_baseline.json",
+    "raw_findings": 74,
+    "normalized_identities": 59
+  },
+  "perf_ledger": {
+    "path": "docs/perf/baseline_ledger.jsonl",
+    "lines": 2,
+    "candidate": "docs/audits/20260611T100416Z/opt/candidate.json",
+    "verdict": "docs/audits/20260611T100416Z/opt/verdict.json"
+  },
+  "line_counts": {
+    "SKILL.md": 111,
+    "perf-optimization/SKILL.md": 109,
+    "references/sample-report.md": 54,
+    "references/tool-guide.md": 46,
+    "CHANGELOG.md": 15,
+    "perf-optimization/CHANGELOG.md": 11
+  },
+  "push": {
+    "performed": false
+  }
+}
