@@ -1,6 +1,6 @@
 ---
 name: perf-optimization
-version: 0.2.0
+version: 0.2.1
 description: >
   Evidence-driven performance optimization that consumes perf-benchmark
   findings, selects one bounded candidate, re-measures with identical profiling,

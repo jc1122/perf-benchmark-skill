@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.2.1 - 2026-06-11
+
+- Reworked win-verdict tier rank constants to avoid Bandit B105 false
+  positives while preserving the `PASS` tier semantics.
+
 ## 0.2.0 - 2026-06-11
 
 - Documented the SP9 no-candidate optimization verdict path.

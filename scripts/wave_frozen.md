@@ -47,7 +47,7 @@
 
 ## SP11 iteration 2 reporting complexity ratchet
 
-- Ratchet timestamp: 2026-06-12T00:05:00Z
+- Ratchet timestamp: 2026-06-11T21:48:00Z
 - Split `_summarize_wall_time_metrics` into focused helpers for pytest
   benchmark metrics, per-size timings, and flat timing lists.
 - Removed the stale `_summarize_wall_time_metrics` `cyclomatic_complexity` and

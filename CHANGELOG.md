@@ -1,5 +1,16 @@
 # Changelog
 
+## 0.3.1 - 2026-06-11
+
+- Added counted security trusted-subprocess policy support to the repo wave
+  baseline.
+- Added hotspot policy config for intentional README/SKILL/pipeline coupling
+  and single-maintainer concentration.
+- Removed Bandit false positives while preserving deterministic finding IDs.
+- Split wall-time summary reporting helpers and ratcheted the wave baseline
+  from 55 to 39 normalized identities.
+- Updated CI workflow actions to current majors.
+
 ## 0.3.0 - 2026-06-11
 
 - Added SP9 self-audit evidence for the perf benchmark repository.
