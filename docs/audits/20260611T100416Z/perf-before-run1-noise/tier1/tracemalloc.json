@@ -1,0 +1,106 @@
+{
+  "current_bytes": 2533108,
+  "peak_bytes": 19062612,
+  "top_allocators": [
+    {
+      "traceback": "<frozen importlib._bootstrap_external>:511",
+      "size_bytes": 1340957,
+      "count": 10933
+    },
+    {
+      "traceback": "<frozen runpy>:259",
+      "size_bytes": 288573,
+      "count": 2038
+    },
+    {
+      "traceback": "<frozen importlib._bootstrap>:491",
+      "size_bytes": 105959,
+      "count": 908
+    },
+    {
+      "traceback": "<frozen abc>:106",
+      "size_bytes": 72732,
+      "count": 284
+    },
+    {
+      "traceback": "/home/jakub/projects/perf-benchmark-skill/scripts/perf_benchmark/stage_helpers.py:277",
+      "size_bytes": 15496,
+      "count": 189
+    },
+    {
+      "traceback": "/usr/lib/python3.14/enum.py:262",
+      "size_bytes": 9976,
+      "count": 58
+    },
+    {
+      "traceback": "<frozen abc>:107",
+      "size_bytes": 9760,
+      "count": 66
+    },
+    {
+      "traceback": "/usr/lib/python3.14/enum.py:550",
+      "size_bytes": 9625,
+      "count": 26
+    },
+    {
+      "traceback": "/usr/lib/python3.14/typing.py:2826",
+      "size_bytes": 6640,
+      "count": 2
+    },
+    {
+      "traceback": "/usr/lib/python3.14/pathlib/__init__.py:35",
+      "size_bytes": 6632,
+      "count": 3
+    },
+    {
+      "traceback": "<frozen importlib._bootstrap>:950",
+      "size_bytes": 6512,
+      "count": 1
+    },
+    {
+      "traceback": "<frozen importlib._bootstrap_external>:133",
+      "size_bytes": 5905,
+      "count": 64
+    },
+    {
+      "traceback": "/usr/lib/python3/dist-packages/_distutils_hack/__init__.py:107",
+      "size_bytes": 5810,
+      "count": 65
+    },
+    {
+      "traceback": "<frozen abc>:24",
+      "size_bytes": 5368,
+      "count": 62
+    },
+    {
+      "traceback": "/usr/lib/python3.14/argparse.py:840",
+      "size_bytes": 4749,
+      "count": 11
+    },
+    {
+      "traceback": "<frozen importlib._bootstrap_external>:596",
+      "size_bytes": 4712,
+      "count": 31
+    },
+    {
+      "traceback": "/usr/lib/python3.14/collections/__init__.py:515",
+      "size_bytes": 4656,
+      "count": 19
+    },
+    {
+      "traceback": "/usr/lib/python3.14/pathlib/__init__.py:77",
+      "size_bytes": 4157,
+      "count": 18
+    },
+    {
+      "traceback": "/usr/lib/python3.14/argparse.py:1852",
+      "size_bytes": 4143,
+      "count": 11
+    },
+    {
+      "traceback": "/usr/lib/python3.14/_py_warnings.py:681",
+      "size_bytes": 3947,
+      "count": 12
+    }
+  ]
+}

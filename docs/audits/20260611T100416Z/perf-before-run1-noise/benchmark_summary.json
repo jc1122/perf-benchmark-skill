@@ -1,0 +1,101 @@
+{
+  "generated_at": "2026-06-11T10:13:09.304967+00:00",
+  "root": "/home/jakub/projects/perf-benchmark-skill",
+  "tier": "fast",
+  "rubric": {
+    "total": 4,
+    "max_possible": 4,
+    "dimensions": {
+      "Algorithmic Scaling": {
+        "score": -1,
+        "tier": "N/A",
+        "sub_checks": {
+          "complexity_exponent": {
+            "k": 0.809,
+            "tier": "PASS"
+          }
+        },
+        "missing_sub_checks": [
+          "allocation_churn",
+          "call_amplification",
+          "data_reuse",
+          "multiplicative_paths",
+          "write_amplification"
+        ],
+        "note": "Incomplete evidence for strict scaling rubric"
+      },
+      "Wall-Time Stability": {
+        "score": -1,
+        "tier": "N/A (noise)",
+        "cv": 7.23
+      },
+      "CPU Efficiency": {
+        "score": -1,
+        "tier": "N/A"
+      },
+      "L1 Cache Efficiency": {
+        "score": -1,
+        "tier": "N/A"
+      },
+      "Last-Level Cache": {
+        "score": -1,
+        "tier": "N/A"
+      },
+      "Branch Prediction": {
+        "score": -1,
+        "tier": "N/A"
+      },
+      "Memory Profile": {
+        "score": 4,
+        "tier": "PASS",
+        "peak_bytes": 19062612,
+        "source": "tracemalloc"
+      }
+    }
+  },
+  "prerequisites": {
+    "python_ok": true,
+    "valgrind": false,
+    "perf_paranoid": 4,
+    "governor": "powersave",
+    "cache_topology": {
+      "D1": "49152,12,64",
+      "I1": "32768,8,64",
+      "LL": "12582912,8,64"
+    },
+    "ram_mb": 15091
+  },
+  "baseline_regressions": [],
+  "regression_blocker": false,
+  "wall_time_cv": 7.23,
+  "wall_time_cv_by_size": {
+    "1000": 7.21,
+    "4000": 2.51,
+    "16000": 7.23
+  },
+  "wall_time_mean_by_size": {
+    "1000": 0.076,
+    "4000": 0.178,
+    "16000": 0.716
+  },
+  "environment": {
+    "cpu_model": "13th Gen Intel(R) Core(TM) i5-1340P",
+    "kernel": "7.0.0-22-generic",
+    "governor": "powersave",
+    "smt": "1",
+    "load_avg_1m": 3.06,
+    "python_version": "3.14.4",
+    "timestamp_utc": "2026-06-11T10:13:09+00:00"
+  },
+  "wall_time_percentiles": {
+    "p50": 0.18,
+    "p95": 0.762,
+    "p99": 0.7684000000000001
+  },
+  "tracemalloc_peak_bytes": 19062612,
+  "ledger_regressions": {
+    "vs_last": [],
+    "vs_best": [],
+    "warnings": []
+  }
+}
