@@ -37,12 +37,6 @@
   },
   {
     "leaf": "complexity",
-    "path": "perf-optimization/scripts/verify_win.py",
-    "symbol": "<module>",
-    "metric": "maintainability_index"
-  },
-  {
-    "leaf": "complexity",
     "path": "scripts/perf_benchmark/reporting.py",
     "symbol": "<module>",
     "metric": "maintainability_index"
@@ -62,12 +56,6 @@
   {
     "leaf": "complexity",
     "path": "scripts/perf_benchmark/support.py",
-    "symbol": "<module>",
-    "metric": "maintainability_index"
-  },
-  {
-    "leaf": "complexity",
-    "path": "scripts/perf_benchmark_pipeline.py",
     "symbol": "<module>",
     "metric": "maintainability_index"
   },
@@ -229,18 +217,6 @@
   },
   {
     "leaf": "complexity",
-    "path": "perf-optimization/scripts/select_candidate.py",
-    "symbol": "<module>",
-    "metric": "maintainability_index"
-  },
-  {
-    "leaf": "complexity",
-    "path": "scripts/check_wave_baseline.py",
-    "symbol": "<module>",
-    "metric": "maintainability_index"
-  },
-  {
-    "leaf": "complexity",
     "path": "scripts/perf_benchmark/findings.py",
     "symbol": "<module>",
     "metric": "maintainability_index"
@@ -304,24 +280,6 @@
     "path": "scripts/perf_benchmark_pipeline.py",
     "symbol": "blacklist",
     "metric": "bandit_B404"
-  },
-  {
-    "leaf": "security",
-    "path": "scripts/perf_benchmark_pipeline.py",
-    "symbol": "subprocess_without_shell_equals_true",
-    "metric": "bandit_B603"
-  },
-  {
-    "leaf": "security",
-    "path": "scripts/perf_benchmark_pipeline.py",
-    "symbol": "subprocess_without_shell_equals_true",
-    "metric": "bandit_B603"
-  },
-  {
-    "leaf": "security",
-    "path": "scripts/perf_benchmark_pipeline.py",
-    "symbol": "subprocess_without_shell_equals_true",
-    "metric": "bandit_B603"
   },
   {
     "leaf": "security",

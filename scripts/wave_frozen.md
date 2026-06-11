@@ -20,6 +20,13 @@
 - Removed stale identity: `hotspot|SKILL.md|SKILL.md|churn_complexity_product`.
 - Current baseline has 74 raw findings and 59 normalized identities.
 
+## SP10 v0.5.1 ratchet
+
+- Ratchet timestamp: 2026-06-11T15:47:00Z
+- Removed stale CLI module-MI identities after running with `SKILLS_ROOT=/home/jakub/projects/repo-audit-skills/skills` at v0.5.1.
+- Removed stale identities: `perf-optimization/scripts/select_candidate.py`, `perf-optimization/scripts/verify_win.py`, `scripts/check_wave_baseline.py`, and `scripts/perf_benchmark_pipeline.py` module-level `maintainability_index`.
+- Current baseline has 67 raw findings and 55 normalized identities.
+
 ## Residual findings
 
 The code-health lane contains findings; there are no missing-artifact failures in this snapshot.
