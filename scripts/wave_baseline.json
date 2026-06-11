@@ -13,12 +13,6 @@
   },
   {
     "leaf": "complexity",
-    "path": "scripts/perf_benchmark/scoring.py",
-    "symbol": "score_wall_time_stability",
-    "metric": "cyclomatic_complexity"
-  },
-  {
-    "leaf": "complexity",
     "path": "scripts/perf_benchmark/stage_helpers.py",
     "symbol": "_parse_cachegrind_summary",
     "metric": "cyclomatic_complexity"

@@ -195,10 +195,7 @@ def score_algorithmic_scaling(
     return {"score": 4, "tier": "PASS", "sub_checks": sub_checks}
 
 
-def score_wall_time_stability(tier1: dict, max_cv: float = 5.0) -> dict[str, Any]:
-    """Dimension 1: wall-time CV.  CV > *max_cv* ⇒ tier ``N/A (noise)``, excluded from total."""
-    pb = tier1.get("pytest_benchmark", {})
-    benchmarks = pb.get("benchmarks", [])
+def _pytest_benchmark_cv(benchmarks: list[dict[str, Any]]) -> float | None:
     if benchmarks:
         cvs = [
             benchmark.get("stats", {}).get("stddev", 0)
@@ -206,27 +203,45 @@ def score_wall_time_stability(tier1: dict, max_cv: float = 5.0) -> dict[str, Any
             * 100
             for benchmark in benchmarks
         ]
-        avg_cv = sum(cvs) / len(cvs) if cvs else 0
-    else:
-        time_usage_by_size = tier1.get("time_usage_by_size", {})
-        if time_usage_by_size:
-            cv_by_size = {
-                int(size): round(
-                    _cv([run.get("wall_seconds", 0.0) for run in runs if run.get("wall_seconds")]),
-                    2,
-                )
-                for size, runs in time_usage_by_size.items()
-                if any(run.get("wall_seconds") for run in runs)
-            }
-            avg_cv = max(cv_by_size.values()) if cv_by_size else -1
-        else:
-            times = [
-                item.get("wall_seconds", 0)
-                for item in tier1.get("time_usage", [])
-                if item.get("wall_seconds")
-            ]
-            cv_by_size = None
-            avg_cv = _cv(times) if times else -1
+        return sum(cvs) / len(cvs) if cvs else 0.0
+    return None
+
+
+def _explicit_size_wall_time_cv(time_usage_by_size: dict) -> tuple[float, dict[int, float]] | None:
+    if not time_usage_by_size:
+        return None
+    cv_by_size = {
+        int(size): round(
+            _cv([run.get("wall_seconds", 0.0) for run in runs if run.get("wall_seconds")]),
+            2,
+        )
+        for size, runs in time_usage_by_size.items()
+        if any(run.get("wall_seconds") for run in runs)
+    }
+    return (max(cv_by_size.values()) if cv_by_size else -1.0, cv_by_size)
+
+
+def _flat_wall_time_cv(time_usage: list[dict[str, Any]]) -> float:
+    times = [item.get("wall_seconds", 0) for item in time_usage if item.get("wall_seconds")]
+    return _cv(times) if times else -1.0
+
+
+def _wall_time_cv_payload(tier1: dict) -> tuple[float, dict[int, float] | None]:
+    pb = tier1.get("pytest_benchmark", {})
+    benchmark_cv = _pytest_benchmark_cv(pb.get("benchmarks", []))
+    if benchmark_cv is not None:
+        return benchmark_cv, None
+
+    explicit_size_cv = _explicit_size_wall_time_cv(tier1.get("time_usage_by_size", {}))
+    if explicit_size_cv is not None:
+        return explicit_size_cv
+
+    return _flat_wall_time_cv(tier1.get("time_usage", [])), None
+
+
+def score_wall_time_stability(tier1: dict, max_cv: float = 5.0) -> dict[str, Any]:
+    """Dimension 1: wall-time CV.  CV > *max_cv* ⇒ tier ``N/A (noise)``, excluded from total."""
+    avg_cv, cv_by_size = _wall_time_cv_payload(tier1)
 
     if avg_cv < 0:
         return {"score": -1, "tier": "N/A", "cv": None}
@@ -237,7 +252,7 @@ def score_wall_time_stability(tier1: dict, max_cv: float = 5.0) -> dict[str, Any
     tier_val = "PASS" if avg_cv <= 3 else "WARN" if avg_cv <= 8 else "FAIL"
     score = 4 if tier_val == "PASS" else 2 if tier_val == "WARN" else 0
     result: dict[str, Any] = {"score": score, "tier": tier_val, "cv": round(avg_cv, 2)}
-    if not benchmarks and "cv_by_size" in locals() and cv_by_size is not None:
+    if cv_by_size is not None:
         result["cv_by_size"] = cv_by_size
     return result
 

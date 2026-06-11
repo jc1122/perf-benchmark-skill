@@ -70,6 +70,17 @@
   than hidden or treated as unfixable growth.
 - Current baseline has 41 raw findings and 41 normalized identities.
 
+## SP11 iteration 3 scoring wall-time ratchet
+
+- Ratchet timestamp: 2026-06-11T23:12:56Z
+- Split wall-time CV collection in `scripts/perf_benchmark/scoring.py` into
+  private helpers for pytest-benchmark, explicit per-size timings, and flat
+  timing lists while preserving the public `score_wall_time_stability` result
+  shape.
+- Removed the stale `score_wall_time_stability` `cyclomatic_complexity`
+  identity.
+- Current baseline has 40 raw findings and 40 normalized identities.
+
 ## Residual findings
 
 The machine-readable authority is `scripts/wave_baseline.json`. The residual
@@ -79,5 +90,5 @@ honestly recorded as residue if no bounded win remains.
 
 | Leaf | Count | Class | Residue |
 | --- | ---: | --- | --- |
-| complexity | 37 | deferred-structural | Function complexity, function length, module maintainability, and parameter-count rows across the perf benchmark pipeline, reporting, scoring, ledger, support, stage helpers, and perf-optimization helpers. |
+| complexity | 36 | deferred-structural | Function complexity, function length, module maintainability, and parameter-count rows across the perf benchmark pipeline, reporting, scoring, ledger, support, stage helpers, and perf-optimization helpers. |
 | hotspot | 4 | deferred-structural / loop-reanchor-residue | `scripts/perf_benchmark/reporting.py`, `scripts/perf_benchmark/scoring.py`, `scripts/perf_benchmark_pipeline.py`, and `scripts/wave_baseline.json` still carry `churn_complexity_product`; policy config deliberately does not suppress churn-complexity rows. |
