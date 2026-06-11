@@ -1,0 +1,62 @@
+{
+  "schema_version": 2,
+  "repo_root": "/home/jakub/projects/perf-benchmark-skill",
+  "started_utc": "2026-06-11T13:19:08Z",
+  "finished_utc": "2026-06-11T13:19:08Z",
+  "orchestrator_skill_version": "0.3.0",
+  "lanes": {
+    "wave": {
+      "skills_root": "/home/jakub/projects/repo-audit-skills/skills",
+      "run1": {
+        "status": "pass",
+        "count": 59,
+        "baseline": 59
+      },
+      "run2": {
+        "status": "pass",
+        "count": 59,
+        "baseline": 59
+      }
+    },
+    "tests": {
+      "pytest": "154 passed",
+      "ruff": "all checks passed; 21 files already formatted"
+    }
+  },
+  "findings_totals": {
+    "wave_baseline": 59,
+    "new_findings_after_fix": 0,
+    "stale_baseline": 0
+  },
+  "backlog": {
+    "accepted": 0,
+    "deferred": 59,
+    "coverage_gated": 0,
+    "wont_fix": 0
+  },
+  "batches": [
+    {
+      "name": "K5-T3 duplication growth cleanup",
+      "commit": "0f7bbcc",
+      "evidence": "Cleared four v0.5.0 duplication findings without changing the wave baseline"
+    }
+  ],
+  "verification": [
+    {
+      "command": "python3 -m pytest -q",
+      "status": "pass",
+      "evidence": "154 passed"
+    },
+    {
+      "command": "ruff check . && ruff format --check .",
+      "status": "pass",
+      "evidence": "All checks passed; 21 files already formatted"
+    },
+    {
+      "command": "WAVE_RUNNER=/home/jakub/projects/repo-audit-refactor-optimize/scripts/run_diagnosis_wave.py SKILLS_ROOT=/home/jakub/projects/repo-audit-skills/skills python3 scripts/check_wave_baseline.py",
+      "status": "pass",
+      "evidence": "run 1 and run 2 both status pass, count 59, baseline 59"
+    }
+  ],
+  "warnings": []
+}
