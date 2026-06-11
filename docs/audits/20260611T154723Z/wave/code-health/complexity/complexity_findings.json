@@ -1,0 +1,922 @@
+[
+  {
+    "confidence": "high",
+    "evidence": {
+      "raw": "_validate_finding( finding : Any ) CCN=12",
+      "tool": "lizard"
+    },
+    "id": "25b259958ce8ce0b",
+    "leaf": "complexity",
+    "location": {
+      "line_end": 74,
+      "line_start": 50,
+      "symbol": "_validate_finding"
+    },
+    "metric": {
+      "name": "cyclomatic_complexity",
+      "threshold": 10.0,
+      "value": 12.0
+    },
+    "path": "perf-optimization/scripts/select_candidate.py",
+    "severity": "medium",
+    "signal": "DECOMPOSE",
+    "suggested_action": "Split _validate_finding() \u2014 complexity 12 exceeds 10"
+  },
+  {
+    "confidence": "high",
+    "evidence": {
+      "raw": "_read_ledger( ledger_path : str , after_dims : dict [ str , str ] ) CCN=13",
+      "tool": "lizard"
+    },
+    "id": "4d4dd422a5101286",
+    "leaf": "complexity",
+    "location": {
+      "line_end": 185,
+      "line_start": 132,
+      "symbol": "_read_ledger"
+    },
+    "metric": {
+      "name": "cyclomatic_complexity",
+      "threshold": 10.0,
+      "value": 13.0
+    },
+    "path": "perf-optimization/scripts/verify_win.py",
+    "severity": "medium",
+    "signal": "DECOMPOSE",
+    "suggested_action": "Split _read_ledger() \u2014 complexity 13 exceeds 10"
+  },
+  {
+    "confidence": "high",
+    "evidence": {
+      "raw": "main( argv : list [ str ] | None = None ) NLOC=51",
+      "tool": "lizard"
+    },
+    "id": "2432e1a6c7e00773",
+    "leaf": "complexity",
+    "location": {
+      "line_end": 306,
+      "line_start": 248,
+      "symbol": "main"
+    },
+    "metric": {
+      "name": "function_nloc",
+      "threshold": 50.0,
+      "value": 51.0
+    },
+    "path": "perf-optimization/scripts/verify_win.py",
+    "severity": "medium",
+    "signal": "DECOMPOSE",
+    "suggested_action": "Shorten main() \u2014 51 lines exceeds 50"
+  },
+  {
+    "confidence": "high",
+    "evidence": {
+      "raw": "main( argv : list [ str ] | None = None ) NLOC=70",
+      "tool": "lizard"
+    },
+    "id": "8a951ef83171a139",
+    "leaf": "complexity",
+    "location": {
+      "line_end": 92,
+      "line_start": 21,
+      "symbol": "main"
+    },
+    "metric": {
+      "name": "function_nloc",
+      "threshold": 50.0,
+      "value": 70.0
+    },
+    "path": "scripts/check_wave_baseline.py",
+    "severity": "medium",
+    "signal": "DECOMPOSE",
+    "suggested_action": "Shorten main() \u2014 70 lines exceeds 50"
+  },
+  {
+    "confidence": "high",
+    "evidence": {
+      "raw": "MI=56.3 rank=A",
+      "tool": "radon"
+    },
+    "id": "40a5c65af70d4831",
+    "leaf": "complexity",
+    "location": {
+      "line_end": 1,
+      "line_start": 1,
+      "symbol": "<module>"
+    },
+    "metric": {
+      "name": "maintainability_index",
+      "threshold": 65.0,
+      "value": 56.332343006303965
+    },
+    "path": "scripts/perf_benchmark/findings.py",
+    "severity": "low",
+    "signal": "SIMPLIFY",
+    "suggested_action": "Improve maintainability of scripts/perf_benchmark/findings.py \u2014 MI 56.3 below 65"
+  },
+  {
+    "confidence": "high",
+    "evidence": {
+      "raw": "compare( ledger_path : Path , summary : dict [ str , Any ] ) CCN=11",
+      "tool": "lizard"
+    },
+    "id": "28bac70edfa7424d",
+    "leaf": "complexity",
+    "location": {
+      "line_end": 128,
+      "line_start": 50,
+      "symbol": "compare"
+    },
+    "metric": {
+      "name": "cyclomatic_complexity",
+      "threshold": 10.0,
+      "value": 11.0
+    },
+    "path": "scripts/perf_benchmark/ledger.py",
+    "severity": "medium",
+    "signal": "DECOMPOSE",
+    "suggested_action": "Split compare() \u2014 complexity 11 exceeds 10"
+  },
+  {
+    "confidence": "high",
+    "evidence": {
+      "raw": "MI=22.1 rank=A",
+      "tool": "radon"
+    },
+    "id": "81d4b5ec710c19a1",
+    "leaf": "complexity",
+    "location": {
+      "line_end": 1,
+      "line_start": 1,
+      "symbol": "<module>"
+    },
+    "metric": {
+      "name": "maintainability_index",
+      "threshold": 65.0,
+      "value": 22.138961707215444
+    },
+    "path": "scripts/perf_benchmark/reporting.py",
+    "severity": "medium",
+    "signal": "SIMPLIFY",
+    "suggested_action": "Improve maintainability of scripts/perf_benchmark/reporting.py \u2014 MI 22.1 below 65"
+  },
+  {
+    "confidence": "high",
+    "evidence": {
+      "raw": "_summarize_wall_time_metrics( tier1 : dict , cv_fn ) CCN=22",
+      "tool": "lizard"
+    },
+    "id": "be8280ec6017d84b",
+    "leaf": "complexity",
+    "location": {
+      "line_end": 125,
+      "line_start": 67,
+      "symbol": "_summarize_wall_time_metrics"
+    },
+    "metric": {
+      "name": "cyclomatic_complexity",
+      "threshold": 10.0,
+      "value": 22.0
+    },
+    "path": "scripts/perf_benchmark/reporting.py",
+    "severity": "high",
+    "signal": "DECOMPOSE",
+    "suggested_action": "Split _summarize_wall_time_metrics() \u2014 complexity 22 exceeds 10"
+  },
+  {
+    "confidence": "high",
+    "evidence": {
+      "raw": "_summarize_wall_time_metrics( tier1 : dict , cv_fn ) NLOC=56",
+      "tool": "lizard"
+    },
+    "id": "362b0d2336b893c7",
+    "leaf": "complexity",
+    "location": {
+      "line_end": 125,
+      "line_start": 67,
+      "symbol": "_summarize_wall_time_metrics"
+    },
+    "metric": {
+      "name": "function_nloc",
+      "threshold": 50.0,
+      "value": 56.0
+    },
+    "path": "scripts/perf_benchmark/reporting.py",
+    "severity": "medium",
+    "signal": "DECOMPOSE",
+    "suggested_action": "Shorten _summarize_wall_time_metrics() \u2014 56 lines exceeds 50"
+  },
+  {
+    "confidence": "high",
+    "evidence": {
+      "raw": "write_markdown_report( rubric : dict , tier1 : dict , tier234 : dict , prereqs : dict , args , out_dir : Path , ) CCN=38",
+      "tool": "lizard"
+    },
+    "id": "7f66790364a72186",
+    "leaf": "complexity",
+    "location": {
+      "line_end": 352,
+      "line_start": 128,
+      "symbol": "write_markdown_report"
+    },
+    "metric": {
+      "name": "cyclomatic_complexity",
+      "threshold": 10.0,
+      "value": 38.0
+    },
+    "path": "scripts/perf_benchmark/reporting.py",
+    "severity": "high",
+    "signal": "DECOMPOSE",
+    "suggested_action": "Split write_markdown_report() \u2014 complexity 38 exceeds 10"
+  },
+  {
+    "confidence": "high",
+    "evidence": {
+      "raw": "write_markdown_report( rubric : dict , tier1 : dict , tier234 : dict , prereqs : dict , args , out_dir : Path , ) NLOC=215",
+      "tool": "lizard"
+    },
+    "id": "7cdc3b6794318aa2",
+    "leaf": "complexity",
+    "location": {
+      "line_end": 352,
+      "line_start": 128,
+      "symbol": "write_markdown_report"
+    },
+    "metric": {
+      "name": "function_nloc",
+      "threshold": 50.0,
+      "value": 215.0
+    },
+    "path": "scripts/perf_benchmark/reporting.py",
+    "severity": "medium",
+    "signal": "DECOMPOSE",
+    "suggested_action": "Shorten write_markdown_report() \u2014 215 lines exceeds 50"
+  },
+  {
+    "confidence": "high",
+    "evidence": {
+      "raw": "write_markdown_report( rubric : dict , tier1 : dict , tier234 : dict , prereqs : dict , args , out_dir : Path , ) params=6",
+      "tool": "lizard"
+    },
+    "id": "bb5ce9cf9e1b6046",
+    "leaf": "complexity",
+    "location": {
+      "line_end": 352,
+      "line_start": 128,
+      "symbol": "write_markdown_report"
+    },
+    "metric": {
+      "name": "parameter_count",
+      "threshold": 5.0,
+      "value": 6.0
+    },
+    "path": "scripts/perf_benchmark/reporting.py",
+    "severity": "low",
+    "signal": "SIMPLIFY",
+    "suggested_action": "Reduce parameters of write_markdown_report() \u2014 6 exceeds 5"
+  },
+  {
+    "confidence": "high",
+    "evidence": {
+      "raw": "write_json_summary( rubric : dict , tier1 : dict , tier234 : dict , prereqs : dict , args , out_dir : Path , cv_fn , ) CCN=17",
+      "tool": "lizard"
+    },
+    "id": "8fa68453ef183e5a",
+    "leaf": "complexity",
+    "location": {
+      "line_end": 424,
+      "line_start": 355,
+      "symbol": "write_json_summary"
+    },
+    "metric": {
+      "name": "cyclomatic_complexity",
+      "threshold": 10.0,
+      "value": 17.0
+    },
+    "path": "scripts/perf_benchmark/reporting.py",
+    "severity": "medium",
+    "signal": "DECOMPOSE",
+    "suggested_action": "Split write_json_summary() \u2014 complexity 17 exceeds 10"
+  },
+  {
+    "confidence": "high",
+    "evidence": {
+      "raw": "write_json_summary( rubric : dict , tier1 : dict , tier234 : dict , prereqs : dict , args , out_dir : Path , cv_fn , ) NLOC=62",
+      "tool": "lizard"
+    },
+    "id": "07e9b1c8c03c54bf",
+    "leaf": "complexity",
+    "location": {
+      "line_end": 424,
+      "line_start": 355,
+      "symbol": "write_json_summary"
+    },
+    "metric": {
+      "name": "function_nloc",
+      "threshold": 50.0,
+      "value": 62.0
+    },
+    "path": "scripts/perf_benchmark/reporting.py",
+    "severity": "medium",
+    "signal": "DECOMPOSE",
+    "suggested_action": "Shorten write_json_summary() \u2014 62 lines exceeds 50"
+  },
+  {
+    "confidence": "high",
+    "evidence": {
+      "raw": "write_json_summary( rubric : dict , tier1 : dict , tier234 : dict , prereqs : dict , args , out_dir : Path , cv_fn , ) params=7",
+      "tool": "lizard"
+    },
+    "id": "8f0683dfaad1ce44",
+    "leaf": "complexity",
+    "location": {
+      "line_end": 424,
+      "line_start": 355,
+      "symbol": "write_json_summary"
+    },
+    "metric": {
+      "name": "parameter_count",
+      "threshold": 5.0,
+      "value": 7.0
+    },
+    "path": "scripts/perf_benchmark/reporting.py",
+    "severity": "low",
+    "signal": "SIMPLIFY",
+    "suggested_action": "Reduce parameters of write_json_summary() \u2014 7 exceeds 5"
+  },
+  {
+    "confidence": "high",
+    "evidence": {
+      "raw": "MI=0.0 rank=C",
+      "tool": "radon"
+    },
+    "id": "2c5dcc70c0def4b5",
+    "leaf": "complexity",
+    "location": {
+      "line_end": 1,
+      "line_start": 1,
+      "symbol": "<module>"
+    },
+    "metric": {
+      "name": "maintainability_index",
+      "threshold": 65.0,
+      "value": 0.0
+    },
+    "path": "scripts/perf_benchmark/scoring.py",
+    "severity": "medium",
+    "signal": "SIMPLIFY",
+    "suggested_action": "Improve maintainability of scripts/perf_benchmark/scoring.py \u2014 MI 0.0 below 65"
+  },
+  {
+    "confidence": "high",
+    "evidence": {
+      "raw": "_fit_exponent( sizes : list [ int ] , times : list [ float ] ) CCN=12",
+      "tool": "lizard"
+    },
+    "id": "bc3fac61582bab7b",
+    "leaf": "complexity",
+    "location": {
+      "line_end": 52,
+      "line_start": 34,
+      "symbol": "_fit_exponent"
+    },
+    "metric": {
+      "name": "cyclomatic_complexity",
+      "threshold": 10.0,
+      "value": 12.0
+    },
+    "path": "scripts/perf_benchmark/scoring.py",
+    "severity": "medium",
+    "signal": "DECOMPOSE",
+    "suggested_action": "Split _fit_exponent() \u2014 complexity 12 exceeds 10"
+  },
+  {
+    "confidence": "high",
+    "evidence": {
+      "raw": "score_algorithmic_scaling( tier1 : dict , tier234 : dict , args : argparse . Namespace ) CCN=64",
+      "tool": "lizard"
+    },
+    "id": "779617b216157dc3",
+    "leaf": "complexity",
+    "location": {
+      "line_end": 194,
+      "line_start": 55,
+      "symbol": "score_algorithmic_scaling"
+    },
+    "metric": {
+      "name": "cyclomatic_complexity",
+      "threshold": 10.0,
+      "value": 64.0
+    },
+    "path": "scripts/perf_benchmark/scoring.py",
+    "severity": "high",
+    "signal": "DECOMPOSE",
+    "suggested_action": "Split score_algorithmic_scaling() \u2014 complexity 64 exceeds 10"
+  },
+  {
+    "confidence": "high",
+    "evidence": {
+      "raw": "score_algorithmic_scaling( tier1 : dict , tier234 : dict , args : argparse . Namespace ) NLOC=130",
+      "tool": "lizard"
+    },
+    "id": "1bf643bbb3d8d10e",
+    "leaf": "complexity",
+    "location": {
+      "line_end": 194,
+      "line_start": 55,
+      "symbol": "score_algorithmic_scaling"
+    },
+    "metric": {
+      "name": "function_nloc",
+      "threshold": 50.0,
+      "value": 130.0
+    },
+    "path": "scripts/perf_benchmark/scoring.py",
+    "severity": "medium",
+    "signal": "DECOMPOSE",
+    "suggested_action": "Shorten score_algorithmic_scaling() \u2014 130 lines exceeds 50"
+  },
+  {
+    "confidence": "high",
+    "evidence": {
+      "raw": "score_wall_time_stability( tier1 : dict , max_cv : float = 5 . 0 ) CCN=23",
+      "tool": "lizard"
+    },
+    "id": "e9152b1686dcd94c",
+    "leaf": "complexity",
+    "location": {
+      "line_end": 241,
+      "line_start": 197,
+      "symbol": "score_wall_time_stability"
+    },
+    "metric": {
+      "name": "cyclomatic_complexity",
+      "threshold": 10.0,
+      "value": 23.0
+    },
+    "path": "scripts/perf_benchmark/scoring.py",
+    "severity": "high",
+    "signal": "DECOMPOSE",
+    "suggested_action": "Split score_wall_time_stability() \u2014 complexity 23 exceeds 10"
+  },
+  {
+    "confidence": "high",
+    "evidence": {
+      "raw": "score_cpu_efficiency( tier234 : dict ) CCN=16",
+      "tool": "lizard"
+    },
+    "id": "c13ce1fc813f783e",
+    "leaf": "complexity",
+    "location": {
+      "line_end": 281,
+      "line_start": 244,
+      "symbol": "score_cpu_efficiency"
+    },
+    "metric": {
+      "name": "cyclomatic_complexity",
+      "threshold": 10.0,
+      "value": 16.0
+    },
+    "path": "scripts/perf_benchmark/scoring.py",
+    "severity": "medium",
+    "signal": "DECOMPOSE",
+    "suggested_action": "Split score_cpu_efficiency() \u2014 complexity 16 exceeds 10"
+  },
+  {
+    "confidence": "high",
+    "evidence": {
+      "raw": "score_cache_dim( tier234 : dict , metric_key : str , pass_t : float , warn_t : float ) CCN=17",
+      "tool": "lizard"
+    },
+    "id": "73140d32f8dfbfa0",
+    "leaf": "complexity",
+    "location": {
+      "line_end": 311,
+      "line_start": 284,
+      "symbol": "score_cache_dim"
+    },
+    "metric": {
+      "name": "cyclomatic_complexity",
+      "threshold": 10.0,
+      "value": 17.0
+    },
+    "path": "scripts/perf_benchmark/scoring.py",
+    "severity": "medium",
+    "signal": "DECOMPOSE",
+    "suggested_action": "Split score_cache_dim() \u2014 complexity 17 exceeds 10"
+  },
+  {
+    "confidence": "high",
+    "evidence": {
+      "raw": "score_memory_profile( tier1 : dict , tier234 : dict , baseline : dict | None ) CCN=17",
+      "tool": "lizard"
+    },
+    "id": "cdb90aed00f877eb",
+    "leaf": "complexity",
+    "location": {
+      "line_end": 368,
+      "line_start": 314,
+      "symbol": "score_memory_profile"
+    },
+    "metric": {
+      "name": "cyclomatic_complexity",
+      "threshold": 10.0,
+      "value": 17.0
+    },
+    "path": "scripts/perf_benchmark/scoring.py",
+    "severity": "medium",
+    "signal": "DECOMPOSE",
+    "suggested_action": "Split score_memory_profile() \u2014 complexity 17 exceeds 10"
+  },
+  {
+    "confidence": "high",
+    "evidence": {
+      "raw": "MI=13.6 rank=B",
+      "tool": "radon"
+    },
+    "id": "f2c8719ea6d62cd7",
+    "leaf": "complexity",
+    "location": {
+      "line_end": 1,
+      "line_start": 1,
+      "symbol": "<module>"
+    },
+    "metric": {
+      "name": "maintainability_index",
+      "threshold": 65.0,
+      "value": 13.589530717201956
+    },
+    "path": "scripts/perf_benchmark/stage_helpers.py",
+    "severity": "medium",
+    "signal": "SIMPLIFY",
+    "suggested_action": "Improve maintainability of scripts/perf_benchmark/stage_helpers.py \u2014 MI 13.6 below 65"
+  },
+  {
+    "confidence": "high",
+    "evidence": {
+      "raw": "_generate_tracemalloc_wrapper( args : argparse . Namespace , targets : list [ str ] ) NLOC=70",
+      "tool": "lizard"
+    },
+    "id": "b6804fc9ce0e7bd5",
+    "leaf": "complexity",
+    "location": {
+      "line_end": 128,
+      "line_start": 57,
+      "symbol": "_generate_tracemalloc_wrapper"
+    },
+    "metric": {
+      "name": "function_nloc",
+      "threshold": 50.0,
+      "value": 70.0
+    },
+    "path": "scripts/perf_benchmark/stage_helpers.py",
+    "severity": "medium",
+    "signal": "DECOMPOSE",
+    "suggested_action": "Shorten _generate_tracemalloc_wrapper() \u2014 70 lines exceeds 50"
+  },
+  {
+    "confidence": "high",
+    "evidence": {
+      "raw": "_parse_cachegrind_summary( text : str ) CCN=21",
+      "tool": "lizard"
+    },
+    "id": "c6b3fd1806ee0df9",
+    "leaf": "complexity",
+    "location": {
+      "line_end": 202,
+      "line_start": 150,
+      "symbol": "_parse_cachegrind_summary"
+    },
+    "metric": {
+      "name": "cyclomatic_complexity",
+      "threshold": 10.0,
+      "value": 21.0
+    },
+    "path": "scripts/perf_benchmark/stage_helpers.py",
+    "severity": "high",
+    "signal": "DECOMPOSE",
+    "suggested_action": "Split _parse_cachegrind_summary() \u2014 complexity 21 exceeds 10"
+  },
+  {
+    "confidence": "high",
+    "evidence": {
+      "raw": "_parse_massif_out( path : Path ) CCN=18",
+      "tool": "lizard"
+    },
+    "id": "c515eee8861dbca7",
+    "leaf": "complexity",
+    "location": {
+      "line_end": 310,
+      "line_start": 253,
+      "symbol": "_parse_massif_out"
+    },
+    "metric": {
+      "name": "cyclomatic_complexity",
+      "threshold": 10.0,
+      "value": 18.0
+    },
+    "path": "scripts/perf_benchmark/stage_helpers.py",
+    "severity": "medium",
+    "signal": "DECOMPOSE",
+    "suggested_action": "Split _parse_massif_out() \u2014 complexity 18 exceeds 10"
+  },
+  {
+    "confidence": "high",
+    "evidence": {
+      "raw": "_parse_massif_out( path : Path ) NLOC=51",
+      "tool": "lizard"
+    },
+    "id": "04e492d8c2642998",
+    "leaf": "complexity",
+    "location": {
+      "line_end": 310,
+      "line_start": 253,
+      "symbol": "_parse_massif_out"
+    },
+    "metric": {
+      "name": "function_nloc",
+      "threshold": 50.0,
+      "value": 51.0
+    },
+    "path": "scripts/perf_benchmark/stage_helpers.py",
+    "severity": "medium",
+    "signal": "DECOMPOSE",
+    "suggested_action": "Shorten _parse_massif_out() \u2014 51 lines exceeds 50"
+  },
+  {
+    "confidence": "high",
+    "evidence": {
+      "raw": "_parse_perf_stat( stderr : str ) CCN=12",
+      "tool": "lizard"
+    },
+    "id": "7a6be4d84b402db8",
+    "leaf": "complexity",
+    "location": {
+      "line_end": 343,
+      "line_start": 313,
+      "symbol": "_parse_perf_stat"
+    },
+    "metric": {
+      "name": "cyclomatic_complexity",
+      "threshold": 10.0,
+      "value": 12.0
+    },
+    "path": "scripts/perf_benchmark/stage_helpers.py",
+    "severity": "medium",
+    "signal": "DECOMPOSE",
+    "suggested_action": "Split _parse_perf_stat() \u2014 complexity 12 exceeds 10"
+  },
+  {
+    "confidence": "high",
+    "evidence": {
+      "raw": "_discover_objdump_targets( root : Path , source_prefix : str | None ) CCN=11",
+      "tool": "lizard"
+    },
+    "id": "39bf4947cc0ab6fa",
+    "leaf": "complexity",
+    "location": {
+      "line_end": 384,
+      "line_start": 367,
+      "symbol": "_discover_objdump_targets"
+    },
+    "metric": {
+      "name": "cyclomatic_complexity",
+      "threshold": 10.0,
+      "value": 11.0
+    },
+    "path": "scripts/perf_benchmark/stage_helpers.py",
+    "severity": "medium",
+    "signal": "DECOMPOSE",
+    "suggested_action": "Split _discover_objdump_targets() \u2014 complexity 11 exceeds 10"
+  },
+  {
+    "confidence": "high",
+    "evidence": {
+      "raw": "MI=24.7 rank=A",
+      "tool": "radon"
+    },
+    "id": "ce5bcf0340c7fb76",
+    "leaf": "complexity",
+    "location": {
+      "line_end": 1,
+      "line_start": 1,
+      "symbol": "<module>"
+    },
+    "metric": {
+      "name": "maintainability_index",
+      "threshold": 65.0,
+      "value": 24.67724679578173
+    },
+    "path": "scripts/perf_benchmark/support.py",
+    "severity": "medium",
+    "signal": "SIMPLIFY",
+    "suggested_action": "Improve maintainability of scripts/perf_benchmark/support.py \u2014 MI 24.7 below 65"
+  },
+  {
+    "confidence": "high",
+    "evidence": {
+      "raw": "detect_cache_topology( ) CCN=16",
+      "tool": "lizard"
+    },
+    "id": "7abaeb20a7f9cc7b",
+    "leaf": "complexity",
+    "location": {
+      "line_end": 99,
+      "line_start": 60,
+      "symbol": "detect_cache_topology"
+    },
+    "metric": {
+      "name": "cyclomatic_complexity",
+      "threshold": 10.0,
+      "value": 16.0
+    },
+    "path": "scripts/perf_benchmark/support.py",
+    "severity": "medium",
+    "signal": "DECOMPOSE",
+    "suggested_action": "Split detect_cache_topology() \u2014 complexity 16 exceeds 10"
+  },
+  {
+    "confidence": "high",
+    "evidence": {
+      "raw": "stage_tier1( args : argparse . Namespace , prereqs : dict , targets : list [ str ] , out_dir : Path ) CCN=22",
+      "tool": "lizard"
+    },
+    "id": "39b0fe8ddbdb18fa",
+    "leaf": "complexity",
+    "location": {
+      "line_end": 267,
+      "line_start": 155,
+      "symbol": "stage_tier1"
+    },
+    "metric": {
+      "name": "cyclomatic_complexity",
+      "threshold": 10.0,
+      "value": 22.0
+    },
+    "path": "scripts/perf_benchmark_pipeline.py",
+    "severity": "high",
+    "signal": "DECOMPOSE",
+    "suggested_action": "Split stage_tier1() \u2014 complexity 22 exceeds 10"
+  },
+  {
+    "confidence": "high",
+    "evidence": {
+      "raw": "stage_tier1( args : argparse . Namespace , prereqs : dict , targets : list [ str ] , out_dir : Path ) NLOC=103",
+      "tool": "lizard"
+    },
+    "id": "4d095fb9c44b43a0",
+    "leaf": "complexity",
+    "location": {
+      "line_end": 267,
+      "line_start": 155,
+      "symbol": "stage_tier1"
+    },
+    "metric": {
+      "name": "function_nloc",
+      "threshold": 50.0,
+      "value": 103.0
+    },
+    "path": "scripts/perf_benchmark_pipeline.py",
+    "severity": "medium",
+    "signal": "DECOMPOSE",
+    "suggested_action": "Shorten stage_tier1() \u2014 103 lines exceeds 50"
+  },
+  {
+    "confidence": "high",
+    "evidence": {
+      "raw": "stage_perf_record( args : argparse . Namespace , prereqs : dict , targets : list [ str ] , out_dir : Path ) NLOC=63",
+      "tool": "lizard"
+    },
+    "id": "6ca0d43e53512e8d",
+    "leaf": "complexity",
+    "location": {
+      "line_end": 519,
+      "line_start": 452,
+      "symbol": "stage_perf_record"
+    },
+    "metric": {
+      "name": "function_nloc",
+      "threshold": 50.0,
+      "value": 63.0
+    },
+    "path": "scripts/perf_benchmark_pipeline.py",
+    "severity": "medium",
+    "signal": "DECOMPOSE",
+    "suggested_action": "Shorten stage_perf_record() \u2014 63 lines exceeds 50"
+  },
+  {
+    "confidence": "high",
+    "evidence": {
+      "raw": "run_parallel_tiers( args : argparse . Namespace , prereqs : dict , targets : list [ str ] , out_dir : Path ) CCN=12",
+      "tool": "lizard"
+    },
+    "id": "101968b17c5f2a69",
+    "leaf": "complexity",
+    "location": {
+      "line_end": 634,
+      "line_start": 583,
+      "symbol": "run_parallel_tiers"
+    },
+    "metric": {
+      "name": "cyclomatic_complexity",
+      "threshold": 10.0,
+      "value": 12.0
+    },
+    "path": "scripts/perf_benchmark_pipeline.py",
+    "severity": "medium",
+    "signal": "DECOMPOSE",
+    "suggested_action": "Split run_parallel_tiers() \u2014 complexity 12 exceeds 10"
+  },
+  {
+    "confidence": "high",
+    "evidence": {
+      "raw": "write_json_summary( rubric : dict , tier1 : dict , tier234 : dict , prereqs : dict , args : argparse . Namespace , out_dir : Path , ) params=6",
+      "tool": "lizard"
+    },
+    "id": "76fa59965c13df74",
+    "leaf": "complexity",
+    "location": {
+      "line_end": 651,
+      "line_start": 642,
+      "symbol": "write_json_summary"
+    },
+    "metric": {
+      "name": "parameter_count",
+      "threshold": 5.0,
+      "value": 6.0
+    },
+    "path": "scripts/perf_benchmark_pipeline.py",
+    "severity": "low",
+    "signal": "SIMPLIFY",
+    "suggested_action": "Reduce parameters of write_json_summary() \u2014 6 exceeds 5"
+  },
+  {
+    "confidence": "high",
+    "evidence": {
+      "raw": "parse_args( argv : list [ str ] | None = None ) NLOC=78",
+      "tool": "lizard"
+    },
+    "id": "aa03dc29372f56a7",
+    "leaf": "complexity",
+    "location": {
+      "line_end": 737,
+      "line_start": 659,
+      "symbol": "parse_args"
+    },
+    "metric": {
+      "name": "function_nloc",
+      "threshold": 50.0,
+      "value": 78.0
+    },
+    "path": "scripts/perf_benchmark_pipeline.py",
+    "severity": "medium",
+    "signal": "DECOMPOSE",
+    "suggested_action": "Shorten parse_args() \u2014 78 lines exceeds 50"
+  },
+  {
+    "confidence": "high",
+    "evidence": {
+      "raw": "main( argv : list [ str ] | None = None ) CCN=14",
+      "tool": "lizard"
+    },
+    "id": "4d3555fbf0112ff7",
+    "leaf": "complexity",
+    "location": {
+      "line_end": 808,
+      "line_start": 740,
+      "symbol": "main"
+    },
+    "metric": {
+      "name": "cyclomatic_complexity",
+      "threshold": 10.0,
+      "value": 14.0
+    },
+    "path": "scripts/perf_benchmark_pipeline.py",
+    "severity": "medium",
+    "signal": "DECOMPOSE",
+    "suggested_action": "Split main() \u2014 complexity 14 exceeds 10"
+  },
+  {
+    "confidence": "high",
+    "evidence": {
+      "raw": "main( argv : list [ str ] | None = None ) NLOC=55",
+      "tool": "lizard"
+    },
+    "id": "6746140cab657322",
+    "leaf": "complexity",
+    "location": {
+      "line_end": 808,
+      "line_start": 740,
+      "symbol": "main"
+    },
+    "metric": {
+      "name": "function_nloc",
+      "threshold": 50.0,
+      "value": 55.0
+    },
+    "path": "scripts/perf_benchmark_pipeline.py",
+    "severity": "medium",
+    "signal": "DECOMPOSE",
+    "suggested_action": "Shorten main() \u2014 55 lines exceeds 50"
+  }
+]

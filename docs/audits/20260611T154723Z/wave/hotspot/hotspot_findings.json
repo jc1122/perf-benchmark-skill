@@ -1,0 +1,140 @@
+[
+  {
+    "confidence": "medium",
+    "evidence": {
+      "raw": "7 co-changes of README.md and SKILL.md in last 43 commits (max 500) from 870471ab9d49",
+      "tool": "git"
+    },
+    "id": "412b8252780279a8",
+    "leaf": "hotspot",
+    "location": {
+      "line_end": 1,
+      "line_start": 1,
+      "symbol": "README.md<->SKILL.md"
+    },
+    "metric": {
+      "name": "temporal_coupling_ratio",
+      "threshold": 0.7,
+      "value": 0.78
+    },
+    "path": "README.md",
+    "severity": "medium",
+    "signal": "RESTRUCTURE",
+    "suggested_action": "Files co-change; move the shared concern into one module or merge them"
+  },
+  {
+    "confidence": "medium",
+    "evidence": {
+      "raw": "7 co-changes of README.md and scripts/perf_benchmark_pipeline.py in last 43 commits (max 500) from 870471ab9d49",
+      "tool": "git"
+    },
+    "id": "42051f8b3992c10b",
+    "leaf": "hotspot",
+    "location": {
+      "line_end": 1,
+      "line_start": 1,
+      "symbol": "README.md<->scripts/perf_benchmark_pipeline.py"
+    },
+    "metric": {
+      "name": "temporal_coupling_ratio",
+      "threshold": 0.7,
+      "value": 0.7
+    },
+    "path": "README.md",
+    "severity": "medium",
+    "signal": "RESTRUCTURE",
+    "suggested_action": "Files co-change; move the shared concern into one module or merge them"
+  },
+  {
+    "confidence": "medium",
+    "evidence": {
+      "raw": "7 co-changes of SKILL.md and scripts/perf_benchmark_pipeline.py in last 43 commits (max 500) from 870471ab9d49",
+      "tool": "git"
+    },
+    "id": "d8f1c79aff7534f0",
+    "leaf": "hotspot",
+    "location": {
+      "line_end": 1,
+      "line_start": 1,
+      "symbol": "SKILL.md<->scripts/perf_benchmark_pipeline.py"
+    },
+    "metric": {
+      "name": "temporal_coupling_ratio",
+      "threshold": 0.7,
+      "value": 0.78
+    },
+    "path": "SKILL.md",
+    "severity": "medium",
+    "signal": "RESTRUCTURE",
+    "suggested_action": "Files co-change; move the shared concern into one module or merge them"
+  },
+  {
+    "confidence": "medium",
+    "evidence": {
+      "raw": "6 commits x 386 nloc in last 43 commits (max 500) from 870471ab9d49",
+      "tool": "git"
+    },
+    "id": "75d6ab169901cc62",
+    "leaf": "hotspot",
+    "location": {
+      "line_end": 1,
+      "line_start": 1,
+      "symbol": "scripts/perf_benchmark/reporting.py"
+    },
+    "metric": {
+      "name": "churn_complexity_product",
+      "threshold": 1000.0,
+      "value": 2316.0
+    },
+    "path": "scripts/perf_benchmark/reporting.py",
+    "severity": "medium",
+    "signal": "DECOMPOSE",
+    "suggested_action": "Hotspot: scripts/perf_benchmark/reporting.py changes often and is large; split along change axes"
+  },
+  {
+    "confidence": "medium",
+    "evidence": {
+      "raw": "16 commits x 708 nloc in last 43 commits (max 500) from 870471ab9d49",
+      "tool": "git"
+    },
+    "id": "4b8b00795a295f80",
+    "leaf": "hotspot",
+    "location": {
+      "line_end": 1,
+      "line_start": 1,
+      "symbol": "scripts/perf_benchmark_pipeline.py"
+    },
+    "metric": {
+      "name": "churn_complexity_product",
+      "threshold": 1000.0,
+      "value": 11328.0
+    },
+    "path": "scripts/perf_benchmark_pipeline.py",
+    "severity": "high",
+    "signal": "DECOMPOSE",
+    "suggested_action": "Hotspot: scripts/perf_benchmark_pipeline.py changes often and is large; split along change axes"
+  },
+  {
+    "confidence": "low",
+    "evidence": {
+      "raw": "top author jc1122/16 commits (max 500) from 870471ab9d49",
+      "tool": "git"
+    },
+    "id": "a4dda4550cc07c79",
+    "leaf": "hotspot",
+    "location": {
+      "line_end": 1,
+      "line_start": 1,
+      "symbol": "scripts/perf_benchmark_pipeline.py"
+    },
+    "metric": {
+      "name": "author_concentration",
+      "threshold": 0.9,
+      "value": 1.0
+    },
+    "path": "scripts/perf_benchmark_pipeline.py",
+    "severity": "low",
+    "signal": "RESTRUCTURE",
+    "suggested_action": "Knowledge concentrated in one author; schedule reviews/pairing on this file"
+  }
+]

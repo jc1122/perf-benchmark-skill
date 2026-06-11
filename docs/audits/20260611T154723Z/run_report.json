@@ -1,0 +1,189 @@
+{
+  "schema_version": 2,
+  "repo_root": "/home/jakub/projects/perf-benchmark-skill",
+  "started_utc": "2026-06-11T15:47:23Z",
+  "finished_utc": "2026-06-11T15:48:07Z",
+  "orchestrator_skill_version": "0.4.1",
+  "lanes": {
+    "bootstrap": {
+      "status": "pass",
+      "summary": {
+        "active_lanes": [
+          "bootstrap",
+          "code-health-python",
+          "security",
+          "performance",
+          "hygiene",
+          "orchestration"
+        ],
+        "restart_required": false,
+        "stop_before_discovery": false
+      },
+      "source_skills_root": "/home/jakub/projects/repo-audit-skills/skills",
+      "source_package_version": "0.5.1",
+      "installed_readback_version": "0.5.0",
+      "installed_readback_note": "Expected before T6; reinstall is explicitly human-gated."
+    },
+    "wave": {
+      "skills_root": "/home/jakub/projects/repo-audit-skills/skills",
+      "scope": [
+        "scripts",
+        "perf-optimization/scripts"
+      ],
+      "pre_ratchet_baseline": 59,
+      "post_ratchet_baseline": 55,
+      "run1": {
+        "status": "pass",
+        "count": 55,
+        "baseline": 55,
+        "summary": {
+          "code-health": {
+            "exit": 1,
+            "status": "findings",
+            "findings": 40
+          },
+          "security": {
+            "exit": 1,
+            "status": "findings",
+            "findings": 21
+          },
+          "hygiene": {
+            "exit": 0,
+            "status": "ok",
+            "findings": 0
+          },
+          "docs": {
+            "exit": 0,
+            "status": "ok",
+            "findings": 0
+          },
+          "dependency": {
+            "exit": 0,
+            "status": "ok",
+            "findings": 0
+          },
+          "hotspot": {
+            "exit": 1,
+            "status": "findings",
+            "findings": 6
+          }
+        }
+      },
+      "run2": {
+        "status": "pass",
+        "count": 55,
+        "baseline": 55,
+        "summary": {
+          "code-health": {
+            "exit": 1,
+            "status": "findings",
+            "findings": 40
+          },
+          "security": {
+            "exit": 1,
+            "status": "findings",
+            "findings": 21
+          },
+          "hygiene": {
+            "exit": 0,
+            "status": "ok",
+            "findings": 0
+          },
+          "docs": {
+            "exit": 0,
+            "status": "ok",
+            "findings": 0
+          },
+          "dependency": {
+            "exit": 0,
+            "status": "ok",
+            "findings": 0
+          },
+          "hotspot": {
+            "exit": 1,
+            "status": "findings",
+            "findings": 6
+          }
+        }
+      },
+      "raw_findings": 67,
+      "normalized_identities": 55,
+      "convergence": {
+        "status": "pass",
+        "new_in_run2": 0,
+        "stale_in_run2": 0
+      }
+    },
+    "tests": {
+      "pytest": "154 passed"
+    },
+    "release": {
+      "version": "0.3.0",
+      "version_bump": "not required: baseline/docs ratchet only"
+    }
+  },
+  "findings_totals": {
+    "wave_baseline_before": 59,
+    "wave_baseline_after": 55,
+    "stale_removed": 4,
+    "new_findings": 0,
+    "raw_wave_findings": 67,
+    "code_health_findings": 40,
+    "security_findings": 21,
+    "hotspot_findings": 6,
+    "docs_findings": 0,
+    "dependency_findings": 0,
+    "hygiene_findings": 0
+  },
+  "backlog": {
+    "accepted": [
+      {
+        "class": "baseline-ratchet",
+        "rule": "Remove stale precision rows in the same commit when v0.5.1 leaves stop producing them.",
+        "evidence": "Entry-point module-MI rows for select_candidate, verify_win, check_wave_baseline, and perf_benchmark_pipeline dissolved; baseline 59 -> 55."
+      }
+    ],
+    "deferred": [
+      {
+        "class": "structural-code-health",
+        "rule": "Keep broad benchmark pipeline decomposition for a dedicated performance/refactor round.",
+        "evidence": "40 code-health findings remain across scoring, reporting, stage helpers, and pipeline orchestration."
+      },
+      {
+        "class": "security-fp",
+        "rule": "Keep existing documented security false positives unless a dedicated security round changes subprocess/tool orchestration.",
+        "evidence": "21 security findings remain, matching the freeze ledger classes."
+      },
+      {
+        "class": "hotspot-ordering",
+        "rule": "Use hotspot rows as ordering signals for future structural work.",
+        "evidence": "6 hotspot findings remain."
+      }
+    ],
+    "coverage_gated": [],
+    "wont_fix": []
+  },
+  "batches": [
+    {
+      "name": "SP10 T5 wave baseline ratchet",
+      "commit": "870471a",
+      "evidence": "baseline 59 -> 55; two wave runs pass 55/55."
+    }
+  ],
+  "verification": [
+    {
+      "command": "python3 -m pytest -q",
+      "status": "pass",
+      "evidence": "154 passed."
+    },
+    {
+      "command": "WAVE_RUNNER=/home/jakub/projects/repo-audit-refactor-optimize/scripts/run_diagnosis_wave.py SKILLS_ROOT=/home/jakub/projects/repo-audit-skills/skills python3 scripts/check_wave_baseline.py",
+      "status": "pass",
+      "evidence": "run 1 and run 2 both status pass, count 55, baseline 55."
+    }
+  ],
+  "warnings": [
+    "Installed repo-audit leaves still read as 0.5.0 until the T6 human-gated reinstall.",
+    "No repo-P version bump: SP10 changed only baseline/docs artifacts."
+  ]
+}

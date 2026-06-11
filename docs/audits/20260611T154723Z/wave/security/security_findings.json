@@ -1,0 +1,485 @@
+[
+  {
+    "confidence": "medium",
+    "evidence": {
+      "raw": "Possible hardcoded password: '2' [B105]",
+      "tool": "bandit"
+    },
+    "id": "fa76dde041948981",
+    "leaf": "security",
+    "location": {
+      "line_end": 30,
+      "line_start": 30,
+      "symbol": "hardcoded_password_string"
+    },
+    "metric": {
+      "name": "bandit_B105",
+      "threshold": 0.0,
+      "value": 1.0
+    },
+    "path": "perf-optimization/scripts/verify_win.py",
+    "severity": "low",
+    "signal": "SECURITY",
+    "suggested_action": "Review and remediate B105 at perf-optimization/scripts/verify_win.py:30"
+  },
+  {
+    "confidence": "high",
+    "evidence": {
+      "raw": "Consider possible security implications associated with the subprocess module. [B404]",
+      "tool": "bandit"
+    },
+    "id": "bcf63ac2ee81be74",
+    "leaf": "security",
+    "location": {
+      "line_end": 9,
+      "line_start": 9,
+      "symbol": "blacklist"
+    },
+    "metric": {
+      "name": "bandit_B404",
+      "threshold": 0.0,
+      "value": 1.0
+    },
+    "path": "scripts/check_wave_baseline.py",
+    "severity": "low",
+    "signal": "SECURITY",
+    "suggested_action": "Review and remediate B404 at scripts/check_wave_baseline.py:9"
+  },
+  {
+    "confidence": "high",
+    "evidence": {
+      "raw": "subprocess call - check for execution of untrusted input. [B603]",
+      "tool": "bandit"
+    },
+    "id": "ab433cdb71e783db",
+    "leaf": "security",
+    "location": {
+      "line_end": 54,
+      "line_start": 38,
+      "symbol": "subprocess_without_shell_equals_true"
+    },
+    "metric": {
+      "name": "bandit_B603",
+      "threshold": 0.0,
+      "value": 1.0
+    },
+    "path": "scripts/check_wave_baseline.py",
+    "severity": "low",
+    "signal": "SECURITY",
+    "suggested_action": "Review and remediate B603 at scripts/check_wave_baseline.py:38"
+  },
+  {
+    "confidence": "high",
+    "evidence": {
+      "raw": "Use of weak SHA1 hash for security. Consider usedforsecurity=False [B324]",
+      "tool": "bandit"
+    },
+    "id": "c288d4628e192029",
+    "leaf": "security",
+    "location": {
+      "line_end": 155,
+      "line_start": 155,
+      "symbol": "hashlib"
+    },
+    "metric": {
+      "name": "bandit_B324",
+      "threshold": 0.0,
+      "value": 3.0
+    },
+    "path": "scripts/perf_benchmark/findings.py",
+    "severity": "high",
+    "signal": "SECURITY",
+    "suggested_action": "Review and remediate B324 at scripts/perf_benchmark/findings.py:155"
+  },
+  {
+    "confidence": "medium",
+    "evidence": {
+      "raw": "Possible hardcoded password: '2' [B105]",
+      "tool": "bandit"
+    },
+    "id": "2bfa23d8476b6e38",
+    "leaf": "security",
+    "location": {
+      "line_end": 18,
+      "line_start": 18,
+      "symbol": "hardcoded_password_string"
+    },
+    "metric": {
+      "name": "bandit_B105",
+      "threshold": 0.0,
+      "value": 1.0
+    },
+    "path": "scripts/perf_benchmark/ledger.py",
+    "severity": "low",
+    "signal": "SECURITY",
+    "suggested_action": "Review and remediate B105 at scripts/perf_benchmark/ledger.py:18"
+  },
+  {
+    "confidence": "medium",
+    "evidence": {
+      "raw": "Possible hardcoded password: '2' [B105]",
+      "tool": "bandit"
+    },
+    "id": "f0fbd191667779e7",
+    "leaf": "security",
+    "location": {
+      "line_end": 9,
+      "line_start": 9,
+      "symbol": "hardcoded_password_string"
+    },
+    "metric": {
+      "name": "bandit_B105",
+      "threshold": 0.0,
+      "value": 1.0
+    },
+    "path": "scripts/perf_benchmark/scoring.py",
+    "severity": "low",
+    "signal": "SECURITY",
+    "suggested_action": "Review and remediate B105 at scripts/perf_benchmark/scoring.py:9"
+  },
+  {
+    "confidence": "high",
+    "evidence": {
+      "raw": "Consider possible security implications associated with the subprocess module. [B404]",
+      "tool": "bandit"
+    },
+    "id": "1944ab0dd1a65e84",
+    "leaf": "security",
+    "location": {
+      "line_end": 23,
+      "line_start": 23,
+      "symbol": "blacklist"
+    },
+    "metric": {
+      "name": "bandit_B404",
+      "threshold": 0.0,
+      "value": 1.0
+    },
+    "path": "scripts/perf_benchmark_pipeline.py",
+    "severity": "low",
+    "signal": "SECURITY",
+    "suggested_action": "Review and remediate B404 at scripts/perf_benchmark_pipeline.py:23"
+  },
+  {
+    "confidence": "high",
+    "evidence": {
+      "raw": "subprocess call - check for execution of untrusted input. [B603]",
+      "tool": "bandit"
+    },
+    "id": "dc07f5525d8423f7",
+    "leaf": "security",
+    "location": {
+      "line_end": 115,
+      "line_start": 108,
+      "symbol": "subprocess_without_shell_equals_true"
+    },
+    "metric": {
+      "name": "bandit_B603",
+      "threshold": 0.0,
+      "value": 1.0
+    },
+    "path": "scripts/perf_benchmark_pipeline.py",
+    "severity": "low",
+    "signal": "SECURITY",
+    "suggested_action": "Review and remediate B603 at scripts/perf_benchmark_pipeline.py:108"
+  },
+  {
+    "confidence": "high",
+    "evidence": {
+      "raw": "subprocess call - check for execution of untrusted input. [B603]",
+      "tool": "bandit"
+    },
+    "id": "dc07f5525d8423f7",
+    "leaf": "security",
+    "location": {
+      "line_end": 178,
+      "line_start": 178,
+      "symbol": "subprocess_without_shell_equals_true"
+    },
+    "metric": {
+      "name": "bandit_B603",
+      "threshold": 0.0,
+      "value": 1.0
+    },
+    "path": "scripts/perf_benchmark_pipeline.py",
+    "severity": "low",
+    "signal": "SECURITY",
+    "suggested_action": "Review and remediate B603 at scripts/perf_benchmark_pipeline.py:178"
+  },
+  {
+    "confidence": "high",
+    "evidence": {
+      "raw": "subprocess call - check for execution of untrusted input. [B603]",
+      "tool": "bandit"
+    },
+    "id": "dc07f5525d8423f7",
+    "leaf": "security",
+    "location": {
+      "line_end": 213,
+      "line_start": 200,
+      "symbol": "subprocess_without_shell_equals_true"
+    },
+    "metric": {
+      "name": "bandit_B603",
+      "threshold": 0.0,
+      "value": 1.0
+    },
+    "path": "scripts/perf_benchmark_pipeline.py",
+    "severity": "low",
+    "signal": "SECURITY",
+    "suggested_action": "Review and remediate B603 at scripts/perf_benchmark_pipeline.py:200"
+  },
+  {
+    "confidence": "high",
+    "evidence": {
+      "raw": "subprocess call - check for execution of untrusted input. [B603]",
+      "tool": "bandit"
+    },
+    "id": "dc07f5525d8423f7",
+    "leaf": "security",
+    "location": {
+      "line_end": 243,
+      "line_start": 237,
+      "symbol": "subprocess_without_shell_equals_true"
+    },
+    "metric": {
+      "name": "bandit_B603",
+      "threshold": 0.0,
+      "value": 1.0
+    },
+    "path": "scripts/perf_benchmark_pipeline.py",
+    "severity": "low",
+    "signal": "SECURITY",
+    "suggested_action": "Review and remediate B603 at scripts/perf_benchmark_pipeline.py:237"
+  },
+  {
+    "confidence": "high",
+    "evidence": {
+      "raw": "subprocess call - check for execution of untrusted input. [B603]",
+      "tool": "bandit"
+    },
+    "id": "dc07f5525d8423f7",
+    "leaf": "security",
+    "location": {
+      "line_end": 304,
+      "line_start": 299,
+      "symbol": "subprocess_without_shell_equals_true"
+    },
+    "metric": {
+      "name": "bandit_B603",
+      "threshold": 0.0,
+      "value": 1.0
+    },
+    "path": "scripts/perf_benchmark_pipeline.py",
+    "severity": "low",
+    "signal": "SECURITY",
+    "suggested_action": "Review and remediate B603 at scripts/perf_benchmark_pipeline.py:299"
+  },
+  {
+    "confidence": "high",
+    "evidence": {
+      "raw": "subprocess call - check for execution of untrusted input. [B603]",
+      "tool": "bandit"
+    },
+    "id": "dc07f5525d8423f7",
+    "leaf": "security",
+    "location": {
+      "line_end": 344,
+      "line_start": 339,
+      "symbol": "subprocess_without_shell_equals_true"
+    },
+    "metric": {
+      "name": "bandit_B603",
+      "threshold": 0.0,
+      "value": 1.0
+    },
+    "path": "scripts/perf_benchmark_pipeline.py",
+    "severity": "low",
+    "signal": "SECURITY",
+    "suggested_action": "Review and remediate B603 at scripts/perf_benchmark_pipeline.py:339"
+  },
+  {
+    "confidence": "high",
+    "evidence": {
+      "raw": "subprocess call - check for execution of untrusted input. [B603]",
+      "tool": "bandit"
+    },
+    "id": "dc07f5525d8423f7",
+    "leaf": "security",
+    "location": {
+      "line_end": 381,
+      "line_start": 374,
+      "symbol": "subprocess_without_shell_equals_true"
+    },
+    "metric": {
+      "name": "bandit_B603",
+      "threshold": 0.0,
+      "value": 1.0
+    },
+    "path": "scripts/perf_benchmark_pipeline.py",
+    "severity": "low",
+    "signal": "SECURITY",
+    "suggested_action": "Review and remediate B603 at scripts/perf_benchmark_pipeline.py:374"
+  },
+  {
+    "confidence": "high",
+    "evidence": {
+      "raw": "subprocess call - check for execution of untrusted input. [B603]",
+      "tool": "bandit"
+    },
+    "id": "dc07f5525d8423f7",
+    "leaf": "security",
+    "location": {
+      "line_end": 391,
+      "line_start": 386,
+      "symbol": "subprocess_without_shell_equals_true"
+    },
+    "metric": {
+      "name": "bandit_B603",
+      "threshold": 0.0,
+      "value": 1.0
+    },
+    "path": "scripts/perf_benchmark_pipeline.py",
+    "severity": "low",
+    "signal": "SECURITY",
+    "suggested_action": "Review and remediate B603 at scripts/perf_benchmark_pipeline.py:386"
+  },
+  {
+    "confidence": "high",
+    "evidence": {
+      "raw": "subprocess call - check for execution of untrusted input. [B603]",
+      "tool": "bandit"
+    },
+    "id": "dc07f5525d8423f7",
+    "leaf": "security",
+    "location": {
+      "line_end": 498,
+      "line_start": 491,
+      "symbol": "subprocess_without_shell_equals_true"
+    },
+    "metric": {
+      "name": "bandit_B603",
+      "threshold": 0.0,
+      "value": 1.0
+    },
+    "path": "scripts/perf_benchmark_pipeline.py",
+    "severity": "low",
+    "signal": "SECURITY",
+    "suggested_action": "Review and remediate B603 at scripts/perf_benchmark_pipeline.py:491"
+  },
+  {
+    "confidence": "high",
+    "evidence": {
+      "raw": "subprocess call - check for execution of untrusted input. [B603]",
+      "tool": "bandit"
+    },
+    "id": "dc07f5525d8423f7",
+    "leaf": "security",
+    "location": {
+      "line_end": 541,
+      "line_start": 536,
+      "symbol": "subprocess_without_shell_equals_true"
+    },
+    "metric": {
+      "name": "bandit_B603",
+      "threshold": 0.0,
+      "value": 1.0
+    },
+    "path": "scripts/perf_benchmark_pipeline.py",
+    "severity": "low",
+    "signal": "SECURITY",
+    "suggested_action": "Review and remediate B603 at scripts/perf_benchmark_pipeline.py:536"
+  },
+  {
+    "confidence": "high",
+    "evidence": {
+      "raw": "Starting a process with a partial executable path [B607]",
+      "tool": "bandit"
+    },
+    "id": "826dbb4447ce0a65",
+    "leaf": "security",
+    "location": {
+      "line_end": 541,
+      "line_start": 536,
+      "symbol": "start_process_with_partial_path"
+    },
+    "metric": {
+      "name": "bandit_B607",
+      "threshold": 0.0,
+      "value": 1.0
+    },
+    "path": "scripts/perf_benchmark_pipeline.py",
+    "severity": "low",
+    "signal": "SECURITY",
+    "suggested_action": "Review and remediate B607 at scripts/perf_benchmark_pipeline.py:536"
+  },
+  {
+    "confidence": "high",
+    "evidence": {
+      "raw": "subprocess call - check for execution of untrusted input. [B603]",
+      "tool": "bandit"
+    },
+    "id": "dc07f5525d8423f7",
+    "leaf": "security",
+    "location": {
+      "line_end": 553,
+      "line_start": 548,
+      "symbol": "subprocess_without_shell_equals_true"
+    },
+    "metric": {
+      "name": "bandit_B603",
+      "threshold": 0.0,
+      "value": 1.0
+    },
+    "path": "scripts/perf_benchmark_pipeline.py",
+    "severity": "low",
+    "signal": "SECURITY",
+    "suggested_action": "Review and remediate B603 at scripts/perf_benchmark_pipeline.py:548"
+  },
+  {
+    "confidence": "high",
+    "evidence": {
+      "raw": "Starting a process with a partial executable path [B607]",
+      "tool": "bandit"
+    },
+    "id": "826dbb4447ce0a65",
+    "leaf": "security",
+    "location": {
+      "line_end": 553,
+      "line_start": 548,
+      "symbol": "start_process_with_partial_path"
+    },
+    "metric": {
+      "name": "bandit_B607",
+      "threshold": 0.0,
+      "value": 1.0
+    },
+    "path": "scripts/perf_benchmark_pipeline.py",
+    "severity": "low",
+    "signal": "SECURITY",
+    "suggested_action": "Review and remediate B607 at scripts/perf_benchmark_pipeline.py:548"
+  },
+  {
+    "confidence": "high",
+    "evidence": {
+      "raw": "subprocess call - check for execution of untrusted input. [B603]",
+      "tool": "bandit"
+    },
+    "id": "dc07f5525d8423f7",
+    "leaf": "security",
+    "location": {
+      "line_end": 568,
+      "line_start": 568,
+      "symbol": "subprocess_without_shell_equals_true"
+    },
+    "metric": {
+      "name": "bandit_B603",
+      "threshold": 0.0,
+      "value": 1.0
+    },
+    "path": "scripts/perf_benchmark_pipeline.py",
+    "severity": "low",
+    "signal": "SECURITY",
+    "suggested_action": "Review and remediate B603 at scripts/perf_benchmark_pipeline.py:568"
+  }
+]

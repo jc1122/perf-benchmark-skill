@@ -1,0 +1,32 @@
+{
+  "code-health": {
+    "exit": 1,
+    "status": "findings",
+    "findings": 40
+  },
+  "security": {
+    "exit": 1,
+    "status": "findings",
+    "findings": 21
+  },
+  "hygiene": {
+    "exit": 0,
+    "status": "ok",
+    "findings": 0
+  },
+  "docs": {
+    "exit": 0,
+    "status": "ok",
+    "findings": 0
+  },
+  "dependency": {
+    "exit": 0,
+    "status": "ok",
+    "findings": 0
+  },
+  "hotspot": {
+    "exit": 1,
+    "status": "findings",
+    "findings": 6
+  }
+}
