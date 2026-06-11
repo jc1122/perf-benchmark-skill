@@ -59,70 +59,83 @@ def _format_cache_model(prefix: str, cache: dict[str, Any]) -> str:
     )
 
 
-def _cv_for_runs(runs: list[dict[str, Any]], cv_fn) -> float:
-    values = [run.get("wall_seconds", 0.0) for run in runs if run.get("wall_seconds")]
-    return round(cv_fn(values), 2)
+def _wall_seconds(runs: list[dict[str, Any]]) -> list[float]:
+    return [run["wall_seconds"] for run in runs if run.get("wall_seconds")]
+
+
+def _summarize_pytest_benchmark_metrics(benchmarks: list[dict[str, Any]]) -> dict[str, Any] | None:
+    if not benchmarks:
+        return None
+    cvs = [
+        round(
+            benchmark.get("stats", {}).get("stddev", 0)
+            / max(benchmark.get("stats", {}).get("mean", 1e-12), 1e-12)
+            * 100,
+            2,
+        )
+        for benchmark in benchmarks
+    ]
+    if not cvs:
+        return None
+    means = [
+        round(benchmark.get("stats", {}).get("mean", 0), 4)
+        for benchmark in benchmarks
+        if benchmark.get("stats", {}).get("mean") is not None
+    ]
+    summary: dict[str, Any] = {
+        "wall_time_cv": round(sum(cvs) / len(cvs), 2),
+        "wall_time_cv_by_benchmark": cvs,
+    }
+    if means:
+        summary["wall_time_mean"] = round(sum(means) / len(means), 4)
+    return summary
+
+
+def _summarize_size_wall_time_metrics(
+    time_usage_by_size: dict[Any, list[dict[str, Any]]],
+    cv_fn,
+) -> dict[str, Any] | None:
+    if not time_usage_by_size:
+        return None
+    cv_by_size: dict[str, float] = {}
+    means_by_size: dict[str, float] = {}
+    for size, runs in time_usage_by_size.items():
+        walls = _wall_seconds(runs)
+        if walls:
+            key = str(int(size))
+            cv_by_size[key] = round(cv_fn(walls), 2)
+            means_by_size[key] = round(sum(walls) / len(walls), 4)
+    if not cv_by_size:
+        return None
+    return {
+        "wall_time_cv": max(cv_by_size.values()),
+        "wall_time_cv_by_size": cv_by_size,
+        "wall_time_mean_by_size": means_by_size,
+    }
+
+
+def _summarize_flat_wall_time_metrics(
+    time_data: list[dict[str, Any]], cv_fn
+) -> dict[str, Any] | None:
+    walls = _wall_seconds(time_data)
+    if not walls:
+        return None
+    return {
+        "wall_time_cv": round(cv_fn(walls), 2),
+        "wall_time_mean": round(sum(walls) / len(walls), 4),
+    }
 
 
 def _summarize_wall_time_metrics(tier1: dict, cv_fn) -> dict[str, Any]:
     """Return summary-friendly wall-time metrics aligned with the scorer."""
-    pytest_benchmark = tier1.get("pytest_benchmark", {})
-    benchmarks = pytest_benchmark.get("benchmarks", [])
-    if benchmarks:
-        cvs = [
-            round(
-                benchmark.get("stats", {}).get("stddev", 0)
-                / max(benchmark.get("stats", {}).get("mean", 1e-12), 1e-12)
-                * 100,
-                2,
-            )
-            for benchmark in benchmarks
-        ]
-        means = [
-            round(benchmark.get("stats", {}).get("mean", 0), 4)
-            for benchmark in benchmarks
-            if benchmark.get("stats", {}).get("mean") is not None
-        ]
-        if cvs:
-            summary: dict[str, Any] = {
-                "wall_time_cv": round(sum(cvs) / len(cvs), 2),
-                "wall_time_cv_by_benchmark": cvs,
-            }
-            if means:
-                summary["wall_time_mean"] = round(sum(means) / len(means), 4)
-            return summary
-
-    time_usage_by_size = tier1.get("time_usage_by_size", {})
-    if time_usage_by_size:
-        cv_by_size = {
-            str(int(size)): _cv_for_runs(runs, cv_fn)
-            for size, runs in time_usage_by_size.items()
-            if any(run.get("wall_seconds") for run in runs)
-        }
-        means_by_size = {
-            str(int(size)): round(
-                sum(run["wall_seconds"] for run in runs if run.get("wall_seconds"))
-                / len([run for run in runs if run.get("wall_seconds")]),
-                4,
-            )
-            for size, runs in time_usage_by_size.items()
-            if any(run.get("wall_seconds") for run in runs)
-        }
-        if cv_by_size:
-            return {
-                "wall_time_cv": max(cv_by_size.values()),
-                "wall_time_cv_by_size": cv_by_size,
-                "wall_time_mean_by_size": means_by_size,
-            }
-
-    time_data = tier1.get("time_usage", [])
-    walls = [item.get("wall_seconds", 0) for item in time_data if item.get("wall_seconds")]
-    if walls:
-        return {
-            "wall_time_cv": round(cv_fn(walls), 2),
-            "wall_time_mean": round(sum(walls) / len(walls), 4),
-        }
-    return {}
+    summaries = (
+        _summarize_pytest_benchmark_metrics(
+            tier1.get("pytest_benchmark", {}).get("benchmarks", [])
+        ),
+        _summarize_size_wall_time_metrics(tier1.get("time_usage_by_size", {}), cv_fn),
+        _summarize_flat_wall_time_metrics(tier1.get("time_usage", []), cv_fn),
+    )
+    return next((summary for summary in summaries if summary), {})
 
 
 def write_markdown_report(

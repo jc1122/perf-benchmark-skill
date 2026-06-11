@@ -45,6 +45,15 @@
   identities, and 1 checker complexity identity.
 - Current baseline has 41 raw findings and 41 normalized identities.
 
+## SP11 iteration 2 reporting complexity ratchet
+
+- Ratchet timestamp: 2026-06-12T00:05:00Z
+- Split `_summarize_wall_time_metrics` into focused helpers for pytest
+  benchmark metrics, per-size timings, and flat timing lists.
+- Removed the stale `_summarize_wall_time_metrics` `cyclomatic_complexity` and
+  `function_nloc` identities.
+- Current baseline has 39 raw findings and 39 normalized identities.
+
 ## Residual findings
 
 The machine-readable authority is `scripts/wave_baseline.json`. The residual
@@ -54,5 +63,5 @@ honestly recorded as residue if no bounded win remains.
 
 | Leaf | Count | Class | Residue |
 | --- | ---: | --- | --- |
-| complexity | 39 | deferred-structural | Function complexity, function length, module maintainability, and parameter-count rows across the perf benchmark pipeline, reporting, scoring, ledger, support, stage helpers, and perf-optimization helpers. |
+| complexity | 37 | deferred-structural | Function complexity, function length, module maintainability, and parameter-count rows across the perf benchmark pipeline, reporting, scoring, ledger, support, stage helpers, and perf-optimization helpers. |
 | hotspot | 2 | deferred-structural | `scripts/perf_benchmark/reporting.py` and `scripts/perf_benchmark_pipeline.py` still carry `churn_complexity_product`; policy config deliberately does not suppress churn-complexity rows. |

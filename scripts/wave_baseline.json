@@ -2,12 +2,6 @@
   {
     "leaf": "complexity",
     "path": "scripts/perf_benchmark/reporting.py",
-    "symbol": "_summarize_wall_time_metrics",
-    "metric": "cyclomatic_complexity"
-  },
-  {
-    "leaf": "complexity",
-    "path": "scripts/perf_benchmark/reporting.py",
     "symbol": "write_markdown_report",
     "metric": "cyclomatic_complexity"
   },
@@ -82,12 +76,6 @@
     "path": "scripts/perf_benchmark/ledger.py",
     "symbol": "compare",
     "metric": "cyclomatic_complexity"
-  },
-  {
-    "leaf": "complexity",
-    "path": "scripts/perf_benchmark/reporting.py",
-    "symbol": "_summarize_wall_time_metrics",
-    "metric": "function_nloc"
   },
   {
     "leaf": "complexity",
