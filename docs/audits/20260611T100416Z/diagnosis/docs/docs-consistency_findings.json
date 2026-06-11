@@ -1,0 +1,462 @@
+[
+  {
+    "confidence": "medium",
+    "evidence": {
+      "raw": "shared/health_common.py",
+      "tool": "markdown"
+    },
+    "id": "96eb01376a4dbaf8",
+    "leaf": "docs-consistency",
+    "location": {
+      "line_end": 22,
+      "line_start": 22,
+      "symbol": "shared/health_common.py"
+    },
+    "metric": {
+      "name": "doc_path_missing",
+      "threshold": 0.0,
+      "value": 1.0
+    },
+    "path": "docs/plans/2026-06-10-sp6-perf-bench-v0.2.md",
+    "severity": "low",
+    "signal": "LINT",
+    "suggested_action": "Create shared/health_common.py or update docs/plans/2026-06-10-sp6-perf-bench-v0.2.md reference"
+  },
+  {
+    "confidence": "medium",
+    "evidence": {
+      "raw": "references/prioritization.md",
+      "tool": "markdown"
+    },
+    "id": "8d5a612e9906759d",
+    "leaf": "docs-consistency",
+    "location": {
+      "line_end": 38,
+      "line_start": 38,
+      "symbol": "references/prioritization.md"
+    },
+    "metric": {
+      "name": "doc_path_missing",
+      "threshold": 0.0,
+      "value": 1.0
+    },
+    "path": "docs/plans/2026-06-10-sp6-perf-bench-v0.2.md",
+    "severity": "low",
+    "signal": "LINT",
+    "suggested_action": "Create references/prioritization.md or update docs/plans/2026-06-10-sp6-perf-bench-v0.2.md reference"
+  },
+  {
+    "confidence": "medium",
+    "evidence": {
+      "raw": "references/remediation-playbook.md",
+      "tool": "markdown"
+    },
+    "id": "7dc11fb4cc03b80f",
+    "leaf": "docs-consistency",
+    "location": {
+      "line_end": 38,
+      "line_start": 38,
+      "symbol": "references/remediation-playbook.md"
+    },
+    "metric": {
+      "name": "doc_path_missing",
+      "threshold": 0.0,
+      "value": 1.0
+    },
+    "path": "docs/plans/2026-06-10-sp6-perf-bench-v0.2.md",
+    "severity": "low",
+    "signal": "LINT",
+    "suggested_action": "Create references/remediation-playbook.md or update docs/plans/2026-06-10-sp6-perf-bench-v0.2.md reference"
+  },
+  {
+    "confidence": "medium",
+    "evidence": {
+      "raw": "references/prioritization.md",
+      "tool": "markdown"
+    },
+    "id": "8d5a612e9906759d",
+    "leaf": "docs-consistency",
+    "location": {
+      "line_end": 189,
+      "line_start": 189,
+      "symbol": "references/prioritization.md"
+    },
+    "metric": {
+      "name": "doc_path_missing",
+      "threshold": 0.0,
+      "value": 1.0
+    },
+    "path": "docs/plans/2026-06-10-sp6-perf-bench-v0.2.md",
+    "severity": "low",
+    "signal": "LINT",
+    "suggested_action": "Create references/prioritization.md or update docs/plans/2026-06-10-sp6-perf-bench-v0.2.md reference"
+  },
+  {
+    "confidence": "medium",
+    "evidence": {
+      "raw": "references/remediation-playbook.md",
+      "tool": "markdown"
+    },
+    "id": "7dc11fb4cc03b80f",
+    "leaf": "docs-consistency",
+    "location": {
+      "line_end": 189,
+      "line_start": 189,
+      "symbol": "references/remediation-playbook.md"
+    },
+    "metric": {
+      "name": "doc_path_missing",
+      "threshold": 0.0,
+      "value": 1.0
+    },
+    "path": "docs/plans/2026-06-10-sp6-perf-bench-v0.2.md",
+    "severity": "low",
+    "signal": "LINT",
+    "suggested_action": "Create references/remediation-playbook.md or update docs/plans/2026-06-10-sp6-perf-bench-v0.2.md reference"
+  },
+  {
+    "confidence": "medium",
+    "evidence": {
+      "raw": "references/remediation-playbook.md",
+      "tool": "markdown"
+    },
+    "id": "7dc11fb4cc03b80f",
+    "leaf": "docs-consistency",
+    "location": {
+      "line_end": 191,
+      "line_start": 191,
+      "symbol": "references/remediation-playbook.md"
+    },
+    "metric": {
+      "name": "doc_path_missing",
+      "threshold": 0.0,
+      "value": 1.0
+    },
+    "path": "docs/plans/2026-06-10-sp6-perf-bench-v0.2.md",
+    "severity": "low",
+    "signal": "LINT",
+    "suggested_action": "Create references/remediation-playbook.md or update docs/plans/2026-06-10-sp6-perf-bench-v0.2.md reference"
+  },
+  {
+    "confidence": "medium",
+    "evidence": {
+      "raw": "references/prioritization.md",
+      "tool": "markdown"
+    },
+    "id": "8d5a612e9906759d",
+    "leaf": "docs-consistency",
+    "location": {
+      "line_end": 192,
+      "line_start": 192,
+      "symbol": "references/prioritization.md"
+    },
+    "metric": {
+      "name": "doc_path_missing",
+      "threshold": 0.0,
+      "value": 1.0
+    },
+    "path": "docs/plans/2026-06-10-sp6-perf-bench-v0.2.md",
+    "severity": "low",
+    "signal": "LINT",
+    "suggested_action": "Create references/prioritization.md or update docs/plans/2026-06-10-sp6-perf-bench-v0.2.md reference"
+  },
+  {
+    "confidence": "medium",
+    "evidence": {
+      "raw": "references/optimization-playbook.md",
+      "tool": "markdown"
+    },
+    "id": "ac58ccbe51436335",
+    "leaf": "docs-consistency",
+    "location": {
+      "line_end": 167,
+      "line_start": 167,
+      "symbol": "references/optimization-playbook.md"
+    },
+    "metric": {
+      "name": "doc_path_missing",
+      "threshold": 0.0,
+      "value": 1.0
+    },
+    "path": "perf-optimization/SKILL.md",
+    "severity": "low",
+    "signal": "LINT",
+    "suggested_action": "Create references/optimization-playbook.md or update perf-optimization/SKILL.md reference"
+  },
+  {
+    "confidence": "medium",
+    "evidence": {
+      "raw": "references/optimization-playbook.md",
+      "tool": "markdown"
+    },
+    "id": "ac58ccbe51436335",
+    "leaf": "docs-consistency",
+    "location": {
+      "line_end": 195,
+      "line_start": 195,
+      "symbol": "references/optimization-playbook.md"
+    },
+    "metric": {
+      "name": "doc_path_missing",
+      "threshold": 0.0,
+      "value": 1.0
+    },
+    "path": "perf-optimization/SKILL.md",
+    "severity": "low",
+    "signal": "LINT",
+    "suggested_action": "Create references/optimization-playbook.md or update perf-optimization/SKILL.md reference"
+  },
+  {
+    "confidence": "medium",
+    "evidence": {
+      "raw": "../references/perf-remediation-playbook.md",
+      "tool": "markdown"
+    },
+    "id": "d0c4126c812357e1",
+    "leaf": "docs-consistency",
+    "location": {
+      "line_end": 305,
+      "line_start": 305,
+      "symbol": "../references/perf-remediation-playbook.md"
+    },
+    "metric": {
+      "name": "doc_path_missing",
+      "threshold": 0.0,
+      "value": 1.0
+    },
+    "path": "perf-optimization/SKILL.md",
+    "severity": "low",
+    "signal": "LINT",
+    "suggested_action": "Create ../references/perf-remediation-playbook.md or update perf-optimization/SKILL.md reference"
+  },
+  {
+    "confidence": "medium",
+    "evidence": {
+      "raw": "references/optimization-playbook.md",
+      "tool": "markdown"
+    },
+    "id": "ac58ccbe51436335",
+    "leaf": "docs-consistency",
+    "location": {
+      "line_end": 310,
+      "line_start": 310,
+      "symbol": "references/optimization-playbook.md"
+    },
+    "metric": {
+      "name": "doc_path_missing",
+      "threshold": 0.0,
+      "value": 1.0
+    },
+    "path": "perf-optimization/SKILL.md",
+    "severity": "low",
+    "signal": "LINT",
+    "suggested_action": "Create references/optimization-playbook.md or update perf-optimization/SKILL.md reference"
+  },
+  {
+    "confidence": "medium",
+    "evidence": {
+      "raw": "references/optimization-playbook.md",
+      "tool": "markdown"
+    },
+    "id": "ac58ccbe51436335",
+    "leaf": "docs-consistency",
+    "location": {
+      "line_end": 327,
+      "line_start": 327,
+      "symbol": "references/optimization-playbook.md"
+    },
+    "metric": {
+      "name": "doc_path_missing",
+      "threshold": 0.0,
+      "value": 1.0
+    },
+    "path": "perf-optimization/SKILL.md",
+    "severity": "low",
+    "signal": "LINT",
+    "suggested_action": "Create references/optimization-playbook.md or update perf-optimization/SKILL.md reference"
+  },
+  {
+    "confidence": "medium",
+    "evidence": {
+      "raw": "../references/perf-remediation-playbook.md",
+      "tool": "markdown"
+    },
+    "id": "d0c4126c812357e1",
+    "leaf": "docs-consistency",
+    "location": {
+      "line_end": 328,
+      "line_start": 328,
+      "symbol": "../references/perf-remediation-playbook.md"
+    },
+    "metric": {
+      "name": "doc_path_missing",
+      "threshold": 0.0,
+      "value": 1.0
+    },
+    "path": "perf-optimization/SKILL.md",
+    "severity": "low",
+    "signal": "LINT",
+    "suggested_action": "Create ../references/perf-remediation-playbook.md or update perf-optimization/SKILL.md reference"
+  },
+  {
+    "confidence": "medium",
+    "evidence": {
+      "raw": "../references/finding-schema.json",
+      "tool": "markdown"
+    },
+    "id": "6a700019c20c20eb",
+    "leaf": "docs-consistency",
+    "location": {
+      "line_end": 329,
+      "line_start": 329,
+      "symbol": "../references/finding-schema.json"
+    },
+    "metric": {
+      "name": "doc_path_missing",
+      "threshold": 0.0,
+      "value": 1.0
+    },
+    "path": "perf-optimization/SKILL.md",
+    "severity": "low",
+    "signal": "LINT",
+    "suggested_action": "Create ../references/finding-schema.json or update perf-optimization/SKILL.md reference"
+  },
+  {
+    "confidence": "medium",
+    "evidence": {
+      "raw": "../scripts/perf_benchmark/ledger.py",
+      "tool": "markdown"
+    },
+    "id": "f5f320048c251ab9",
+    "leaf": "docs-consistency",
+    "location": {
+      "line_end": 330,
+      "line_start": 330,
+      "symbol": "../scripts/perf_benchmark/ledger.py"
+    },
+    "metric": {
+      "name": "doc_path_missing",
+      "threshold": 0.0,
+      "value": 1.0
+    },
+    "path": "perf-optimization/SKILL.md",
+    "severity": "low",
+    "signal": "LINT",
+    "suggested_action": "Create ../scripts/perf_benchmark/ledger.py or update perf-optimization/SKILL.md reference"
+  },
+  {
+    "confidence": "medium",
+    "evidence": {
+      "raw": "../scripts/perf_benchmark/findings.py",
+      "tool": "markdown"
+    },
+    "id": "54c3a867c761325b",
+    "leaf": "docs-consistency",
+    "location": {
+      "line_end": 331,
+      "line_start": 331,
+      "symbol": "../scripts/perf_benchmark/findings.py"
+    },
+    "metric": {
+      "name": "doc_path_missing",
+      "threshold": 0.0,
+      "value": 1.0
+    },
+    "path": "perf-optimization/SKILL.md",
+    "severity": "low",
+    "signal": "LINT",
+    "suggested_action": "Create ../scripts/perf_benchmark/findings.py or update perf-optimization/SKILL.md reference"
+  },
+  {
+    "confidence": "medium",
+    "evidence": {
+      "raw": "../references/perf-remediation-playbook.md",
+      "tool": "markdown"
+    },
+    "id": "a81360b16018736b",
+    "leaf": "docs-consistency",
+    "location": {
+      "line_end": 213,
+      "line_start": 213,
+      "symbol": "../references/perf-remediation-playbook.md"
+    },
+    "metric": {
+      "name": "doc_path_missing",
+      "threshold": 0.0,
+      "value": 1.0
+    },
+    "path": "perf-optimization/references/optimization-playbook.md",
+    "severity": "low",
+    "signal": "LINT",
+    "suggested_action": "Create ../references/perf-remediation-playbook.md or update perf-optimization/references/optimization-playbook.md reference"
+  },
+  {
+    "confidence": "medium",
+    "evidence": {
+      "raw": "../SKILL.md",
+      "tool": "markdown"
+    },
+    "id": "b36e7d137a1276db",
+    "leaf": "docs-consistency",
+    "location": {
+      "line_end": 217,
+      "line_start": 217,
+      "symbol": "../SKILL.md"
+    },
+    "metric": {
+      "name": "doc_path_missing",
+      "threshold": 0.0,
+      "value": 1.0
+    },
+    "path": "perf-optimization/references/optimization-playbook.md",
+    "severity": "low",
+    "signal": "LINT",
+    "suggested_action": "Create ../SKILL.md or update perf-optimization/references/optimization-playbook.md reference"
+  },
+  {
+    "confidence": "medium",
+    "evidence": {
+      "raw": "../references/finding-schema.json",
+      "tool": "markdown"
+    },
+    "id": "1cd47a87277545f9",
+    "leaf": "docs-consistency",
+    "location": {
+      "line_end": 219,
+      "line_start": 219,
+      "symbol": "../references/finding-schema.json"
+    },
+    "metric": {
+      "name": "doc_path_missing",
+      "threshold": 0.0,
+      "value": 1.0
+    },
+    "path": "perf-optimization/references/optimization-playbook.md",
+    "severity": "low",
+    "signal": "LINT",
+    "suggested_action": "Create ../references/finding-schema.json or update perf-optimization/references/optimization-playbook.md reference"
+  },
+  {
+    "confidence": "medium",
+    "evidence": {
+      "raw": "tests/benchmarks/test_benchmark_graph.py",
+      "tool": "markdown"
+    },
+    "id": "f545c76bf7d904fe",
+    "leaf": "docs-consistency",
+    "location": {
+      "line_end": 27,
+      "line_start": 27,
+      "symbol": "tests/benchmarks/test_benchmark_graph.py"
+    },
+    "metric": {
+      "name": "doc_path_missing",
+      "threshold": 0.0,
+      "value": 1.0
+    },
+    "path": "references/sample-report.md",
+    "severity": "low",
+    "signal": "LINT",
+    "suggested_action": "Create tests/benchmarks/test_benchmark_graph.py or update references/sample-report.md reference"
+  }
+]

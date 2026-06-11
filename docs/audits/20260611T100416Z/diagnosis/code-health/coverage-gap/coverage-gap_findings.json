@@ -1,0 +1,71 @@
+[
+  {
+    "confidence": "medium",
+    "evidence": {
+      "raw": "36/98 statements executed",
+      "tool": "coverage"
+    },
+    "id": "8c14dba17dffb7aa",
+    "leaf": "coverage-gap",
+    "location": {
+      "line_end": 1,
+      "line_start": 1,
+      "symbol": "<file>"
+    },
+    "metric": {
+      "name": "file_coverage_percent",
+      "threshold": 50.0,
+      "value": 36.73
+    },
+    "path": "perf-optimization/scripts/select_candidate.py",
+    "severity": "medium",
+    "signal": "TEST",
+    "suggested_action": "Add behavior tests covering perf-optimization/scripts/select_candidate.py (coverage 36.73% < 50.0%)"
+  },
+  {
+    "confidence": "high",
+    "evidence": {
+      "raw": "0/150 statements executed",
+      "tool": "coverage"
+    },
+    "id": "1687975eaceaab27",
+    "leaf": "coverage-gap",
+    "location": {
+      "line_end": 1,
+      "line_start": 1,
+      "symbol": "<file>"
+    },
+    "metric": {
+      "name": "file_coverage_percent",
+      "threshold": 50.0,
+      "value": 0.0
+    },
+    "path": "perf-optimization/scripts/verify_win.py",
+    "severity": "high",
+    "signal": "TEST",
+    "suggested_action": "Add behavior tests covering perf-optimization/scripts/verify_win.py (coverage 0.0% < 50.0%)"
+  },
+  {
+    "confidence": "medium",
+    "evidence": {
+      "raw": "38/80 statements executed",
+      "tool": "coverage"
+    },
+    "id": "5209a77fabbb7131",
+    "leaf": "coverage-gap",
+    "location": {
+      "line_end": 1,
+      "line_start": 1,
+      "symbol": "<file>"
+    },
+    "metric": {
+      "name": "file_coverage_percent",
+      "threshold": 50.0,
+      "value": 47.5
+    },
+    "path": "scripts/perf_benchmark/findings.py",
+    "severity": "medium",
+    "signal": "TEST",
+    "suggested_action": "Add behavior tests covering scripts/perf_benchmark/findings.py (coverage 47.5% < 50.0%)"
+  }
+]

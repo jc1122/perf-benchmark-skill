@@ -1,0 +1,508 @@
+[
+  {
+    "confidence": "high",
+    "evidence": {
+      "raw": "Would reformat: perf-optimization/scripts/select_candidate.py",
+      "tool": "ruff format"
+    },
+    "id": "edd9d858eb0feba4",
+    "leaf": "quality",
+    "location": {
+      "line_end": 1,
+      "line_start": 1,
+      "symbol": "perf-optimization/scripts/select_candidate.py"
+    },
+    "metric": {
+      "name": "format_drift",
+      "threshold": 0.0,
+      "value": 0.0
+    },
+    "path": "perf-optimization/scripts/select_candidate.py",
+    "severity": "low",
+    "signal": "FORMAT",
+    "suggested_action": "Run the formatter on perf-optimization/scripts/select_candidate.py"
+  },
+  {
+    "confidence": "high",
+    "evidence": {
+      "raw": "Would reformat: perf-optimization/scripts/verify_win.py",
+      "tool": "ruff format"
+    },
+    "id": "33b4b6ec5885d063",
+    "leaf": "quality",
+    "location": {
+      "line_end": 1,
+      "line_start": 1,
+      "symbol": "perf-optimization/scripts/verify_win.py"
+    },
+    "metric": {
+      "name": "format_drift",
+      "threshold": 0.0,
+      "value": 0.0
+    },
+    "path": "perf-optimization/scripts/verify_win.py",
+    "severity": "low",
+    "signal": "FORMAT",
+    "suggested_action": "Run the formatter on perf-optimization/scripts/verify_win.py"
+  },
+  {
+    "confidence": "high",
+    "evidence": {
+      "raw": "Line too long (101 > 100)",
+      "tool": "ruff"
+    },
+    "id": "5cb2e0d9b35480ae",
+    "leaf": "quality",
+    "location": {
+      "line_end": 214,
+      "line_start": 214,
+      "symbol": "E501@214:101"
+    },
+    "metric": {
+      "name": "E501",
+      "threshold": 0.0,
+      "value": 0.0
+    },
+    "path": "perf-optimization/scripts/verify_win.py",
+    "severity": "medium",
+    "signal": "LINT",
+    "suggested_action": "Line too long (101 > 100)"
+  },
+  {
+    "confidence": "high",
+    "evidence": {
+      "raw": "Line too long (102 > 100)",
+      "tool": "ruff"
+    },
+    "id": "28d25312ce3b6d4a",
+    "leaf": "quality",
+    "location": {
+      "line_end": 252,
+      "line_start": 252,
+      "symbol": "E501@252:101"
+    },
+    "metric": {
+      "name": "E501",
+      "threshold": 0.0,
+      "value": 0.0
+    },
+    "path": "perf-optimization/scripts/verify_win.py",
+    "severity": "medium",
+    "signal": "LINT",
+    "suggested_action": "Line too long (102 > 100)"
+  },
+  {
+    "confidence": "high",
+    "evidence": {
+      "raw": "Line too long (107 > 100)",
+      "tool": "ruff"
+    },
+    "id": "065c8c89be91e375",
+    "leaf": "quality",
+    "location": {
+      "line_end": 255,
+      "line_start": 255,
+      "symbol": "E501@255:101"
+    },
+    "metric": {
+      "name": "E501",
+      "threshold": 0.0,
+      "value": 0.0
+    },
+    "path": "perf-optimization/scripts/verify_win.py",
+    "severity": "medium",
+    "signal": "LINT",
+    "suggested_action": "Line too long (107 > 100)"
+  },
+  {
+    "confidence": "high",
+    "evidence": {
+      "raw": "Line too long (101 > 100)",
+      "tool": "ruff"
+    },
+    "id": "4067559dd858b9a3",
+    "leaf": "quality",
+    "location": {
+      "line_end": 256,
+      "line_start": 256,
+      "symbol": "E501@256:101"
+    },
+    "metric": {
+      "name": "E501",
+      "threshold": 0.0,
+      "value": 0.0
+    },
+    "path": "perf-optimization/scripts/verify_win.py",
+    "severity": "medium",
+    "signal": "LINT",
+    "suggested_action": "Line too long (101 > 100)"
+  },
+  {
+    "confidence": "high",
+    "evidence": {
+      "raw": "Line too long (147 > 100)",
+      "tool": "ruff"
+    },
+    "id": "b04c25d255d355b5",
+    "leaf": "quality",
+    "location": {
+      "line_end": 265,
+      "line_start": 265,
+      "symbol": "E501@265:101"
+    },
+    "metric": {
+      "name": "E501",
+      "threshold": 0.0,
+      "value": 0.0
+    },
+    "path": "perf-optimization/scripts/verify_win.py",
+    "severity": "medium",
+    "signal": "LINT",
+    "suggested_action": "Line too long (147 > 100)"
+  },
+  {
+    "confidence": "high",
+    "evidence": {
+      "raw": "Line too long (146 > 100)",
+      "tool": "ruff"
+    },
+    "id": "70cf507ca3ed3bf9",
+    "leaf": "quality",
+    "location": {
+      "line_end": 275,
+      "line_start": 275,
+      "symbol": "E501@275:101"
+    },
+    "metric": {
+      "name": "E501",
+      "threshold": 0.0,
+      "value": 0.0
+    },
+    "path": "perf-optimization/scripts/verify_win.py",
+    "severity": "medium",
+    "signal": "LINT",
+    "suggested_action": "Line too long (146 > 100)"
+  },
+  {
+    "confidence": "high",
+    "evidence": {
+      "raw": "Loop control variable `size` not used within loop body",
+      "tool": "ruff"
+    },
+    "id": "7be213b4ed323126",
+    "leaf": "quality",
+    "location": {
+      "line_end": 392,
+      "line_start": 392,
+      "symbol": "B007@392:13"
+    },
+    "metric": {
+      "name": "B007",
+      "threshold": 0.0,
+      "value": 0.0
+    },
+    "path": "scripts/perf_benchmark/reporting.py",
+    "severity": "medium",
+    "signal": "LINT",
+    "suggested_action": "Loop control variable `size` not used within loop body"
+  },
+  {
+    "confidence": "high",
+    "evidence": {
+      "raw": "No return value expected",
+      "tool": "mypy"
+    },
+    "id": "f5dad70d7abeb6b0",
+    "leaf": "quality",
+    "location": {
+      "line_end": 422,
+      "line_start": 422,
+      "symbol": "return-value@422"
+    },
+    "metric": {
+      "name": "return-value",
+      "threshold": 0.0,
+      "value": 0.0
+    },
+    "path": "scripts/perf_benchmark/reporting.py",
+    "severity": "high",
+    "signal": "TYPE",
+    "suggested_action": "No return value expected"
+  },
+  {
+    "confidence": "high",
+    "evidence": {
+      "raw": "`zip()` without an explicit `strict=` parameter",
+      "tool": "ruff"
+    },
+    "id": "45ac60b3aca9a1a8",
+    "leaf": "quality",
+    "location": {
+      "line_end": 38,
+      "line_start": 38,
+      "symbol": "B905@38:42"
+    },
+    "metric": {
+      "name": "B905",
+      "threshold": 0.0,
+      "value": 0.0
+    },
+    "path": "scripts/perf_benchmark/scoring.py",
+    "severity": "medium",
+    "signal": "LINT",
+    "suggested_action": "`zip()` without an explicit `strict=` parameter"
+  },
+  {
+    "confidence": "high",
+    "evidence": {
+      "raw": "`zip()` without an explicit `strict=` parameter",
+      "tool": "ruff"
+    },
+    "id": "75001652566a704f",
+    "leaf": "quality",
+    "location": {
+      "line_end": 46,
+      "line_start": 46,
+      "symbol": "B905@46:36"
+    },
+    "metric": {
+      "name": "B905",
+      "threshold": 0.0,
+      "value": 0.0
+    },
+    "path": "scripts/perf_benchmark/scoring.py",
+    "severity": "medium",
+    "signal": "LINT",
+    "suggested_action": "`zip()` without an explicit `strict=` parameter"
+  },
+  {
+    "confidence": "high",
+    "evidence": {
+      "raw": "Use a single `if` statement instead of nested `if` statements",
+      "tool": "ruff"
+    },
+    "id": "735ad4c4ba85ded1",
+    "leaf": "quality",
+    "location": {
+      "line_end": 107,
+      "line_start": 106,
+      "symbol": "SIM102@106:5"
+    },
+    "metric": {
+      "name": "SIM102",
+      "threshold": 0.0,
+      "value": 0.0
+    },
+    "path": "scripts/perf_benchmark/scoring.py",
+    "severity": "medium",
+    "signal": "LINT",
+    "suggested_action": "Use a single `if` statement instead of nested `if` statements"
+  },
+  {
+    "confidence": "high",
+    "evidence": {
+      "raw": "Use a context manager for opening files",
+      "tool": "ruff"
+    },
+    "id": "ac4f5a31ccd31f6a",
+    "leaf": "quality",
+    "location": {
+      "line_end": 125,
+      "line_start": 125,
+      "symbol": "SIM115@125:11"
+    },
+    "metric": {
+      "name": "SIM115",
+      "threshold": 0.0,
+      "value": 0.0
+    },
+    "path": "scripts/perf_benchmark/stage_helpers.py",
+    "severity": "medium",
+    "signal": "LINT",
+    "suggested_action": "Use a context manager for opening files"
+  },
+  {
+    "confidence": "high",
+    "evidence": {
+      "raw": "`zip()` without an explicit `strict=` parameter",
+      "tool": "ruff"
+    },
+    "id": "b4d02b4a0da554c3",
+    "leaf": "quality",
+    "location": {
+      "line_end": 172,
+      "line_start": 172,
+      "symbol": "B905@172:34"
+    },
+    "metric": {
+      "name": "B905",
+      "threshold": 0.0,
+      "value": 0.0
+    },
+    "path": "scripts/perf_benchmark/stage_helpers.py",
+    "severity": "medium",
+    "signal": "LINT",
+    "suggested_action": "`zip()` without an explicit `strict=` parameter"
+  },
+  {
+    "confidence": "high",
+    "evidence": {
+      "raw": "`zip()` without an explicit `strict=` parameter",
+      "tool": "ruff"
+    },
+    "id": "245bdaaac6441dc9",
+    "leaf": "quality",
+    "location": {
+      "line_end": 187,
+      "line_start": 187,
+      "symbol": "B905@187:30"
+    },
+    "metric": {
+      "name": "B905",
+      "threshold": 0.0,
+      "value": 0.0
+    },
+    "path": "scripts/perf_benchmark/stage_helpers.py",
+    "severity": "medium",
+    "signal": "LINT",
+    "suggested_action": "`zip()` without an explicit `strict=` parameter"
+  },
+  {
+    "confidence": "high",
+    "evidence": {
+      "raw": "Incompatible types in assignment (expression has type \"str\", variable has type \"int\")",
+      "tool": "mypy"
+    },
+    "id": "15674d25249e6bc2",
+    "leaf": "quality",
+    "location": {
+      "line_end": 187,
+      "line_start": 187,
+      "symbol": "assignment@187"
+    },
+    "metric": {
+      "name": "assignment",
+      "threshold": 0.0,
+      "value": 0.0
+    },
+    "path": "scripts/perf_benchmark/stage_helpers.py",
+    "severity": "high",
+    "signal": "TYPE",
+    "suggested_action": "Incompatible types in assignment (expression has type \"str\", variable has type \"int\")"
+  },
+  {
+    "confidence": "high",
+    "evidence": {
+      "raw": "Use `contextlib.suppress(ValueError)` instead of `try`-`except`-`pass`",
+      "tool": "ruff"
+    },
+    "id": "e7f87b5e10f72db0",
+    "leaf": "quality",
+    "location": {
+      "line_end": 191,
+      "line_start": 188,
+      "symbol": "SIM105@188:13"
+    },
+    "metric": {
+      "name": "SIM105",
+      "threshold": 0.0,
+      "value": 0.0
+    },
+    "path": "scripts/perf_benchmark/stage_helpers.py",
+    "severity": "medium",
+    "signal": "LINT",
+    "suggested_action": "Use `contextlib.suppress(ValueError)` instead of `try`-`except`-`pass`"
+  },
+  {
+    "confidence": "high",
+    "evidence": {
+      "raw": "Use `contextlib.suppress(ValueError)` instead of `try`-`except`-`pass`",
+      "tool": "ruff"
+    },
+    "id": "399d0c34da3c0043",
+    "leaf": "quality",
+    "location": {
+      "line_end": 327,
+      "line_start": 324,
+      "symbol": "SIM105@324:9"
+    },
+    "metric": {
+      "name": "SIM105",
+      "threshold": 0.0,
+      "value": 0.0
+    },
+    "path": "scripts/perf_benchmark/stage_helpers.py",
+    "severity": "medium",
+    "signal": "LINT",
+    "suggested_action": "Use `contextlib.suppress(ValueError)` instead of `try`-`except`-`pass`"
+  },
+  {
+    "confidence": "high",
+    "evidence": {
+      "raw": "Use `contextlib.suppress(ValueError, OSError)` instead of `try`-`except`-`pass`",
+      "tool": "ruff"
+    },
+    "id": "2f943870842bfedf",
+    "leaf": "quality",
+    "location": {
+      "line_end": 125,
+      "line_start": 116,
+      "symbol": "SIM105@116:5"
+    },
+    "metric": {
+      "name": "SIM105",
+      "threshold": 0.0,
+      "value": 0.0
+    },
+    "path": "scripts/perf_benchmark/support.py",
+    "severity": "medium",
+    "signal": "LINT",
+    "suggested_action": "Use `contextlib.suppress(ValueError, OSError)` instead of `try`-`except`-`pass`"
+  },
+  {
+    "confidence": "high",
+    "evidence": {
+      "raw": "Use `contextlib.suppress(ValueError, OSError)` instead of `try`-`except`-`pass`",
+      "tool": "ruff"
+    },
+    "id": "3b64311652dc720d",
+    "leaf": "quality",
+    "location": {
+      "line_end": 135,
+      "line_start": 126,
+      "symbol": "SIM105@126:5"
+    },
+    "metric": {
+      "name": "SIM105",
+      "threshold": 0.0,
+      "value": 0.0
+    },
+    "path": "scripts/perf_benchmark/support.py",
+    "severity": "medium",
+    "signal": "LINT",
+    "suggested_action": "Use `contextlib.suppress(ValueError, OSError)` instead of `try`-`except`-`pass`"
+  },
+  {
+    "confidence": "high",
+    "evidence": {
+      "raw": "Use `contextlib.suppress(ValueError, OSError)` instead of `try`-`except`-`pass`",
+      "tool": "ruff"
+    },
+    "id": "1710695215f324ab",
+    "leaf": "quality",
+    "location": {
+      "line_end": 145,
+      "line_start": 136,
+      "symbol": "SIM105@136:5"
+    },
+    "metric": {
+      "name": "SIM105",
+      "threshold": 0.0,
+      "value": 0.0
+    },
+    "path": "scripts/perf_benchmark/support.py",
+    "severity": "medium",
+    "signal": "LINT",
+    "suggested_action": "Use `contextlib.suppress(ValueError, OSError)` instead of `try`-`except`-`pass`"
+  }
+]

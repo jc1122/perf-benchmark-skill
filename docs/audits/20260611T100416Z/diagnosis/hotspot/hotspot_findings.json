@@ -1,0 +1,140 @@
+[
+  {
+    "confidence": "medium",
+    "evidence": {
+      "raw": "7 co-changes of README.md and SKILL.md in last 33 commits (max 500) from ceff6b775353",
+      "tool": "git"
+    },
+    "id": "412b8252780279a8",
+    "leaf": "hotspot",
+    "location": {
+      "line_end": 1,
+      "line_start": 1,
+      "symbol": "README.md<->SKILL.md"
+    },
+    "metric": {
+      "name": "temporal_coupling_ratio",
+      "threshold": 0.7,
+      "value": 0.88
+    },
+    "path": "README.md",
+    "severity": "medium",
+    "signal": "RESTRUCTURE",
+    "suggested_action": "Files co-change; move the shared concern into one module or merge them"
+  },
+  {
+    "confidence": "medium",
+    "evidence": {
+      "raw": "7 co-changes of README.md and scripts/perf_benchmark_pipeline.py in last 33 commits (max 500) from ceff6b775353",
+      "tool": "git"
+    },
+    "id": "42051f8b3992c10b",
+    "leaf": "hotspot",
+    "location": {
+      "line_end": 1,
+      "line_start": 1,
+      "symbol": "README.md<->scripts/perf_benchmark_pipeline.py"
+    },
+    "metric": {
+      "name": "temporal_coupling_ratio",
+      "threshold": 0.7,
+      "value": 0.7
+    },
+    "path": "README.md",
+    "severity": "medium",
+    "signal": "RESTRUCTURE",
+    "suggested_action": "Files co-change; move the shared concern into one module or merge them"
+  },
+  {
+    "confidence": "medium",
+    "evidence": {
+      "raw": "8 commits x 186 nloc in last 33 commits (max 500) from ceff6b775353",
+      "tool": "git"
+    },
+    "id": "18ed0527dd9e2af7",
+    "leaf": "hotspot",
+    "location": {
+      "line_end": 1,
+      "line_start": 1,
+      "symbol": "SKILL.md"
+    },
+    "metric": {
+      "name": "churn_complexity_product",
+      "threshold": 1000.0,
+      "value": 1488.0
+    },
+    "path": "SKILL.md",
+    "severity": "low",
+    "signal": "DECOMPOSE",
+    "suggested_action": "Hotspot: SKILL.md changes often and is large; split along change axes"
+  },
+  {
+    "confidence": "medium",
+    "evidence": {
+      "raw": "7 co-changes of SKILL.md and scripts/perf_benchmark_pipeline.py in last 33 commits (max 500) from ceff6b775353",
+      "tool": "git"
+    },
+    "id": "d8f1c79aff7534f0",
+    "leaf": "hotspot",
+    "location": {
+      "line_end": 1,
+      "line_start": 1,
+      "symbol": "SKILL.md<->scripts/perf_benchmark_pipeline.py"
+    },
+    "metric": {
+      "name": "temporal_coupling_ratio",
+      "threshold": 0.7,
+      "value": 0.88
+    },
+    "path": "SKILL.md",
+    "severity": "medium",
+    "signal": "RESTRUCTURE",
+    "suggested_action": "Files co-change; move the shared concern into one module or merge them"
+  },
+  {
+    "confidence": "medium",
+    "evidence": {
+      "raw": "15 commits x 697 nloc in last 33 commits (max 500) from ceff6b775353",
+      "tool": "git"
+    },
+    "id": "4b8b00795a295f80",
+    "leaf": "hotspot",
+    "location": {
+      "line_end": 1,
+      "line_start": 1,
+      "symbol": "scripts/perf_benchmark_pipeline.py"
+    },
+    "metric": {
+      "name": "churn_complexity_product",
+      "threshold": 1000.0,
+      "value": 10455.0
+    },
+    "path": "scripts/perf_benchmark_pipeline.py",
+    "severity": "high",
+    "signal": "DECOMPOSE",
+    "suggested_action": "Hotspot: scripts/perf_benchmark_pipeline.py changes often and is large; split along change axes"
+  },
+  {
+    "confidence": "low",
+    "evidence": {
+      "raw": "top author jc1122/15 commits (max 500) from ceff6b775353",
+      "tool": "git"
+    },
+    "id": "a4dda4550cc07c79",
+    "leaf": "hotspot",
+    "location": {
+      "line_end": 1,
+      "line_start": 1,
+      "symbol": "scripts/perf_benchmark_pipeline.py"
+    },
+    "metric": {
+      "name": "author_concentration",
+      "threshold": 0.9,
+      "value": 1.0
+    },
+    "path": "scripts/perf_benchmark_pipeline.py",
+    "severity": "low",
+    "signal": "RESTRUCTURE",
+    "suggested_action": "Knowledge concentrated in one author; schedule reviews/pairing on this file"
+  }
+]

@@ -1,0 +1,393 @@
+{
+  "artifact_root": "/home/jakub/projects/perf-benchmark-skill/docs/audits/20260611T100416Z/bootstrap",
+  "install_candidates": [],
+  "lanes": {
+    "bootstrap": {
+      "blocking": false,
+      "lane_type": "bootstrap",
+      "manual_fallback": "Use raw Skills CLI commands when helper skills are missing.",
+      "selected_skills": [],
+      "state": "degraded",
+      "warnings": [
+        "Bootstrap helper skills unavailable; raw Skills CLI fallback required."
+      ]
+    },
+    "code-health-python": {
+      "blocking": false,
+      "lane_type": "code_health",
+      "manual_fallback": "Review Python code health manually and record the tooling gap when the deterministic family is unavailable.",
+      "selected_skills": [
+        "code-health-audit-pipeline",
+        "hotspot-audit"
+      ],
+      "state": "full",
+      "warnings": []
+    },
+    "hygiene": {
+      "blocking": false,
+      "lane_type": "audit",
+      "manual_fallback": "Review repo hygiene manually (tracked artifacts, configs, release files) when the leaf is unavailable.",
+      "selected_skills": [
+        "repo-hygiene-audit",
+        "dependency-audit",
+        "docs-consistency-audit"
+      ],
+      "state": "full",
+      "warnings": []
+    },
+    "orchestration": {
+      "blocking": false,
+      "lane_type": "orchestration",
+      "manual_fallback": "Run verification manually and execute batches sequentially when orchestration helpers are missing.",
+      "selected_skills": [],
+      "state": "manual",
+      "warnings": []
+    },
+    "performance": {
+      "blocking": false,
+      "lane_type": "performance",
+      "manual_fallback": "Use manual performance reasoning and stable verification when the preferred skill set is unavailable.",
+      "selected_skills": [
+        "perf-benchmark",
+        "perf-optimization"
+      ],
+      "state": "full",
+      "warnings": []
+    },
+    "security": {
+      "blocking": false,
+      "lane_type": "audit",
+      "manual_fallback": "Perform a manual security review; the bandit-based leaf is unavailable.",
+      "selected_skills": [
+        "security-audit"
+      ],
+      "state": "full",
+      "warnings": []
+    }
+  },
+  "repo_profile": {
+    "benchmark_surfaces": [
+      "python-benchmarks"
+    ],
+    "has_deterministic_perf_surface": true,
+    "has_deterministic_test_surface": false,
+    "languages": [
+      "python"
+    ],
+    "test_systems": []
+  },
+  "repo_root": "/home/jakub/projects/perf-benchmark-skill",
+  "roots": {
+    "advisory_roots": [],
+    "usable_roots": [
+      {
+        "kind": "orchestrator",
+        "path": "/home/jakub/.codex/skills"
+      },
+      {
+        "kind": "bundled",
+        "path": "/home/jakub/.codex/vendor_imports/skills/skills"
+      },
+      {
+        "kind": "user-local",
+        "path": "/home/jakub/.agents/skills"
+      },
+      {
+        "kind": "extra",
+        "path": "/home/jakub/.claude/skills"
+      }
+    ]
+  },
+  "skills": {
+    "code-health-audit-pipeline": {
+      "found_version": "0.4.0",
+      "install_source": null,
+      "manual_fallback": "Install repo-audit-skills v0.3.0+ (github.com/jc1122/repo-audit-skills, `node bin/install-repo-audit-skills.js --dest <skills-root> --force`), or run the five leaf audits directly.",
+      "min_version": "0.3.0",
+      "name": "code-health-audit-pipeline",
+      "priority": "preferred",
+      "restart_required_if_installed": true,
+      "root_kind": "orchestrator",
+      "skill_path": "/home/jakub/.codex/skills/code-health-audit-pipeline/SKILL.md",
+      "source_type": "user-local",
+      "state": "usable_now"
+    },
+    "complexity-audit": {
+      "found_version": "0.4.0",
+      "install_source": null,
+      "manual_fallback": "Part of repo-audit-skills v0.3.0+; install via its node installer.",
+      "min_version": "0.3.0",
+      "name": "complexity-audit",
+      "priority": "preferred",
+      "restart_required_if_installed": true,
+      "root_kind": "orchestrator",
+      "skill_path": "/home/jakub/.codex/skills/complexity-audit/SKILL.md",
+      "source_type": "user-local",
+      "state": "usable_now"
+    },
+    "dead-code-audit": {
+      "found_version": "0.4.0",
+      "install_source": null,
+      "manual_fallback": "Part of repo-audit-skills v0.3.0+; install via its node installer.",
+      "min_version": "0.3.0",
+      "name": "dead-code-audit",
+      "priority": "preferred",
+      "restart_required_if_installed": true,
+      "root_kind": "orchestrator",
+      "skill_path": "/home/jakub/.codex/skills/dead-code-audit/SKILL.md",
+      "source_type": "user-local",
+      "state": "usable_now"
+    },
+    "dependency-audit": {
+      "found_version": "0.4.0",
+      "install_source": null,
+      "manual_fallback": "Part of repo-audit-skills v0.4.0+; install via its node installer.",
+      "min_version": "0.4.0",
+      "name": "dependency-audit",
+      "priority": "preferred",
+      "restart_required_if_installed": true,
+      "root_kind": "orchestrator",
+      "skill_path": "/home/jakub/.codex/skills/dependency-audit/SKILL.md",
+      "source_type": "user-local",
+      "state": "usable_now"
+    },
+    "dispatching-parallel-agents": {
+      "install_source": null,
+      "manual_fallback": "Run independent lanes sequentially.",
+      "name": "dispatching-parallel-agents",
+      "priority": "optional",
+      "restart_required_if_installed": true,
+      "source_type": "user-local",
+      "state": "manual_only"
+    },
+    "docs-consistency-audit": {
+      "found_version": "0.4.0",
+      "install_source": null,
+      "manual_fallback": "Part of repo-audit-skills v0.4.0+; install via its node installer.",
+      "min_version": "0.4.0",
+      "name": "docs-consistency-audit",
+      "priority": "preferred",
+      "restart_required_if_installed": true,
+      "root_kind": "orchestrator",
+      "skill_path": "/home/jakub/.codex/skills/docs-consistency-audit/SKILL.md",
+      "source_type": "user-local",
+      "state": "usable_now"
+    },
+    "duplication-audit": {
+      "found_version": "0.4.0",
+      "install_source": null,
+      "manual_fallback": "Part of repo-audit-skills v0.3.0+; install via its node installer.",
+      "min_version": "0.3.0",
+      "name": "duplication-audit",
+      "priority": "preferred",
+      "restart_required_if_installed": true,
+      "root_kind": "orchestrator",
+      "skill_path": "/home/jakub/.codex/skills/duplication-audit/SKILL.md",
+      "source_type": "user-local",
+      "state": "usable_now"
+    },
+    "find-skills": {
+      "install_source": null,
+      "manual_fallback": "Use raw `npx skills find` discovery.",
+      "name": "find-skills",
+      "priority": "optional",
+      "restart_required_if_installed": false,
+      "source_type": "user-local",
+      "state": "manual_only"
+    },
+    "hotspot-audit": {
+      "found_version": "0.4.0",
+      "install_source": null,
+      "manual_fallback": "Part of repo-audit-skills v0.4.0+; install via its node installer.",
+      "min_version": "0.4.0",
+      "name": "hotspot-audit",
+      "priority": "preferred",
+      "restart_required_if_installed": true,
+      "root_kind": "orchestrator",
+      "skill_path": "/home/jakub/.codex/skills/hotspot-audit/SKILL.md",
+      "source_type": "user-local",
+      "state": "usable_now"
+    },
+    "perf-benchmark": {
+      "install_source": null,
+      "manual_fallback": "Use manual benchmark discipline with stable commands and fixtures.",
+      "name": "perf-benchmark",
+      "priority": "preferred",
+      "restart_required_if_installed": true,
+      "root_kind": "orchestrator",
+      "skill_path": "/home/jakub/.codex/skills/perf-benchmark/SKILL.md",
+      "source_type": "user-local",
+      "state": "usable_now"
+    },
+    "perf-optimization": {
+      "found_version": "0.1.0",
+      "install_source": null,
+      "manual_fallback": "Optimize manually per the perf-benchmark remediation playbook ratchet.",
+      "min_version": "0.1.0",
+      "name": "perf-optimization",
+      "priority": "preferred",
+      "restart_required_if_installed": true,
+      "root_kind": "orchestrator",
+      "skill_path": "/home/jakub/.codex/skills/perf-optimization/SKILL.md",
+      "source_type": "user-local",
+      "state": "usable_now"
+    },
+    "quality-audit": {
+      "found_version": "0.4.0",
+      "install_source": null,
+      "manual_fallback": "Part of repo-audit-skills v0.3.0+; install via its node installer.",
+      "min_version": "0.3.0",
+      "name": "quality-audit",
+      "priority": "preferred",
+      "restart_required_if_installed": true,
+      "root_kind": "orchestrator",
+      "skill_path": "/home/jakub/.codex/skills/quality-audit/SKILL.md",
+      "source_type": "user-local",
+      "state": "usable_now"
+    },
+    "repo-hygiene-audit": {
+      "found_version": "0.4.0",
+      "install_source": null,
+      "manual_fallback": "Part of repo-audit-skills v0.4.0+; install via its node installer.",
+      "min_version": "0.4.0",
+      "name": "repo-hygiene-audit",
+      "priority": "preferred",
+      "restart_required_if_installed": true,
+      "root_kind": "orchestrator",
+      "skill_path": "/home/jakub/.codex/skills/repo-hygiene-audit/SKILL.md",
+      "source_type": "user-local",
+      "state": "usable_now"
+    },
+    "security-audit": {
+      "found_version": "0.4.0",
+      "install_source": null,
+      "manual_fallback": "Part of repo-audit-skills v0.4.0+; install via its node installer.",
+      "min_version": "0.4.0",
+      "name": "security-audit",
+      "priority": "preferred",
+      "restart_required_if_installed": true,
+      "root_kind": "orchestrator",
+      "skill_path": "/home/jakub/.codex/skills/security-audit/SKILL.md",
+      "source_type": "user-local",
+      "state": "usable_now"
+    },
+    "skill-installer": {
+      "install_source": null,
+      "manual_fallback": "Use raw `npx skills add` installation commands.",
+      "name": "skill-installer",
+      "priority": "optional",
+      "restart_required_if_installed": false,
+      "root_kind": "orchestrator",
+      "skill_path": "/home/jakub/.codex/skills/.system/skill-installer/SKILL.md",
+      "source_type": "user-local",
+      "state": "usable_now"
+    },
+    "structure-audit": {
+      "found_version": "0.4.0",
+      "install_source": null,
+      "manual_fallback": "Part of repo-audit-skills v0.3.0+; install via its node installer.",
+      "min_version": "0.3.0",
+      "name": "structure-audit",
+      "priority": "preferred",
+      "restart_required_if_installed": true,
+      "root_kind": "orchestrator",
+      "skill_path": "/home/jakub/.codex/skills/structure-audit/SKILL.md",
+      "source_type": "user-local",
+      "state": "usable_now"
+    },
+    "subagent-driven-development": {
+      "install_source": null,
+      "manual_fallback": "Execute batches sequentially in one agent.",
+      "name": "subagent-driven-development",
+      "priority": "optional",
+      "restart_required_if_installed": true,
+      "source_type": "user-local",
+      "state": "manual_only"
+    },
+    "verification-before-completion": {
+      "install_source": null,
+      "manual_fallback": "Rerun verification manually and record evidence.",
+      "name": "verification-before-completion",
+      "priority": "preferred",
+      "restart_required_if_installed": true,
+      "source_type": "user-local",
+      "state": "manual_only"
+    }
+  },
+  "summary": {
+    "active_lanes": [
+      "bootstrap",
+      "code-health-python",
+      "security",
+      "performance",
+      "hygiene",
+      "orchestration"
+    ],
+    "restart_required": false,
+    "stop_before_discovery": false
+  },
+  "unreferenced_skills": [
+    "aspnet-core",
+    "chatgpt-apps",
+    "cloudflare-deploy",
+    "codex-cli-branch-workers",
+    "configure-pre-commit",
+    "configure-workflows",
+    "develop-web-game",
+    "dignified-code-simplifier",
+    "doc",
+    "figma",
+    "figma-implement-design",
+    "gh-address-comments",
+    "gh-fix-ci",
+    "goal-branch-orchestrator",
+    "goal-config",
+    "goal-main-orchestrator",
+    "goal-plan-amender",
+    "goal-preflight",
+    "hetzner-delegation",
+    "humanize-text-en",
+    "humanizer",
+    "hypothesis-testing",
+    "imagegen",
+    "jupyter-notebook",
+    "linear",
+    "m10-performance",
+    "m15-anti-pattern",
+    "metaopt-preflight",
+    "ml-metaoptimization",
+    "netlify-deploy",
+    "notion-knowledge-capture",
+    "notion-meeting-intelligence",
+    "notion-research-documentation",
+    "notion-spec-to-implementation",
+    "openai-docs",
+    "opencode-worker-bridge",
+    "pdf",
+    "playwright",
+    "playwright-interactive",
+    "plugin-creator",
+    "python-code-quality",
+    "python-code-style",
+    "render-deploy",
+    "repo-audit-refactor-optimize",
+    "scite-search",
+    "screenshot",
+    "security-best-practices",
+    "security-ownership-map",
+    "security-threat-model",
+    "sentry",
+    "skill-creator",
+    "slides",
+    "sora",
+    "speech",
+    "spreadsheet",
+    "transcribe",
+    "vercel-deploy",
+    "winui-app",
+    "yeet"
+  ],
+  "warnings": [
+    "Bootstrap helper skills unavailable; raw Skills CLI fallback required."
+  ]
+}
