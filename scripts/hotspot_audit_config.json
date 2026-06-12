@@ -1,5 +1,6 @@
 {
   "coupling_allow_pairs": [
+    ["CHANGELOG.md", "SKILL.md"],
     ["README.md", "SKILL.md"],
     ["README.md", "scripts/perf_benchmark_pipeline.py"],
     ["SKILL.md", "scripts/perf_benchmark_pipeline.py"],

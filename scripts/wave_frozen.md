@@ -143,6 +143,18 @@
   `function_nloc` identities.
 - Current baseline has 35 raw findings and 35 normalized identities.
 
+## SP11 iteration 5 C-6 hotspot re-anchor
+
+- Ratchet timestamp: 2026-06-12T02:51:38Z
+- Advanced `scripts/wave_anchor.txt` to
+  `836d1153ce85f228d997ec2078da553efccc80b3`.
+- Re-anchor surfaced the release documentation pair `CHANGELOG.md<->SKILL.md`.
+  Added that pair to `scripts/hotspot_audit_config.json`; the hotspot leaf
+  counts it under `declared_coupling` rather than hiding it.
+- Re-running the wave after the counted policy update produced no new or stale
+  normalized identities.
+- Current baseline remains 35 raw findings and 35 normalized identities.
+
 ## Residual findings
 
 The machine-readable authority is `scripts/wave_baseline.json`. The residual
