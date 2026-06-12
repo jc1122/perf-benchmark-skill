@@ -232,6 +232,15 @@
 - Removed the stale `compare` `cyclomatic_complexity` identity.
 - Current baseline has 31 raw findings and 31 normalized identities.
 
+## SP11 iteration 10 C-6 hotspot re-anchor
+
+- Ratchet timestamp: 2026-06-12T09:10:47Z
+- Advanced `scripts/wave_anchor.txt` to
+  `bb42eaa00806189660500979b6e9b128193a2414`.
+- Re-running the wave after the release-window re-anchor produced no new or
+  stale normalized identities.
+- Current baseline remains 31 raw findings and 31 normalized identities.
+
 ## Residual findings
 
 The machine-readable authority is `scripts/wave_baseline.json`. The residual
