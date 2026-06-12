@@ -173,6 +173,19 @@
 - Removed the stale `_read_ledger` `cyclomatic_complexity` identity.
 - Current baseline has 33 raw findings and 33 normalized identities.
 
+## SP11 iteration 6 C-6 hotspot re-anchor
+
+- Ratchet timestamp: 2026-06-12T04:18:07Z
+- Advanced `scripts/wave_anchor.txt` to
+  `4caf842c4717bdb6936b11b0e1e18a46e555f3ed`.
+- Re-anchor surfaced the release bookkeeping pair
+  `scripts/wave_anchor.txt<->scripts/wave_frozen.md`. Added that pair to
+  `scripts/hotspot_audit_config.json`; the hotspot leaf counts it under
+  `declared_coupling` rather than hiding it.
+- Re-running the wave after the counted policy update produced no new or stale
+  normalized identities.
+- Current baseline remains 33 raw findings and 33 normalized identities.
+
 ## Residual findings
 
 The machine-readable authority is `scripts/wave_baseline.json`. The residual
