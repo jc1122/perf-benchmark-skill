@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.3.4 - 2026-06-12
+
+- Split massif parser snapshot and heap-summary handling into focused helpers.
+- Ratcheted the wave baseline from 37 to 35 normalized identities.
+
 ## 0.3.3 - 2026-06-12
 
 - Split reporting Markdown and JSON summary assembly into focused helpers.

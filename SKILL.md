@@ -1,6 +1,6 @@
 ---
 name: perf-benchmark
-version: 0.3.3
+version: 0.3.4
 description: >
   Use when profiling Linux Python or C workloads for algorithmic scaling,
   cache, branch, memory, or ASM bottlenecks, or when comparing a benchmark run
