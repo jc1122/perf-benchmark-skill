@@ -205,14 +205,23 @@
   refactor. This is recorded as churn-complexity residue rather than suppressed.
 - Current baseline has 33 raw findings and 33 normalized identities.
 
+## SP11 iteration 8 perf benchmark CLI ratchet
+
+- Ratchet timestamp: 2026-06-12T05:57:55Z
+- Split `parse_args` in `scripts/perf_benchmark_pipeline.py` into target,
+  profiling, and output argument-group helpers while preserving parser options,
+  validation, path normalization, and public `parse_args(argv)` behavior.
+- Removed the stale `parse_args` `function_nloc` identity.
+- Current baseline has 32 raw findings and 32 normalized identities.
+
 ## Residual findings
 
 The machine-readable authority is `scripts/wave_baseline.json`. The residual
-baseline now contains only structural code-health debt and the six real
+baseline now contains only structural code-health debt and the seven real
 churn-complexity hotspot rows that must be reduced by future complexity work or
 honestly recorded as residue if no bounded win remains.
 
 | Leaf | Count | Class | Residue |
 | --- | ---: | --- | --- |
-| complexity | 26 | deferred-structural | Function complexity, function length, module maintainability, and parameter-count rows across the perf benchmark pipeline, reporting, scoring, ledger, support, stage helpers, and perf-optimization helpers. |
+| complexity | 25 | deferred-structural | Function complexity, function length, module maintainability, and parameter-count rows across the perf benchmark pipeline, reporting, scoring, ledger, support, stage helpers, and perf-optimization helpers. |
 | hotspot | 7 | deferred-structural / loop-reanchor-residue | `scripts/perf_benchmark/reporting.py`, `scripts/perf_benchmark/scoring.py`, `scripts/perf_benchmark_pipeline.py`, `perf-optimization/scripts/verify_win.py`, `scripts/wave_baseline.json`, `SKILL.md`, and `scripts/wave_frozen.md` still carry `churn_complexity_product`; policy config deliberately does not suppress churn-complexity rows. |

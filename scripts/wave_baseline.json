@@ -116,12 +116,6 @@
   {
     "leaf": "complexity",
     "path": "scripts/perf_benchmark_pipeline.py",
-    "symbol": "parse_args",
-    "metric": "function_nloc"
-  },
-  {
-    "leaf": "complexity",
-    "path": "scripts/perf_benchmark_pipeline.py",
     "symbol": "main",
     "metric": "cyclomatic_complexity"
   },

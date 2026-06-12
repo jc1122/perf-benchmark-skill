@@ -656,11 +656,7 @@ def write_json_summary(
 # ---------------------------------------------------------------------------
 
 
-def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
-    p = argparse.ArgumentParser(
-        description="Linux performance benchmark pipeline — 7-dimension rubric scoring",
-        formatter_class=argparse.RawDescriptionHelpFormatter,
-    )
+def _add_target_args(p: argparse.ArgumentParser) -> None:
     p.add_argument("--root", required=True, type=Path, help="Repository root")
     p.add_argument("--out-dir", required=True, type=Path, help="Output directory")
     p.add_argument(
@@ -671,6 +667,9 @@ def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
     p.add_argument(
         "--source-prefix", default=None, help="Source filter for annotations (e.g. path/to/source/)"
     )
+
+
+def _add_profile_args(p: argparse.ArgumentParser) -> None:
     p.add_argument(
         "--tier",
         default="medium",
@@ -717,6 +716,9 @@ def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
         default=1800,
         help="Timeout per Valgrind run in seconds (default 1800)",
     )
+
+
+def _add_output_args(p: argparse.ArgumentParser) -> None:
     p.add_argument("--env", action="append", default=[], help="Environment variable KEY=VALUE")
     p.add_argument(
         "--findings-out",
@@ -724,6 +726,16 @@ def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
         default=None,
         help="Write shared-schema PERF findings JSON here",
     )
+
+
+def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
+    p = argparse.ArgumentParser(
+        description="Linux performance benchmark pipeline — 7-dimension rubric scoring",
+        formatter_class=argparse.RawDescriptionHelpFormatter,
+    )
+    _add_target_args(p)
+    _add_profile_args(p)
+    _add_output_args(p)
 
     args = p.parse_args(argv)
     if args.sizes:
