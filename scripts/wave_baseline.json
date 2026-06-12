@@ -43,12 +43,6 @@
   },
   {
     "leaf": "complexity",
-    "path": "perf-optimization/scripts/select_candidate.py",
-    "symbol": "_validate_finding",
-    "metric": "cyclomatic_complexity"
-  },
-  {
-    "leaf": "complexity",
     "path": "perf-optimization/scripts/verify_win.py",
     "symbol": "_read_ledger",
     "metric": "cyclomatic_complexity"

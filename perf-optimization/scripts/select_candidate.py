@@ -47,31 +47,36 @@ def _compute_ratio(metric: dict[str, Any]) -> float:
     return value / threshold
 
 
+def _require_keys(payload: dict[str, Any], required: set[str], label: str) -> None:
+    missing = required - set(payload)
+    if missing:
+        raise ValueError(f"{label} missing required keys: {sorted(missing)}")
+
+
+def _require_string_fields(payload: dict[str, Any], fields: tuple[str, ...], label: str) -> None:
+    for key in fields:
+        if not isinstance(payload[key], str):
+            raise ValueError(f"{label}.{key} must be a string")
+
+
+def _require_number_fields(payload: dict[str, Any], fields: tuple[str, ...], label: str) -> None:
+    for key in fields:
+        if not isinstance(payload[key], (int, float)):
+            raise ValueError(f"{label}.{key} must be a number")
+
+
 def _validate_finding(finding: Any) -> None:
     """Validate a single finding has required shape.  Raises ValueError."""
     if not isinstance(finding, dict):
         raise ValueError("finding is not a JSON object")
-    missing = _REQUIRED_FINDING_KEYS - set(finding)
-    if missing:
-        raise ValueError(f"finding missing required keys: {sorted(missing)}")
+    _require_keys(finding, _REQUIRED_FINDING_KEYS, "finding")
     metric = finding.get("metric")
     if not isinstance(metric, dict):
         raise ValueError("finding.metric is not a JSON object")
-    missing_metric = _REQUIRED_METRIC_KEYS - set(metric)
-    if missing_metric:
-        raise ValueError(f"finding.metric missing required keys: {sorted(missing_metric)}")
-    # Validate types
-    for key in ("id", "path"):
-        if not isinstance(finding[key], str):
-            raise ValueError(f"finding.{key} must be a string")
-    if not isinstance(finding["severity"], str):
-        raise ValueError("finding.severity must be a string")
-    for key in ("name",):
-        if not isinstance(metric[key], str):
-            raise ValueError(f"finding.metric.{key} must be a string")
-    for key in ("value", "threshold"):
-        if not isinstance(metric[key], (int, float)):
-            raise ValueError(f"finding.metric.{key} must be a number")
+    _require_keys(metric, _REQUIRED_METRIC_KEYS, "finding.metric")
+    _require_string_fields(finding, ("id", "path", "severity"), "finding")
+    _require_string_fields(metric, ("name",), "finding.metric")
+    _require_number_fields(metric, ("value", "threshold"), "finding.metric")
 
 
 def _validate_findings(findings: Any) -> list[dict[str, Any]]:

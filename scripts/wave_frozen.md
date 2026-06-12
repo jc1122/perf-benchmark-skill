@@ -155,6 +155,15 @@
   normalized identities.
 - Current baseline remains 35 raw findings and 35 normalized identities.
 
+## SP11 iteration 6 perf-optimization candidate validation ratchet
+
+- Ratchet timestamp: 2026-06-12T03:43:50Z
+- Split `_validate_finding` in `perf-optimization/scripts/select_candidate.py`
+  into focused required-key and field-type helpers while preserving the
+  malformed-finding error contract.
+- Removed the stale `_validate_finding` `cyclomatic_complexity` identity.
+- Current baseline has 34 raw findings and 34 normalized identities.
+
 ## Residual findings
 
 The machine-readable authority is `scripts/wave_baseline.json`. The residual
@@ -164,5 +173,5 @@ honestly recorded as residue if no bounded win remains.
 
 | Leaf | Count | Class | Residue |
 | --- | ---: | --- | --- |
-| complexity | 29 | deferred-structural | Function complexity, function length, module maintainability, and parameter-count rows across the perf benchmark pipeline, reporting, scoring, ledger, support, stage helpers, and perf-optimization helpers. |
+| complexity | 28 | deferred-structural | Function complexity, function length, module maintainability, and parameter-count rows across the perf benchmark pipeline, reporting, scoring, ledger, support, stage helpers, and perf-optimization helpers. |
 | hotspot | 6 | deferred-structural / loop-reanchor-residue | `scripts/perf_benchmark/reporting.py`, `scripts/perf_benchmark/scoring.py`, `scripts/perf_benchmark_pipeline.py`, `scripts/wave_baseline.json`, `SKILL.md`, and `scripts/wave_frozen.md` still carry `churn_complexity_product`; policy config deliberately does not suppress churn-complexity rows. |
