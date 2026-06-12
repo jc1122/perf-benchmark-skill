@@ -195,6 +195,16 @@
 - Removed the stale `main` `function_nloc` identity.
 - Current baseline has 32 raw findings and 32 normalized identities.
 
+## SP11 iteration 7 C-6 hotspot re-anchor
+
+- Ratchet timestamp: 2026-06-12T05:24:33Z
+- Advanced `scripts/wave_anchor.txt` to
+  `2065f79821c46d54f391f319475ea4dd1ef7a8df`.
+- Re-anchor surfaced the real source hotspot
+  `perf-optimization/scripts/verify_win.py` from this iteration's verdict CLI
+  refactor. This is recorded as churn-complexity residue rather than suppressed.
+- Current baseline has 33 raw findings and 33 normalized identities.
+
 ## Residual findings
 
 The machine-readable authority is `scripts/wave_baseline.json`. The residual
@@ -205,4 +215,4 @@ honestly recorded as residue if no bounded win remains.
 | Leaf | Count | Class | Residue |
 | --- | ---: | --- | --- |
 | complexity | 26 | deferred-structural | Function complexity, function length, module maintainability, and parameter-count rows across the perf benchmark pipeline, reporting, scoring, ledger, support, stage helpers, and perf-optimization helpers. |
-| hotspot | 6 | deferred-structural / loop-reanchor-residue | `scripts/perf_benchmark/reporting.py`, `scripts/perf_benchmark/scoring.py`, `scripts/perf_benchmark_pipeline.py`, `scripts/wave_baseline.json`, `SKILL.md`, and `scripts/wave_frozen.md` still carry `churn_complexity_product`; policy config deliberately does not suppress churn-complexity rows. |
+| hotspot | 7 | deferred-structural / loop-reanchor-residue | `scripts/perf_benchmark/reporting.py`, `scripts/perf_benchmark/scoring.py`, `scripts/perf_benchmark_pipeline.py`, `perf-optimization/scripts/verify_win.py`, `scripts/wave_baseline.json`, `SKILL.md`, and `scripts/wave_frozen.md` still carry `churn_complexity_product`; policy config deliberately does not suppress churn-complexity rows. |

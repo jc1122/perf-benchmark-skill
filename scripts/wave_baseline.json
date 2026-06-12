@@ -175,6 +175,12 @@
   },
   {
     "leaf": "hotspot",
+    "path": "perf-optimization/scripts/verify_win.py",
+    "symbol": "perf-optimization/scripts/verify_win.py",
+    "metric": "churn_complexity_product"
+  },
+  {
+    "leaf": "hotspot",
     "path": "scripts/wave_baseline.json",
     "symbol": "scripts/wave_baseline.json",
     "metric": "churn_complexity_product"
