@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.3.8 - 2026-06-12
+
+- Split perf benchmark ledger comparison into focused loading, tier, and
+  regression helpers while preserving `vs_last`, `vs_best`, and warning output.
+- Ratcheted the wave baseline from 32 to 31 normalized identities.
+
 ## 0.3.7 - 2026-06-12
 
 - Split perf benchmark CLI argument registration into focused helpers while
