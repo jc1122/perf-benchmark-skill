@@ -133,6 +133,16 @@
   for a future iteration rather than hidden or treated as unfixable growth.
 - Current baseline has 37 raw findings and 37 normalized identities.
 
+## SP11 iteration 5 massif parser ratchet
+
+- Ratchet timestamp: 2026-06-12T02:22:24Z
+- Split `_parse_massif_out` in `scripts/perf_benchmark/stage_helpers.py` into
+  helpers for snapshot accumulation, allocation-site parsing, and heap-series
+  summary calculation while preserving the parsed massif payload shape.
+- Removed stale `_parse_massif_out` `cyclomatic_complexity` and
+  `function_nloc` identities.
+- Current baseline has 35 raw findings and 35 normalized identities.
+
 ## Residual findings
 
 The machine-readable authority is `scripts/wave_baseline.json`. The residual
@@ -142,5 +152,5 @@ honestly recorded as residue if no bounded win remains.
 
 | Leaf | Count | Class | Residue |
 | --- | ---: | --- | --- |
-| complexity | 31 | deferred-structural | Function complexity, function length, module maintainability, and parameter-count rows across the perf benchmark pipeline, reporting, scoring, ledger, support, stage helpers, and perf-optimization helpers. |
+| complexity | 29 | deferred-structural | Function complexity, function length, module maintainability, and parameter-count rows across the perf benchmark pipeline, reporting, scoring, ledger, support, stage helpers, and perf-optimization helpers. |
 | hotspot | 6 | deferred-structural / loop-reanchor-residue | `scripts/perf_benchmark/reporting.py`, `scripts/perf_benchmark/scoring.py`, `scripts/perf_benchmark_pipeline.py`, `scripts/wave_baseline.json`, `SKILL.md`, and `scripts/wave_frozen.md` still carry `churn_complexity_product`; policy config deliberately does not suppress churn-complexity rows. |

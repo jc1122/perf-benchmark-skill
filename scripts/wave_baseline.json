@@ -98,18 +98,6 @@
   {
     "leaf": "complexity",
     "path": "scripts/perf_benchmark/stage_helpers.py",
-    "symbol": "_parse_massif_out",
-    "metric": "cyclomatic_complexity"
-  },
-  {
-    "leaf": "complexity",
-    "path": "scripts/perf_benchmark/stage_helpers.py",
-    "symbol": "_parse_massif_out",
-    "metric": "function_nloc"
-  },
-  {
-    "leaf": "complexity",
-    "path": "scripts/perf_benchmark/stage_helpers.py",
     "symbol": "_parse_perf_stat",
     "metric": "cyclomatic_complexity"
   },

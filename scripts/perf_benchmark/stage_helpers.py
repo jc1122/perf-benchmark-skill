@@ -250,6 +250,75 @@ def _parse_callgrind_raw(text: str, input_size: int) -> dict[str, int]:
     }
 
 
+def _append_massif_snapshot(
+    result: dict[str, Any],
+    current_snap: dict[str, Any],
+    heap_bytes_series: list[int],
+) -> None:
+    if current_snap:
+        result["snapshots"].append(current_snap)
+        heap_bytes_series.append(current_snap.get("mem_heap_B", 0))
+
+
+def _parse_massif_alloc_site(line: str) -> dict[str, Any] | None:
+    match = re.match(r"n\d+:\s+(\d+)\s+(.+)", line)
+    if not match:
+        return None
+    return {"bytes": int(match.group(1)), "location": match.group(2).strip()}
+
+
+def _update_massif_snapshot(
+    line: str,
+    current_snap: dict[str, Any],
+    result: dict[str, Any],
+    heap_bytes_series: list[int],
+) -> dict[str, Any]:
+    if line.startswith("snapshot="):
+        _append_massif_snapshot(result, current_snap, heap_bytes_series)
+        return {"id": int(line.split("=")[1])}
+
+    massif_fields = {
+        "mem_heap_B=": "mem_heap_B",
+        "mem_heap_extra_B=": "mem_heap_extra_B",
+        "mem_stacks_B=": "mem_stacks_B",
+        "time=": "time",
+    }
+    for prefix, field in massif_fields.items():
+        if line.startswith(prefix):
+            current_snap[field] = int(line.split("=")[1])
+            return current_snap
+
+    if line.startswith("n") and ":" in line and "(" in line:
+        alloc_site = _parse_massif_alloc_site(line)
+        if alloc_site:
+            result["alloc_sites"].append(alloc_site)
+    return current_snap
+
+
+def _massif_local_maxima_count(heap_bytes_series: list[int]) -> int:
+    maxima = 0
+    for index in range(1, len(heap_bytes_series) - 1):
+        if (
+            heap_bytes_series[index] > heap_bytes_series[index - 1]
+            and heap_bytes_series[index] > heap_bytes_series[index + 1]
+        ):
+            maxima += 1
+    return maxima
+
+
+def _apply_massif_heap_summary(
+    result: dict[str, Any],
+    heap_bytes_series: list[int],
+) -> None:
+    if not heap_bytes_series:
+        return
+    peak_idx = max(range(len(heap_bytes_series)), key=lambda index: heap_bytes_series[index])
+    result["peak_bytes"] = heap_bytes_series[peak_idx]
+    result["peak_snapshot"] = peak_idx
+    result["local_maxima_count"] = _massif_local_maxima_count(heap_bytes_series)
+    result["heap_series_len"] = len(heap_bytes_series)
+
+
 def _parse_massif_out(path: Path) -> dict[str, Any]:
     """Parse massif.out structured text directly."""
     result: dict[str, Any] = {
@@ -267,45 +336,15 @@ def _parse_massif_out(path: Path) -> dict[str, Any]:
     heap_bytes_series: list[int] = []
 
     for line in text.splitlines():
-        line = line.strip()
-        if line.startswith("snapshot="):
-            if current_snap:
-                result["snapshots"].append(current_snap)
-                heap_bytes_series.append(current_snap.get("mem_heap_B", 0))
-            current_snap = {"id": int(line.split("=")[1])}
-        elif line.startswith("mem_heap_B="):
-            current_snap["mem_heap_B"] = int(line.split("=")[1])
-        elif line.startswith("mem_heap_extra_B="):
-            current_snap["mem_heap_extra_B"] = int(line.split("=")[1])
-        elif line.startswith("mem_stacks_B="):
-            current_snap["mem_stacks_B"] = int(line.split("=")[1])
-        elif line.startswith("time="):
-            current_snap["time"] = int(line.split("=")[1])
-        elif line.startswith("n") and ":" in line and "(" in line:
-            match = re.match(r"n\d+:\s+(\d+)\s+(.+)", line)
-            if match:
-                result["alloc_sites"].append(
-                    {"bytes": int(match.group(1)), "location": match.group(2).strip()}
-                )
+        current_snap = _update_massif_snapshot(
+            line.strip(),
+            current_snap,
+            result,
+            heap_bytes_series,
+        )
 
-    if current_snap:
-        result["snapshots"].append(current_snap)
-        heap_bytes_series.append(current_snap.get("mem_heap_B", 0))
-
-    if heap_bytes_series:
-        peak_idx = max(range(len(heap_bytes_series)), key=lambda index: heap_bytes_series[index])
-        result["peak_bytes"] = heap_bytes_series[peak_idx]
-        result["peak_snapshot"] = peak_idx
-
-        maxima = 0
-        for index in range(1, len(heap_bytes_series) - 1):
-            if (
-                heap_bytes_series[index] > heap_bytes_series[index - 1]
-                and heap_bytes_series[index] > heap_bytes_series[index + 1]
-            ):
-                maxima += 1
-        result["local_maxima_count"] = maxima
-        result["heap_series_len"] = len(heap_bytes_series)
+    _append_massif_snapshot(result, current_snap, heap_bytes_series)
+    _apply_massif_heap_summary(result, heap_bytes_series)
 
     return result
 
