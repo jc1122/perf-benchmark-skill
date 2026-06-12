@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.3.3 - 2026-06-12
+
+- Split reporting Markdown and JSON summary assembly into focused helpers.
+- Ratcheted the wave baseline from 39 to 35 normalized identities.
+
 ## 0.3.2 - 2026-06-11
 
 - Split scoring wall-time CV collection into focused helpers.
