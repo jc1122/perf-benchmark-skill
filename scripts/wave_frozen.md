@@ -121,14 +121,26 @@
   `function_nloc` identities.
 - Current baseline has 35 raw findings and 35 normalized identities.
 
+## SP11 iteration 4 C-6 hotspot re-anchor
+
+- Ratchet timestamp: 2026-06-12T01:33:45Z
+- Advanced `scripts/wave_anchor.txt` to
+  `69ee41a604f8aa7924f30531e23c94f5673d63ee`.
+- Re-anchor surfaced two loop-induced churn rows: `SKILL.md` from the
+  iteration 4 release-version bump and `scripts/wave_frozen.md` from repeated
+  ratchet evidence updates.
+- Per SP11 pre-flight rule 5, both rows are recorded as real re-anchor residue
+  for a future iteration rather than hidden or treated as unfixable growth.
+- Current baseline has 37 raw findings and 37 normalized identities.
+
 ## Residual findings
 
 The machine-readable authority is `scripts/wave_baseline.json`. The residual
-baseline now contains only structural code-health debt and the four real
+baseline now contains only structural code-health debt and the six real
 churn-complexity hotspot rows that must be reduced by future complexity work or
 honestly recorded as residue if no bounded win remains.
 
 | Leaf | Count | Class | Residue |
 | --- | ---: | --- | --- |
 | complexity | 31 | deferred-structural | Function complexity, function length, module maintainability, and parameter-count rows across the perf benchmark pipeline, reporting, scoring, ledger, support, stage helpers, and perf-optimization helpers. |
-| hotspot | 4 | deferred-structural / loop-reanchor-residue | `scripts/perf_benchmark/reporting.py`, `scripts/perf_benchmark/scoring.py`, `scripts/perf_benchmark_pipeline.py`, and `scripts/wave_baseline.json` still carry `churn_complexity_product`; policy config deliberately does not suppress churn-complexity rows. |
+| hotspot | 6 | deferred-structural / loop-reanchor-residue | `scripts/perf_benchmark/reporting.py`, `scripts/perf_benchmark/scoring.py`, `scripts/perf_benchmark_pipeline.py`, `scripts/wave_baseline.json`, `SKILL.md`, and `scripts/wave_frozen.md` still carry `churn_complexity_product`; policy config deliberately does not suppress churn-complexity rows. |
