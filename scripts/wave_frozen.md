@@ -214,6 +214,15 @@
 - Removed the stale `parse_args` `function_nloc` identity.
 - Current baseline has 32 raw findings and 32 normalized identities.
 
+## SP11 iteration 8 C-6 hotspot re-anchor
+
+- Ratchet timestamp: 2026-06-12T06:33:30Z
+- Advanced `scripts/wave_anchor.txt` to
+  `3290b5a9fb23245c41db8cd79f71f39a4d0c6763`.
+- Re-running the wave after the release-window re-anchor produced no new or
+  stale normalized identities.
+- Current baseline remains 32 raw findings and 32 normalized identities.
+
 ## Residual findings
 
 The machine-readable authority is `scripts/wave_baseline.json`. The residual
