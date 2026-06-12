@@ -100,6 +100,17 @@
   identities.
 - Current baseline remains 39 raw findings and 39 normalized identities.
 
+## SP11 iteration 4 reporting markdown ratchet
+
+- Ratchet timestamp: 2026-06-12T02:43:00Z
+- Split `write_markdown_report` in `scripts/perf_benchmark/reporting.py` into
+  focused section renderers for prerequisites, algorithmic analysis, baseline
+  comparison, scorecard, findings, native hotspots, prescriptions, and cache
+  model output while preserving the generated Markdown surface.
+- Removed stale `write_markdown_report` `cyclomatic_complexity` and
+  `function_nloc` identities.
+- Current baseline has 37 raw findings and 37 normalized identities.
+
 ## Residual findings
 
 The machine-readable authority is `scripts/wave_baseline.json`. The residual
@@ -109,5 +120,5 @@ honestly recorded as residue if no bounded win remains.
 
 | Leaf | Count | Class | Residue |
 | --- | ---: | --- | --- |
-| complexity | 35 | deferred-structural | Function complexity, function length, module maintainability, and parameter-count rows across the perf benchmark pipeline, reporting, scoring, ledger, support, stage helpers, and perf-optimization helpers. |
+| complexity | 33 | deferred-structural | Function complexity, function length, module maintainability, and parameter-count rows across the perf benchmark pipeline, reporting, scoring, ledger, support, stage helpers, and perf-optimization helpers. |
 | hotspot | 4 | deferred-structural / loop-reanchor-residue | `scripts/perf_benchmark/reporting.py`, `scripts/perf_benchmark/scoring.py`, `scripts/perf_benchmark_pipeline.py`, and `scripts/wave_baseline.json` still carry `churn_complexity_product`; policy config deliberately does not suppress churn-complexity rows. |

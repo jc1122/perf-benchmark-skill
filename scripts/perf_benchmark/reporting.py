@@ -138,25 +138,7 @@ def _summarize_wall_time_metrics(tier1: dict, cv_fn) -> dict[str, Any]:
     return next((summary for summary in summaries if summary), {})
 
 
-def write_markdown_report(
-    rubric: dict,
-    tier1: dict,
-    tier234: dict,
-    prereqs: dict,
-    args,
-    out_dir: Path,
-) -> None:
-    now = datetime.now(timezone.utc).strftime("%Y-%m-%d %H:%M:%S UTC")
-    lines: list[str] = [
-        "# Performance Benchmark Report",
-        "",
-        f"**Generated**: {now}",
-        f"**Root**: `{args.root}`",
-        f"**Tier**: {args.tier}",
-    ]
-    if args.sizes:
-        lines.append(f"**Sizes**: {args.sizes}")
-    lines.append("")
+def _append_prerequisites_section(lines: list[str], prereqs: dict[str, Any]) -> dict[str, Any]:
     perf_status = "perf available"
     if prereqs["perf_paranoid"] > 1:
         perf_status = "perf UNAVAILABLE, run: sudo sysctl kernel.perf_event_paranoid=1"
@@ -179,85 +161,97 @@ def write_markdown_report(
     if cache:
         lines.append(_format_cache_model("- Cache model", cache))
     lines.append("")
+    return cache
 
+
+def _append_algorithmic_na_section(lines: list[str], dim0: dict[str, Any]) -> None:
+    lines.append(f"*{dim0.get('note', 'Insufficient data for strict algorithmic scoring.')}*")
+    lines.append("")
+    if dim0.get("sub_checks"):
+        lines.extend(
+            [
+                "| Available Sub-check | Value | Tier |",
+                "|---------------------|-------|------|",
+            ]
+        )
+        for name, check in dim0["sub_checks"].items():
+            val = _first_present_metric(check, ["k", "ratio", "peaks", "path_count", "top_fn_ir"])
+            lines.append(f"| {name} | {val} | {check['tier']} |")
+        lines.append("")
+    missing_sub_checks = dim0.get("missing_sub_checks", [])
+    if missing_sub_checks:
+        lines.append("Missing sub-checks:")
+        for name in missing_sub_checks:
+            lines.append(f"- `{name}`")
+        lines.append("")
+        if "complexity_exponent" in missing_sub_checks:
+            lines.append(
+                "*Add at least two real input sizes via `--sizes`, and ensure "
+                "explicit `--target` commands use `{SIZE}`.*"
+            )
+
+
+def _append_algorithmic_result_section(lines: list[str], dim0: dict[str, Any]) -> None:
+    lines.extend(
+        [
+            f"**Result: {dim0['tier']}** (score: {dim0['score']}/4)",
+            "",
+        ]
+    )
+    if dim0.get("sub_checks"):
+        lines.extend(["| Sub-check | Value | Tier |", "|-----------|-------|------|"])
+        for name, check in dim0["sub_checks"].items():
+            val = _first_present_metric(check, ["k", "ratio", "peaks", "path_count", "top_fn_ir"])
+            lines.append(f"| {name} | {val} | {check['tier']} |")
+    if dim0["tier"] == "FAIL":
+        lines.extend(
+            [
+                "",
+                "> **STOP**: Fix algorithmic scaling before hardware-level optimization.",
+                "> Expected impact: 10-1000x improvement.",
+                "> Hardware optimizations (cache, branch, ASM) are irrelevant "
+                "until this is resolved.",
+            ]
+        )
+
+
+def _append_algorithmic_section(lines: list[str], rubric: dict[str, Any]) -> None:
     dim0 = _dimension_by_name(rubric, "Algorithmic Scaling")
     lines.extend(["## Algorithmic Scaling Analysis", ""])
     if dim0.get("tier") == "N/A":
-        lines.append(f"*{dim0.get('note', 'Insufficient data for strict algorithmic scoring.')}*")
-        lines.append("")
-        if dim0.get("sub_checks"):
-            lines.extend(
-                [
-                    "| Available Sub-check | Value | Tier |",
-                    "|---------------------|-------|------|",
-                ]
-            )
-            for name, check in dim0["sub_checks"].items():
-                val = _first_present_metric(
-                    check, ["k", "ratio", "peaks", "path_count", "top_fn_ir"]
-                )
-                lines.append(f"| {name} | {val} | {check['tier']} |")
-            lines.append("")
-        missing_sub_checks = dim0.get("missing_sub_checks", [])
-        if missing_sub_checks:
-            lines.append("Missing sub-checks:")
-            for name in missing_sub_checks:
-                lines.append(f"- `{name}`")
-            lines.append("")
-            if "complexity_exponent" in missing_sub_checks:
-                lines.append(
-                    "*Add at least two real input sizes via `--sizes`, and ensure "
-                    "explicit `--target` commands use `{SIZE}`.*"
-                )
+        _append_algorithmic_na_section(lines, dim0)
     else:
-        lines.extend(
-            [
-                f"**Result: {dim0['tier']}** (score: {dim0['score']}/4)",
-                "",
-            ]
-        )
-        if dim0.get("sub_checks"):
-            lines.extend(["| Sub-check | Value | Tier |", "|-----------|-------|------|"])
-            for name, check in dim0["sub_checks"].items():
-                val = _first_present_metric(
-                    check, ["k", "ratio", "peaks", "path_count", "top_fn_ir"]
-                )
-                lines.append(f"| {name} | {val} | {check['tier']} |")
-        if dim0["tier"] == "FAIL":
-            lines.extend(
-                [
-                    "",
-                    "> **STOP**: Fix algorithmic scaling before hardware-level optimization.",
-                    "> Expected impact: 10-1000x improvement.",
-                    "> Hardware optimizations (cache, branch, ASM) are irrelevant "
-                    "until this is resolved.",
-                ]
-            )
+        _append_algorithmic_result_section(lines, dim0)
     lines.append("")
 
-    if args.baseline:
-        regressions = rubric.get("baseline_regressions", [])
-        lines.extend(["## Baseline Comparison", "", f"**Baseline**: `{args.baseline}`", ""])
-        if regressions:
-            lines.extend(
-                [
-                    "> **Regression blocker**: one or more scored dimensions "
-                    "dropped versus the baseline.",
-                    "",
-                    "| Dimension | Baseline | Current | Tier Drop |",
-                    "|-----------|----------|---------|-----------|",
-                ]
-            )
-            for regression in regressions:
-                regression_row = (
-                    f"| {regression['dimension']} | {regression['baseline_tier']} | "
-                    f"{regression['current_tier']} | {regression['drop']} |"
-                )
-                lines.append(regression_row)
-        else:
-            lines.append("No scored dimension regressed against the supplied baseline.")
-        lines.append("")
 
+def _append_baseline_section(lines: list[str], rubric: dict[str, Any], args) -> None:
+    if not args.baseline:
+        return
+    regressions = rubric.get("baseline_regressions", [])
+    lines.extend(["## Baseline Comparison", "", f"**Baseline**: `{args.baseline}`", ""])
+    if regressions:
+        lines.extend(
+            [
+                "> **Regression blocker**: one or more scored dimensions "
+                "dropped versus the baseline.",
+                "",
+                "| Dimension | Baseline | Current | Tier Drop |",
+                "|-----------|----------|---------|-----------|",
+            ]
+        )
+        for regression in regressions:
+            regression_row = (
+                f"| {regression['dimension']} | {regression['baseline_tier']} | "
+                f"{regression['current_tier']} | {regression['drop']} |"
+            )
+            lines.append(regression_row)
+    else:
+        lines.append("No scored dimension regressed against the supplied baseline.")
+    lines.append("")
+
+
+def _append_rubric_scorecard(lines: list[str], rubric: dict[str, Any]) -> None:
     lines.extend(
         ["## Rubric Scorecard", "", f"**Total: {rubric['total']}/{rubric['max_possible']}**", ""]
     )
@@ -267,6 +261,8 @@ def write_markdown_report(
         lines.append(f"| {index} | {name} | {score_str} | {dimension.get('tier', 'N/A')} |")
     lines.append("")
 
+
+def _append_findings_section(lines: list[str], rubric: dict[str, Any]) -> None:
     lines.extend(["## Findings", ""])
     for severity in ("FAIL", "WARN"):
         for name, dimension in rubric["dimensions"]:
@@ -277,46 +273,58 @@ def write_markdown_report(
                         lines.append(f"- **{key}**: {value}")
                 lines.append("")
 
+
+def _append_native_hotspots(lines: list[str], tier234: dict[str, Any]) -> None:
     perf_record = tier234.get("perf_record")
-    if perf_record:
-        lines.extend(["## Native Hotspots", ""])
-        if not perf_record.get("available", True):
-            lines.append(f"*Unavailable: {perf_record.get('reason', 'unknown reason')}*")
-        else:
-            hotspots = perf_record.get("hotspots", [])
-            if hotspots:
-                lines.extend(
-                    [
-                        "| Overhead | Command | Shared Object | Symbol |",
-                        "|----------|---------|---------------|--------|",
-                    ]
-                )
-                for hotspot in hotspots[:5]:
-                    row = (
-                        f"| {hotspot.get('overhead_pct', 0)} | "
-                        f"{hotspot.get('command', '')} | "
-                        f"{hotspot.get('shared_object', '')} | "
-                        f"{hotspot.get('symbol', '')} |"
-                    )
-                    lines.append(row)
-            else:
-                error_message = (
-                    perf_record.get("parse_error")
-                    or perf_record.get("report_error")
-                    or "No hotspots parsed."
-                )
-                lines.append(f"*{error_message}*")
+    if not perf_record:
+        return
+    lines.extend(["## Native Hotspots", ""])
+    if not perf_record.get("available", True):
+        lines.append(f"*Unavailable: {perf_record.get('reason', 'unknown reason')}*")
+    else:
+        _append_available_hotspots(lines, perf_record)
+        _append_perf_artifact_lines(lines, perf_record)
+    lines.append("")
 
-            artifact_lines: list[str] = []
-            if perf_record.get("data_path"):
-                artifact_lines.append(f"- perf.data: `{perf_record['data_path']}`")
-            if perf_record.get("report_path"):
-                artifact_lines.append(f"- perf report: `{perf_record['report_path']}`")
-            if artifact_lines:
-                lines.append("")
-                lines.extend(artifact_lines)
+
+def _append_available_hotspots(lines: list[str], perf_record: dict[str, Any]) -> None:
+    hotspots = perf_record.get("hotspots", [])
+    if hotspots:
+        lines.extend(
+            [
+                "| Overhead | Command | Shared Object | Symbol |",
+                "|----------|---------|---------------|--------|",
+            ]
+        )
+        for hotspot in hotspots[:5]:
+            row = (
+                f"| {hotspot.get('overhead_pct', 0)} | "
+                f"{hotspot.get('command', '')} | "
+                f"{hotspot.get('shared_object', '')} | "
+                f"{hotspot.get('symbol', '')} |"
+            )
+            lines.append(row)
+    else:
+        error_message = (
+            perf_record.get("parse_error")
+            or perf_record.get("report_error")
+            or "No hotspots parsed."
+        )
+        lines.append(f"*{error_message}*")
+
+
+def _append_perf_artifact_lines(lines: list[str], perf_record: dict[str, Any]) -> None:
+    artifact_lines: list[str] = []
+    if perf_record.get("data_path"):
+        artifact_lines.append(f"- perf.data: `{perf_record['data_path']}`")
+    if perf_record.get("report_path"):
+        artifact_lines.append(f"- perf report: `{perf_record['report_path']}`")
+    if artifact_lines:
         lines.append("")
+        lines.extend(artifact_lines)
 
+
+def _append_prescriptions(lines: list[str], rubric: dict[str, Any]) -> None:
     lines.extend(
         [
             "## Prescriptions",
@@ -345,6 +353,8 @@ def write_markdown_report(
             lines.append(f"- **{name}**: {advice}")
     lines.append("")
 
+
+def _append_cache_model(lines: list[str], cache: dict[str, Any]) -> None:
     lines.extend(
         [
             "## Cache Model",
@@ -360,6 +370,35 @@ def write_markdown_report(
             "",
         ]
     )
+
+
+def write_markdown_report(
+    rubric: dict,
+    tier1: dict,
+    tier234: dict,
+    prereqs: dict,
+    args,
+    out_dir: Path,
+) -> None:
+    now = datetime.now(timezone.utc).strftime("%Y-%m-%d %H:%M:%S UTC")
+    lines: list[str] = [
+        "# Performance Benchmark Report",
+        "",
+        f"**Generated**: {now}",
+        f"**Root**: `{args.root}`",
+        f"**Tier**: {args.tier}",
+    ]
+    if args.sizes:
+        lines.append(f"**Sizes**: {args.sizes}")
+    lines.append("")
+    cache = _append_prerequisites_section(lines, prereqs)
+    _append_algorithmic_section(lines, rubric)
+    _append_baseline_section(lines, rubric, args)
+    _append_rubric_scorecard(lines, rubric)
+    _append_findings_section(lines, rubric)
+    _append_native_hotspots(lines, tier234)
+    _append_prescriptions(lines, rubric)
+    _append_cache_model(lines, cache)
 
     (out_dir / "benchmark_report.md").write_text("\n".join(lines))
     _log(f"  -> Wrote {out_dir / 'benchmark_report.md'}")
