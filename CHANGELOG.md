@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.3.7 - 2026-06-12
+
+- Split perf benchmark CLI argument registration into focused helpers while
+  preserving parser options, validation, and public `parse_args(argv)` behavior.
+- Ratcheted the wave baseline from 33 to 32 normalized identities after the
+  iteration-eight parser split.
+
 ## 0.3.6 - 2026-06-12
 
 - Split perf-optimization verdict CLI parsing and checked summary loading into
