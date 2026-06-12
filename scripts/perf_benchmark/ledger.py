@@ -48,6 +48,59 @@ def append_run(ledger_path: Path, summary: dict[str, Any]) -> None:
         fh.write(json.dumps(entry, sort_keys=True) + "\n")
 
 
+def _read_ledger_entries(
+    ledger_path: Path,
+) -> tuple[list[dict[str, Any]], list[str]]:
+    entries: list[dict[str, Any]] = []
+    warnings: list[str] = []
+    if not ledger_path.exists():
+        return entries, warnings
+    for lineno, raw in enumerate(ledger_path.read_text().splitlines(), start=1):
+        stripped = raw.strip()
+        if not stripped:
+            continue
+        try:
+            entries.append(json.loads(stripped))
+        except json.JSONDecodeError:
+            warnings.append(f"Skipped corrupt line {lineno} in {ledger_path}")
+    return entries, warnings
+
+
+def _summary_dimension_tiers(summary: dict[str, Any]) -> dict[str, str]:
+    rubric = summary.get("rubric", {}) or {}
+    dimensions_map = rubric.get("dimensions", {}) or {}
+    return {name: dim.get("tier", "N/A") for name, dim in dimensions_map.items()}
+
+
+def _tier_drop(current_tier: str, reference_tier: str) -> int | None:
+    if current_tier not in TIER_RANK or reference_tier not in TIER_RANK:
+        return None
+    drop = TIER_RANK[reference_tier] - TIER_RANK[current_tier]
+    return drop if drop >= 1 else None
+
+
+def _dimension_regressions(
+    current_dims: dict[str, str], reference_dims: dict[str, str], prefix: str
+) -> list[dict[str, Any]]:
+    regressions: list[dict[str, Any]] = []
+    for name, current_tier in current_dims.items():
+        reference_tier = reference_dims.get(name)
+        if reference_tier is None:
+            continue
+        drop = _tier_drop(current_tier, reference_tier)
+        if drop is None:
+            continue
+        regressions.append(
+            {
+                "dimension": name,
+                f"{prefix}_tier": reference_tier,
+                "current_tier": current_tier,
+                "drop": drop,
+            }
+        )
+    return regressions
+
+
 def compare(ledger_path: Path, summary: dict[str, Any]) -> dict[str, Any]:
     """Return per-dimension tier drops vs the last and best ledger entries.
 
@@ -68,62 +121,21 @@ def compare(ledger_path: Path, summary: dict[str, Any]) -> dict[str, Any]:
     lists.  Dimensions that only appear in the current summary but not in
     the comparison entry are silently ignored.
     """
-    result: dict[str, Any] = {"vs_last": [], "vs_best": [], "warnings": []}
-
-    # ── load ledger ────────────────────────────────────────────────────
-    entries: list[dict[str, Any]] = []
-    if ledger_path.exists():
-        for lineno, raw in enumerate(ledger_path.read_text().splitlines(), start=1):
-            stripped = raw.strip()
-            if not stripped:
-                continue
-            try:
-                entries.append(json.loads(stripped))
-            except json.JSONDecodeError:
-                result["warnings"].append(f"Skipped corrupt line {lineno} in {ledger_path}")
-
+    entries, warnings = _read_ledger_entries(ledger_path)
+    result: dict[str, Any] = {"vs_last": [], "vs_best": [], "warnings": warnings}
     if not entries:
         return result
 
-    # ── current dimensions as {name: tier} ─────────────────────────────
-    rubric = summary.get("rubric", {}) or {}
-    dimensions_map = rubric.get("dimensions", {}) or {}
-    current_dims: dict[str, str] = {
-        name: dim.get("tier", "N/A") for name, dim in dimensions_map.items()
-    }
-
-    # ── helpers ────────────────────────────────────────────────────────
-    def _drop(cur_t: str, ref_t: str) -> int | None:
-        if cur_t not in TIER_RANK or ref_t not in TIER_RANK:
-            return None
-        d = TIER_RANK[ref_t] - TIER_RANK[cur_t]
-        return d if d >= 1 else None
-
-    def _regressions(ref_dims: dict[str, str], prefix: str) -> list[dict[str, Any]]:
-        regs: list[dict[str, Any]] = []
-        for name, cur_tier in current_dims.items():
-            ref_tier = ref_dims.get(name)
-            if ref_tier is None:
-                continue
-            drop = _drop(cur_tier, ref_tier)
-            if drop is not None:
-                reg = {
-                    "dimension": name,
-                    f"{prefix}_tier": ref_tier,
-                    "current_tier": cur_tier,
-                    "drop": drop,
-                }
-                regs.append(reg)
-        return regs
+    current_dims = _summary_dimension_tiers(summary)
 
     # ── vs_last ────────────────────────────────────────────────────────
     last = entries[-1]
     last_dims: dict[str, str] = last.get("dimensions", {}) or {}
-    result["vs_last"] = _regressions(last_dims, "previous")
+    result["vs_last"] = _dimension_regressions(current_dims, last_dims, "previous")
 
     # ── vs_best (max rubric_total) ─────────────────────────────────────
     best = max(entries, key=lambda e: e.get("rubric_total", 0))
     best_dims: dict[str, str] = best.get("dimensions", {}) or {}
-    result["vs_best"] = _regressions(best_dims, "best")
+    result["vs_best"] = _dimension_regressions(current_dims, best_dims, "best")
 
     return result

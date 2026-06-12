@@ -223,6 +223,15 @@
   stale normalized identities.
 - Current baseline remains 32 raw findings and 32 normalized identities.
 
+## SP11 iteration 10 perf ledger ratchet
+
+- Ratchet timestamp: 2026-06-12T08:32:21Z
+- Split `compare` in `scripts/perf_benchmark/ledger.py` into ledger-entry
+  loading, dimension-tier extraction, tier-drop, and regression-list helpers
+  while preserving the `vs_last`, `vs_best`, and warning contracts.
+- Removed the stale `compare` `cyclomatic_complexity` identity.
+- Current baseline has 31 raw findings and 31 normalized identities.
+
 ## Residual findings
 
 The machine-readable authority is `scripts/wave_baseline.json`. The residual
@@ -232,5 +241,5 @@ honestly recorded as residue if no bounded win remains.
 
 | Leaf | Count | Class | Residue |
 | --- | ---: | --- | --- |
-| complexity | 25 | deferred-structural | Function complexity, function length, module maintainability, and parameter-count rows across the perf benchmark pipeline, reporting, scoring, ledger, support, stage helpers, and perf-optimization helpers. |
+| complexity | 24 | deferred-structural | Function complexity, function length, module maintainability, and parameter-count rows across the perf benchmark pipeline, reporting, scoring, support, stage helpers, and perf-optimization helpers. |
 | hotspot | 7 | deferred-structural / loop-reanchor-residue | `scripts/perf_benchmark/reporting.py`, `scripts/perf_benchmark/scoring.py`, `scripts/perf_benchmark_pipeline.py`, `perf-optimization/scripts/verify_win.py`, `scripts/wave_baseline.json`, `SKILL.md`, and `scripts/wave_frozen.md` still carry `churn_complexity_product`; policy config deliberately does not suppress churn-complexity rows. |
