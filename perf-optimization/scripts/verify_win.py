@@ -130,24 +130,14 @@ def _check_suite(suite_exit_code: int) -> list[str]:
 # ------------------------------------------------------------ ledger reading
 
 
-def _read_ledger(ledger_path: str, after_dims: dict[str, str]) -> tuple[dict[str, Any], list[str]]:
-    """Read the JSONL ledger, compare after dimensions against the last entry.
-
-    Returns (vs_last_dict, warnings).  vs_last_dict is ALWAYS a dict:
-      - {} when no entries exist or no regressions found
-      - {"regressions": [...]} when tier drops are detected
-
-    Corrupt lines produce a warning and are skipped.
-    A missing ledger file produces a warning and {}.
-    """
+def _load_ledger_entries(ledger_path: str) -> tuple[list[dict[str, Any]], list[str]]:
     warnings: list[str] = []
-    entries: list[dict[str, Any]] = []
-
     lpath = Path(ledger_path)
     if not lpath.exists():
         warnings.append(f"Ledger file not found: {ledger_path}")
-        return {}, warnings
+        return [], warnings
 
+    entries: list[dict[str, Any]] = []
     for lineno, raw in enumerate(lpath.read_text().splitlines(), start=1):
         stripped = raw.strip()
         if not stripped:
@@ -156,13 +146,17 @@ def _read_ledger(ledger_path: str, after_dims: dict[str, str]) -> tuple[dict[str
             entries.append(json.loads(stripped))
         except json.JSONDecodeError:
             warnings.append(f"Skipped corrupt line {lineno} in {ledger_path}")
+    return entries, warnings
 
+
+def _ledger_regressions(
+    entries: list[dict[str, Any]], after_dims: dict[str, str]
+) -> list[dict[str, Any]]:
     if not entries:
-        return {}, warnings
+        return []
 
     last = entries[-1]
     last_dims: dict[str, str] = last.get("dimensions", {}) or {}
-
     regressions: list[dict[str, Any]] = []
     for name, after_tier in after_dims.items():
         ref_tier = last_dims.get(name)
@@ -180,6 +174,21 @@ def _read_ledger(ledger_path: str, after_dims: dict[str, str]) -> tuple[dict[str
                     "drop": drop,
                 }
             )
+    return regressions
+
+
+def _read_ledger(ledger_path: str, after_dims: dict[str, str]) -> tuple[dict[str, Any], list[str]]:
+    """Read the JSONL ledger, compare after dimensions against the last entry.
+
+    Returns (vs_last_dict, warnings).  vs_last_dict is ALWAYS a dict:
+      - {} when no entries exist or no regressions found
+      - {"regressions": [...]} when tier drops are detected
+
+    Corrupt lines produce a warning and are skipped.
+    A missing ledger file produces a warning and {}.
+    """
+    entries, warnings = _load_ledger_entries(ledger_path)
+    regressions = _ledger_regressions(entries, after_dims)
 
     if regressions:
         return {"regressions": regressions}, warnings

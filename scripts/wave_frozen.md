@@ -164,6 +164,15 @@
 - Removed the stale `_validate_finding` `cyclomatic_complexity` identity.
 - Current baseline has 34 raw findings and 34 normalized identities.
 
+## SP11 iteration 6 perf-optimization ledger validation ratchet
+
+- Ratchet timestamp: 2026-06-12T03:45:44Z
+- Split `_read_ledger` in `perf-optimization/scripts/verify_win.py` into
+  ledger-entry loading and regression-comparison helpers while preserving the
+  verdict `vs_last` and warning contract.
+- Removed the stale `_read_ledger` `cyclomatic_complexity` identity.
+- Current baseline has 33 raw findings and 33 normalized identities.
+
 ## Residual findings
 
 The machine-readable authority is `scripts/wave_baseline.json`. The residual
@@ -173,5 +182,5 @@ honestly recorded as residue if no bounded win remains.
 
 | Leaf | Count | Class | Residue |
 | --- | ---: | --- | --- |
-| complexity | 28 | deferred-structural | Function complexity, function length, module maintainability, and parameter-count rows across the perf benchmark pipeline, reporting, scoring, ledger, support, stage helpers, and perf-optimization helpers. |
+| complexity | 27 | deferred-structural | Function complexity, function length, module maintainability, and parameter-count rows across the perf benchmark pipeline, reporting, scoring, ledger, support, stage helpers, and perf-optimization helpers. |
 | hotspot | 6 | deferred-structural / loop-reanchor-residue | `scripts/perf_benchmark/reporting.py`, `scripts/perf_benchmark/scoring.py`, `scripts/perf_benchmark_pipeline.py`, `scripts/wave_baseline.json`, `SKILL.md`, and `scripts/wave_frozen.md` still carry `churn_complexity_product`; policy config deliberately does not suppress churn-complexity rows. |
