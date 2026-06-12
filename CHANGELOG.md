@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.3.6 - 2026-06-12
+
+- Split perf-optimization verdict CLI parsing and checked summary loading into
+  focused helpers.
+- Ratcheted the wave baseline from 33 to 32 normalized identities.
+
 ## 0.3.5 - 2026-06-12
 
 - Split perf-optimization candidate finding validation into focused helpers.
