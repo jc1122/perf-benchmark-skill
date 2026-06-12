@@ -111,6 +111,16 @@
   `function_nloc` identities.
 - Current baseline has 37 raw findings and 37 normalized identities.
 
+## SP11 iteration 4 reporting JSON ratchet
+
+- Ratchet timestamp: 2026-06-12T02:49:00Z
+- Split `write_json_summary` in `scripts/perf_benchmark/reporting.py` into
+  helpers for the base summary payload, wall-time percentile samples, memory
+  peaks, and perf-record summaries while preserving the summary JSON contract.
+- Removed stale `write_json_summary` `cyclomatic_complexity` and
+  `function_nloc` identities.
+- Current baseline has 35 raw findings and 35 normalized identities.
+
 ## Residual findings
 
 The machine-readable authority is `scripts/wave_baseline.json`. The residual
@@ -120,5 +130,5 @@ honestly recorded as residue if no bounded win remains.
 
 | Leaf | Count | Class | Residue |
 | --- | ---: | --- | --- |
-| complexity | 33 | deferred-structural | Function complexity, function length, module maintainability, and parameter-count rows across the perf benchmark pipeline, reporting, scoring, ledger, support, stage helpers, and perf-optimization helpers. |
+| complexity | 31 | deferred-structural | Function complexity, function length, module maintainability, and parameter-count rows across the perf benchmark pipeline, reporting, scoring, ledger, support, stage helpers, and perf-optimization helpers. |
 | hotspot | 4 | deferred-structural / loop-reanchor-residue | `scripts/perf_benchmark/reporting.py`, `scripts/perf_benchmark/scoring.py`, `scripts/perf_benchmark_pipeline.py`, and `scripts/wave_baseline.json` still carry `churn_complexity_product`; policy config deliberately does not suppress churn-complexity rows. |

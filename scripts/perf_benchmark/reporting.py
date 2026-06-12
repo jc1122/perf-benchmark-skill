@@ -404,16 +404,8 @@ def write_markdown_report(
     _log(f"  -> Wrote {out_dir / 'benchmark_report.md'}")
 
 
-def write_json_summary(
-    rubric: dict,
-    tier1: dict,
-    tier234: dict,
-    prereqs: dict,
-    args,
-    out_dir: Path,
-    cv_fn,
-) -> dict[str, Any]:
-    summary: dict[str, Any] = {
+def _base_json_summary(rubric: dict, prereqs: dict, args) -> dict[str, Any]:
+    return {
         "generated_at": datetime.now(timezone.utc).isoformat(),
         "root": str(args.root),
         "tier": args.tier,
@@ -433,18 +425,20 @@ def write_json_summary(
         "baseline_regressions": rubric.get("baseline_regressions", []),
         "regression_blocker": bool(rubric.get("baseline_regressions")),
     }
-    summary.update(_summarize_wall_time_metrics(tier1, cv_fn))
 
-    # ── environment fingerprint ───────────────────────────────────────
-    summary["environment"] = _environment_fingerprint()
 
-    # ── wall-time percentiles (p50/p95/p99) from raw repeats ──────────
+def _wall_time_samples(tier1: dict[str, Any]) -> list[float]:
     time_data = tier1.get("time_usage", [])
     walls = [item.get("wall_seconds", 0.0) for item in time_data if item.get("wall_seconds")]
     if not walls:
         time_usage_by_size = tier1.get("time_usage_by_size", {})
         for runs in time_usage_by_size.values():
             walls.extend(run.get("wall_seconds", 0.0) for run in runs if run.get("wall_seconds"))
+    return walls
+
+
+def _add_wall_time_percentiles(summary: dict[str, Any], tier1: dict[str, Any]) -> None:
+    walls = _wall_time_samples(tier1)
     if len(walls) >= 2:
         q = statistics.quantiles(walls, n=100)
         summary["wall_time_percentiles"] = {
@@ -453,6 +447,10 @@ def write_json_summary(
             "p99": q[98],
         }
 
+
+def _add_memory_peaks(
+    summary: dict[str, Any], tier1: dict[str, Any], tier234: dict[str, Any]
+) -> None:
     tracemalloc = tier1.get("tracemalloc", {})
     if tracemalloc and tracemalloc.get("peak_bytes"):
         summary["tracemalloc_peak_bytes"] = tracemalloc["peak_bytes"]
@@ -461,15 +459,38 @@ def write_json_summary(
     if massif and massif.get("peak_bytes"):
         summary["massif_peak_bytes"] = massif["peak_bytes"]
 
+
+def _perf_record_summary(perf_record: dict[str, Any]) -> dict[str, Any]:
+    perf_record_summary = {"available": perf_record.get("available", True)}
+    for key in ("reason", "data_path", "report_path", "report_error", "parse_error"):
+        if key in perf_record:
+            perf_record_summary[key] = perf_record[key]
+    if "hotspots" in perf_record:
+        perf_record_summary["hotspots"] = perf_record.get("hotspots", [])[:5]
+    return perf_record_summary
+
+
+def _add_perf_record_summary(summary: dict[str, Any], tier234: dict[str, Any]) -> None:
     perf_record = tier234.get("perf_record", {})
     if perf_record:
-        perf_record_summary = {"available": perf_record.get("available", True)}
-        for key in ("reason", "data_path", "report_path", "report_error", "parse_error"):
-            if key in perf_record:
-                perf_record_summary[key] = perf_record[key]
-        if "hotspots" in perf_record:
-            perf_record_summary["hotspots"] = perf_record.get("hotspots", [])[:5]
-        summary["perf_record"] = perf_record_summary
+        summary["perf_record"] = _perf_record_summary(perf_record)
+
+
+def write_json_summary(
+    rubric: dict,
+    tier1: dict,
+    tier234: dict,
+    prereqs: dict,
+    args,
+    out_dir: Path,
+    cv_fn,
+) -> dict[str, Any]:
+    summary = _base_json_summary(rubric, prereqs, args)
+    summary.update(_summarize_wall_time_metrics(tier1, cv_fn))
+    summary["environment"] = _environment_fingerprint()
+    _add_wall_time_percentiles(summary, tier1)
+    _add_memory_peaks(summary, tier1, tier234)
+    _add_perf_record_summary(summary, tier234)
 
     (out_dir / "benchmark_summary.json").write_text(json.dumps(summary, indent=2))
     _log(f"  -> Wrote {out_dir / 'benchmark_summary.json'}")

@@ -67,18 +67,6 @@
   },
   {
     "leaf": "complexity",
-    "path": "scripts/perf_benchmark/reporting.py",
-    "symbol": "write_json_summary",
-    "metric": "cyclomatic_complexity"
-  },
-  {
-    "leaf": "complexity",
-    "path": "scripts/perf_benchmark/reporting.py",
-    "symbol": "write_json_summary",
-    "metric": "function_nloc"
-  },
-  {
-    "leaf": "complexity",
     "path": "scripts/perf_benchmark/scoring.py",
     "symbol": "_fit_exponent",
     "metric": "cyclomatic_complexity"
