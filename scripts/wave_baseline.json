@@ -43,12 +43,6 @@
   },
   {
     "leaf": "complexity",
-    "path": "perf-optimization/scripts/verify_win.py",
-    "symbol": "main",
-    "metric": "function_nloc"
-  },
-  {
-    "leaf": "complexity",
     "path": "scripts/perf_benchmark/ledger.py",
     "symbol": "compare",
     "metric": "cyclomatic_complexity"

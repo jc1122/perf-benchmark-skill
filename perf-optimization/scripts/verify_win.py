@@ -255,7 +255,7 @@ def _write_output(payload: dict[str, Any], out_path: str) -> str:
 # --------------------------------------------------------------------- CLI
 
 
-def main(argv: list[str] | None = None) -> int:
+def _build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(description="Deterministic SP6-pipeline win verdict wrapper")
     parser.add_argument(
         "--before", required=True, type=str, help="Before-run benchmark_summary.json"
@@ -272,43 +272,41 @@ def main(argv: list[str] | None = None) -> int:
         "--ledger", type=str, default=None, help="Optional append-only JSONL ledger"
     )
     parser.add_argument("--out", required=True, type=str, help="Path for verdict JSON output")
-    args = parser.parse_args(argv)
+    return parser
 
-    # Load before summary
+
+def _write_malformed_summary(label: str, exc: Exception, out_path: str) -> None:
+    _write_output(
+        {
+            "verdict": "error",
+            "median_win_percent": 0.0,
+            "reasons": ["malformed"],
+            "vs_last": {},
+            "warnings": [f"{label} summary error: {exc}"],
+        },
+        out_path,
+    )
+
+
+def _load_checked_summary(path: str, label: str, out_path: str) -> tuple[dict[str, Any], int]:
     try:
-        before = _load_summary(args.before)
+        return _load_summary(path), 0
     except (OSError, json.JSONDecodeError, ValueError) as exc:
-        _write_output(
-            {
-                "verdict": "error",
-                "median_win_percent": 0.0,
-                "reasons": ["malformed"],
-                "vs_last": {},
-                "warnings": [f"Before summary error: {exc}"],
-            },
-            args.out,
-        )
-        return 2
+        _write_malformed_summary(label, exc, out_path)
+        return {}, 2
 
-    # Load after summary
-    try:
-        after = _load_summary(args.after)
-    except (OSError, json.JSONDecodeError, ValueError) as exc:
-        _write_output(
-            {
-                "verdict": "error",
-                "median_win_percent": 0.0,
-                "reasons": ["malformed"],
-                "vs_last": {},
-                "warnings": [f"After summary error: {exc}"],
-            },
-            args.out,
-        )
-        return 2
 
-    # Build verdict
+def main(argv: list[str] | None = None) -> int:
+    args = _build_parser().parse_args(argv)
+
+    before, exit_code = _load_checked_summary(args.before, "Before", args.out)
+    if exit_code:
+        return exit_code
+    after, exit_code = _load_checked_summary(args.after, "After", args.out)
+    if exit_code:
+        return exit_code
+
     verdict_payload = _build_verdict(before, after, args.suite_exit_code, args.min_win, args.ledger)
-
     _write_output(verdict_payload, args.out)
 
     if verdict_payload["verdict"] == "accept":
