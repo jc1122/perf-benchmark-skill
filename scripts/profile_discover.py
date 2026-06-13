@@ -3,6 +3,7 @@
 
 Deterministic ranking (relative timings only — never used for the win gate).
 """
+
 from __future__ import annotations
 
 import argparse
@@ -11,8 +12,9 @@ import json
 import pstats
 import runpy
 import sys
+from collections.abc import Callable
 from pathlib import Path
-from typing import Any, Callable
+from typing import Any
 
 
 def _stats_to_rows(stats: pstats.Stats, top: int) -> list[dict[str, Any]]:
@@ -48,7 +50,9 @@ def _run_script(path: Path) -> Callable[[], None]:
 
 def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(description="Rank hotspots of a representative run.")
-    parser.add_argument("--script", required=True, type=Path, help="Python script to run under cProfile")
+    parser.add_argument(
+        "--script", required=True, type=Path, help="Python script to run under cProfile"
+    )
     parser.add_argument("--out", required=True, type=Path, help="Output ranked JSON path")
     parser.add_argument("--top", type=int, default=20)
     args = parser.parse_args(argv)
@@ -57,7 +61,10 @@ def main(argv: list[str] | None = None) -> int:
     try:
         rows = rank_hotspots(_run_script(args.script), top=args.top)
     except BaseException as exc:  # noqa: BLE001 — the representative run is arbitrary user code
-        args.out.write_text(json.dumps({"error": f"representative run failed: {exc!r}"}, indent=2) + "\n", encoding="utf-8")
+        args.out.write_text(
+            json.dumps({"error": f"representative run failed: {exc!r}"}, indent=2) + "\n",
+            encoding="utf-8",
+        )
         print(f"profile_discover: representative run failed: {exc!r}", file=sys.stderr)
         return 2
     args.out.write_text(json.dumps(rows, indent=2) + "\n", encoding="utf-8")

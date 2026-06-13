@@ -406,7 +406,7 @@ def write_markdown_report(
 
 
 def build_summary_contract(rubric: dict) -> dict:
-    """Stable top-level signals consumed by repo-B's synthesis gate (decoupled from rubric layout)."""
+    """Stable top-level signals for repo-B's synthesis gate (decoupled from rubric)."""
     dims = dict(rubric.get("dimensions", []))
     algo = dims.get("Algorithmic Scaling", {})
     k = algo.get("sub_checks", {}).get("complexity_exponent", {}).get("k")
@@ -419,7 +419,9 @@ def build_summary_contract(rubric: dict) -> dict:
 
 def _base_json_summary(rubric: dict, prereqs: dict, args) -> dict[str, Any]:
     return {
-        **build_summary_contract(rubric),   # complexity_exponent, deterministic_tier (top-level contract)
+        **build_summary_contract(
+            rubric
+        ),  # complexity_exponent, deterministic_tier (top-level contract)
         "generated_at": datetime.now(timezone.utc).isoformat(),
         "root": str(args.root),
         "tier": args.tier,

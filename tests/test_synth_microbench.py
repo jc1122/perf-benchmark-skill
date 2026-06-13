@@ -11,9 +11,7 @@ def test_generate_writes_runnable_harness_and_stub(tmp_path):
     # a target module to benchmark
     pkg = tmp_path / "src"
     pkg.mkdir()
-    (pkg / "algo.py").write_text(
-        "def find_max(data):\n    return max(data)\n", encoding="utf-8"
-    )
+    (pkg / "algo.py").write_text("def find_max(data):\n    return max(data)\n", encoding="utf-8")
     out = tmp_path / "perf" / "find_max"
     paths = sm.generate(
         out_dir=out,
@@ -42,16 +40,14 @@ def test_generate_writes_runnable_harness_and_stub(tmp_path):
 
 def test_target_command_uses_size_placeholder(tmp_path):
     out = tmp_path / "perf" / "x"
-    paths = sm.generate(
-        out_dir=out, name="x", import_root=tmp_path, module="m", func="f"
-    )
+    paths = sm.generate(out_dir=out, name="x", import_root=tmp_path, module="m", func="f")
     assert "{SIZE}" in paths["target_command"]
     assert paths["bench"].name in paths["target_command"]
 
 
 def test_validate_make_input_flags_unfilled_stub(tmp_path):
     out = tmp_path / "perf" / "x"
-    paths = sm.generate(out_dir=out, name="x", import_root=tmp_path, module="m", func="f")
+    sm.generate(out_dir=out, name="x", import_root=tmp_path, module="m", func="f")
     res = sm.validate_make_input(out)  # stub still raises NotImplementedError
     assert res["ok"] is False and "stub" in res["reason"].lower()
 
@@ -59,7 +55,9 @@ def test_validate_make_input_flags_unfilled_stub(tmp_path):
 def test_validate_make_input_flags_non_scaling(tmp_path):
     out = tmp_path / "perf" / "x"
     sm.generate(out_dir=out, name="x", import_root=tmp_path, module="m", func="f")
-    (out / "make_input.py").write_text("def make_input(size):\n    return [0, 1, 2]\n", encoding="utf-8")
+    (out / "make_input.py").write_text(
+        "def make_input(size):\n    return [0, 1, 2]\n", encoding="utf-8"
+    )
     res = sm.validate_make_input(out)
     assert res["ok"] is False and "scale" in res["reason"].lower()
 
@@ -67,6 +65,8 @@ def test_validate_make_input_flags_non_scaling(tmp_path):
 def test_validate_make_input_accepts_scaling(tmp_path):
     out = tmp_path / "perf" / "x"
     sm.generate(out_dir=out, name="x", import_root=tmp_path, module="m", func="f")
-    (out / "make_input.py").write_text("def make_input(size):\n    return list(range(size))\n", encoding="utf-8")
+    (out / "make_input.py").write_text(
+        "def make_input(size):\n    return list(range(size))\n", encoding="utf-8"
+    )
     res = sm.validate_make_input(out)
     assert res["ok"] is True

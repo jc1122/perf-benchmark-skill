@@ -11,7 +11,8 @@ if str(_SCRIPTS_DIR) not in sys.path:
     sys.path.insert(0, str(_SCRIPTS_DIR))
 
 from perf_benchmark import reporting  # noqa: E402
-from tests.helpers import REPO_ROOT, make_args, pipeline
+
+from tests.helpers import REPO_ROOT, make_args, pipeline  # noqa: E402
 
 
 def test_score_rubric_reports_baseline_regressions_for_any_dimension(tmp_path: Path) -> None:
@@ -610,20 +611,31 @@ def test_write_json_summary_includes_wall_time_percentiles(tmp_path: Path) -> No
 
 
 def test_summary_exposes_top_level_contract():
-    rubric = {"dimensions": [
-        ("Algorithmic Scaling", {"tier": "PASS", "sub_checks": {"complexity_exponent": {"k": 1.93}}}),
-        ("CPU Efficiency", {"tier": "PASS"}),  # callgrind/perf backed
-    ], "total": 8, "max_possible": 8}
+    rubric = {
+        "dimensions": [
+            (
+                "Algorithmic Scaling",
+                {"tier": "PASS", "sub_checks": {"complexity_exponent": {"k": 1.93}}},
+            ),
+            ("CPU Efficiency", {"tier": "PASS"}),  # callgrind/perf backed
+        ],
+        "total": 8,
+        "max_possible": 8,
+    }
     summary = reporting.build_summary_contract(rubric)
     assert summary["complexity_exponent"] == 1.93
     assert summary["deterministic_tier"] is True
 
 
 def test_summary_contract_marks_non_deterministic_and_missing_exponent():
-    rubric = {"dimensions": [
-        ("Algorithmic Scaling", {"tier": "N/A", "note": "Insufficient data"}),
-        ("CPU Efficiency", {"tier": "N/A"}),
-    ], "total": 0, "max_possible": 0}
+    rubric = {
+        "dimensions": [
+            ("Algorithmic Scaling", {"tier": "N/A", "note": "Insufficient data"}),
+            ("CPU Efficiency", {"tier": "N/A"}),
+        ],
+        "total": 0,
+        "max_possible": 0,
+    }
     summary = reporting.build_summary_contract(rubric)
     assert summary["complexity_exponent"] is None
     assert summary["deterministic_tier"] is False
