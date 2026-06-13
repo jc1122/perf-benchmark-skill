@@ -405,8 +405,21 @@ def write_markdown_report(
     _log(f"  -> Wrote {out_dir / 'benchmark_report.md'}")
 
 
+def build_summary_contract(rubric: dict) -> dict:
+    """Stable top-level signals consumed by repo-B's synthesis gate (decoupled from rubric layout)."""
+    dims = dict(rubric.get("dimensions", []))
+    algo = dims.get("Algorithmic Scaling", {})
+    k = algo.get("sub_checks", {}).get("complexity_exponent", {}).get("k")
+    cpu_tier = dims.get("CPU Efficiency", {}).get("tier")
+    return {
+        "complexity_exponent": k,
+        "deterministic_tier": cpu_tier not in (None, "N/A"),
+    }
+
+
 def _base_json_summary(rubric: dict, prereqs: dict, args) -> dict[str, Any]:
     return {
+        **build_summary_contract(rubric),   # complexity_exponent, deterministic_tier (top-level contract)
         "generated_at": datetime.now(timezone.utc).isoformat(),
         "root": str(args.root),
         "tier": args.tier,
