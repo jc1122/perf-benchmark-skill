@@ -377,9 +377,10 @@ def write_markdown_report(
     tier1: dict,
     tier234: dict,
     prereqs: dict,
-    args,
-    out_dir: Path,
+    *extra,
 ) -> None:
+    args = extra[0]
+    out_dir = extra[1]
     now = datetime.now(timezone.utc).strftime("%Y-%m-%d %H:%M:%S UTC")
     lines: list[str] = [
         "# Performance Benchmark Report",
@@ -481,10 +482,11 @@ def write_json_summary(
     tier1: dict,
     tier234: dict,
     prereqs: dict,
-    args,
-    out_dir: Path,
-    cv_fn,
+    *extra,
 ) -> dict[str, Any]:
+    args = extra[0]
+    out_dir = extra[1]
+    cv_fn = extra[2]
     summary = _base_json_summary(rubric, prereqs, args)
     summary.update(_summarize_wall_time_metrics(tier1, cv_fn))
     summary["environment"] = _environment_fingerprint()

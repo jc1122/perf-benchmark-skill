@@ -97,18 +97,6 @@
   },
   {
     "leaf": "complexity",
-    "path": "scripts/perf_benchmark/reporting.py",
-    "symbol": "write_markdown_report",
-    "metric": "parameter_count"
-  },
-  {
-    "leaf": "complexity",
-    "path": "scripts/perf_benchmark/reporting.py",
-    "symbol": "write_json_summary",
-    "metric": "parameter_count"
-  },
-  {
-    "leaf": "complexity",
     "path": "scripts/perf_benchmark_pipeline.py",
     "symbol": "write_json_summary",
     "metric": "parameter_count"
