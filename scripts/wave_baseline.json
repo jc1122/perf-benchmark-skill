@@ -144,136 +144,10 @@
     "metric": "parameter_count"
   },
   {
-    "leaf": "security",
-    "path": "scripts/check_wave_baseline.py",
-    "symbol": "blacklist",
-    "metric": "bandit_B404"
-  },
-  {
-    "leaf": "security",
-    "path": "scripts/check_wave_baseline.py",
-    "symbol": "subprocess_without_shell_equals_true",
-    "metric": "bandit_B603"
-  },
-  {
-    "leaf": "security",
-    "path": "scripts/perf_benchmark_pipeline.py",
-    "symbol": "blacklist",
-    "metric": "bandit_B404"
-  },
-  {
-    "leaf": "security",
-    "path": "scripts/perf_benchmark_pipeline.py",
-    "symbol": "subprocess_without_shell_equals_true",
-    "metric": "bandit_B603"
-  },
-  {
-    "leaf": "security",
-    "path": "scripts/perf_benchmark_pipeline.py",
-    "symbol": "subprocess_without_shell_equals_true",
-    "metric": "bandit_B603"
-  },
-  {
-    "leaf": "security",
-    "path": "scripts/perf_benchmark_pipeline.py",
-    "symbol": "subprocess_without_shell_equals_true",
-    "metric": "bandit_B603"
-  },
-  {
-    "leaf": "security",
-    "path": "scripts/perf_benchmark_pipeline.py",
-    "symbol": "subprocess_without_shell_equals_true",
-    "metric": "bandit_B603"
-  },
-  {
-    "leaf": "security",
-    "path": "scripts/perf_benchmark_pipeline.py",
-    "symbol": "subprocess_without_shell_equals_true",
-    "metric": "bandit_B603"
-  },
-  {
-    "leaf": "security",
-    "path": "scripts/perf_benchmark_pipeline.py",
-    "symbol": "subprocess_without_shell_equals_true",
-    "metric": "bandit_B603"
-  },
-  {
-    "leaf": "security",
-    "path": "scripts/perf_benchmark_pipeline.py",
-    "symbol": "subprocess_without_shell_equals_true",
-    "metric": "bandit_B603"
-  },
-  {
-    "leaf": "security",
-    "path": "scripts/perf_benchmark_pipeline.py",
-    "symbol": "subprocess_without_shell_equals_true",
-    "metric": "bandit_B603"
-  },
-  {
-    "leaf": "security",
-    "path": "scripts/perf_benchmark_pipeline.py",
-    "symbol": "subprocess_without_shell_equals_true",
-    "metric": "bandit_B603"
-  },
-  {
-    "leaf": "security",
-    "path": "scripts/perf_benchmark_pipeline.py",
-    "symbol": "start_process_with_partial_path",
-    "metric": "bandit_B607"
-  },
-  {
-    "leaf": "security",
-    "path": "scripts/perf_benchmark_pipeline.py",
-    "symbol": "subprocess_without_shell_equals_true",
-    "metric": "bandit_B603"
-  },
-  {
-    "leaf": "security",
-    "path": "scripts/perf_benchmark_pipeline.py",
-    "symbol": "start_process_with_partial_path",
-    "metric": "bandit_B607"
-  },
-  {
-    "leaf": "security",
-    "path": "scripts/perf_benchmark_pipeline.py",
-    "symbol": "subprocess_without_shell_equals_true",
-    "metric": "bandit_B603"
-  },
-  {
-    "leaf": "security",
-    "path": "scripts/perf_benchmark_pipeline.py",
-    "symbol": "subprocess_without_shell_equals_true",
-    "metric": "bandit_B603"
-  },
-  {
-    "leaf": "hotspot",
-    "path": "CHANGELOG.md",
-    "symbol": "CHANGELOG.md<->SKILL.md",
-    "metric": "temporal_coupling_ratio"
-  },
-  {
-    "leaf": "hotspot",
-    "path": "README.md",
-    "symbol": "README.md<->SKILL.md",
-    "metric": "temporal_coupling_ratio"
-  },
-  {
-    "leaf": "hotspot",
-    "path": "README.md",
-    "symbol": "README.md<->scripts/perf_benchmark_pipeline.py",
-    "metric": "temporal_coupling_ratio"
-  },
-  {
     "leaf": "hotspot",
     "path": "SKILL.md",
     "symbol": "SKILL.md",
     "metric": "churn_complexity_product"
-  },
-  {
-    "leaf": "hotspot",
-    "path": "SKILL.md",
-    "symbol": "SKILL.md",
-    "metric": "author_concentration"
   },
   {
     "leaf": "hotspot",
@@ -301,33 +175,9 @@
   },
   {
     "leaf": "hotspot",
-    "path": "scripts/perf_benchmark_pipeline.py",
-    "symbol": "scripts/perf_benchmark_pipeline.py",
-    "metric": "author_concentration"
-  },
-  {
-    "leaf": "hotspot",
-    "path": "scripts/wave_anchor.txt",
-    "symbol": "scripts/wave_anchor.txt<->scripts/wave_frozen.md",
-    "metric": "temporal_coupling_ratio"
-  },
-  {
-    "leaf": "hotspot",
     "path": "scripts/wave_baseline.json",
     "symbol": "scripts/wave_baseline.json",
     "metric": "churn_complexity_product"
-  },
-  {
-    "leaf": "hotspot",
-    "path": "scripts/wave_baseline.json",
-    "symbol": "scripts/wave_baseline.json",
-    "metric": "author_concentration"
-  },
-  {
-    "leaf": "hotspot",
-    "path": "scripts/wave_baseline.json",
-    "symbol": "scripts/wave_baseline.json<->scripts/wave_frozen.md",
-    "metric": "temporal_coupling_ratio"
   },
   {
     "leaf": "hotspot",
@@ -336,9 +186,9 @@
     "metric": "churn_complexity_product"
   },
   {
-    "leaf": "hotspot",
-    "path": "scripts/wave_frozen.md",
-    "symbol": "scripts/wave_frozen.md",
-    "metric": "author_concentration"
+    "leaf": "growth-audit",
+    "path": "<repo>",
+    "symbol": "net_loc_growth",
+    "metric": "net_loc_growth"
   }
 ]
