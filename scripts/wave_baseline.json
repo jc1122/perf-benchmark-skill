@@ -1,12 +1,6 @@
 [
   {
     "leaf": "complexity",
-    "path": "scripts/perf_benchmark/scoring.py",
-    "symbol": "score_algorithmic_scaling",
-    "metric": "cyclomatic_complexity"
-  },
-  {
-    "leaf": "complexity",
     "path": "scripts/perf_benchmark/stage_helpers.py",
     "symbol": "_parse_cachegrind_summary",
     "metric": "cyclomatic_complexity"
@@ -40,30 +34,6 @@
     "path": "scripts/perf_benchmark/support.py",
     "symbol": "<module>",
     "metric": "maintainability_index"
-  },
-  {
-    "leaf": "complexity",
-    "path": "scripts/perf_benchmark/scoring.py",
-    "symbol": "_fit_exponent",
-    "metric": "cyclomatic_complexity"
-  },
-  {
-    "leaf": "complexity",
-    "path": "scripts/perf_benchmark/scoring.py",
-    "symbol": "score_algorithmic_scaling",
-    "metric": "function_nloc"
-  },
-  {
-    "leaf": "complexity",
-    "path": "scripts/perf_benchmark/scoring.py",
-    "symbol": "score_cpu_efficiency",
-    "metric": "cyclomatic_complexity"
-  },
-  {
-    "leaf": "complexity",
-    "path": "scripts/perf_benchmark/scoring.py",
-    "symbol": "score_memory_profile",
-    "metric": "cyclomatic_complexity"
   },
   {
     "leaf": "complexity",
