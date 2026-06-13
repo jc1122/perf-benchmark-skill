@@ -34,7 +34,10 @@ def test_main_writes_ranked_json(tmp_path):
         encoding="utf-8",
     )
     out = tmp_path / "ranked.json"
-    rc = pd.main(["--script", str(target), "--out", str(out), "--top", "10"])
+    # --top must comfortably exceed the runpy/importlib wrapper frames (exec, <module>,
+    # _find_and_load, …) that rank above the profiled function by cumulative time; their
+    # count varies by Python version, so a narrow window can drop `work` (e.g. on 3.12).
+    rc = pd.main(["--script", str(target), "--out", str(out), "--top", "50"])
     assert rc == 0
     data = json.loads(out.read_text())
     assert isinstance(data, list) and data
