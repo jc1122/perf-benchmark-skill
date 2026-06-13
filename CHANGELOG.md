@@ -1,5 +1,16 @@
 # Changelog
 
+## 0.4.0 - 2026-06-14
+
+- Benchmark-synthesis primitives for the `synthesizable` performance lane:
+  `scripts/profile_discover.py` (stdlib cProfile hotspot ranking, the fallback
+  when `perf`/valgrind are absent) and `scripts/synth_microbench.py` (generate a
+  perf-benchmark-shaped harness + `make_input` stub, with a `validate_make_input`
+  pre-measurement guard).
+- `reporting.build_summary_contract` exposes a stable top-level summary contract
+  (`complexity_exponent`, `deterministic_tier`) so consumers gate on it instead of
+  reaching into nested rubric internals. Additive; existing keys unchanged.
+
 ## 0.3.8 - 2026-06-12
 
 - Split perf benchmark ledger comparison into focused loading, tier, and
