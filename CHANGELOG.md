@@ -1,5 +1,21 @@
 # Changelog
 
+## 0.4.2 - 2026-06-14
+
+Self-contained convergent family — Phase 1. New `convergence-gate` CI job runs the
+Tier-1 deterministic wave against repo-P self-contained and reproducibly: pinned
+leaves (`v0.7.2`) + pinned runner (`repo-audit-refactor-optimize` `v0.8.1`), pinned
+toolchain, Python 3.14, jscpd via `$GITHUB_PATH`, full git history (`fetch-depth: 0`,
+needed by the history-mining hotspot/growth lanes), gated on the real exit code. With
+the runner at `v0.8.1` the wave now includes the `perf-smell` lane, so repo-P's own
+scripts are perf-smell-audited; findings triaged (genuine fixes applied, perflint
+over-approximations justify-accepted in `.repo-audit/accept.json`). Also accepts the
+cross-skill jscpd duplication clone (the JSONL-ledger reader shared by
+`scripts/perf_benchmark/ledger.py` and `perf-optimization/scripts/verify_win.py`,
+which are separate independently-installed skills). Added `tests/test_accept_policy.py`
+guarding the acceptance policy, and dropped the stale `wave_baseline.json`
+declared-coupling pair.
+
 ## 0.4.1 - 2026-06-14
 
 - Re-anchored the convergence wave and fixed two real TYPE findings in source
