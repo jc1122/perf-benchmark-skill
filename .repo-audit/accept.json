@@ -322,6 +322,19 @@
       "applies": [
         "report"
       ]
+    },
+    {
+      "match": {
+        "kind": "finding",
+        "leaf": "duplication",
+        "path": "perf-optimization/scripts/verify_win.py",
+        "symbol": "scripts/perf_benchmark/ledger.py:58-69",
+        "metric": "duplicate_tokens"
+      },
+      "reason": "Incidental clone of the ~11-line JSONL-ledger parse loop (read lines, skip blanks, json.loads each, warn-and-skip on JSONDecodeError) shared by perf-benchmark's scripts/perf_benchmark/ledger.py::_read_ledger_entries and perf-optimization's perf-optimization/scripts/verify_win.py::_load_ledger_entries. The two live in SEPARATE, independently-installed skills (installed to distinct ~/.claude/skills dirs) that cannot import each other at runtime, so extracting a shared helper would break skill self-containment; each skill legitimately self-contains its own ledger reader. Surfaced only under the self-contained leaf set (jscpd via the pinned/cloned leaves), which is the canonical convergence env (CI convergence-gate). Line-pinned (L5): re-anchor if ledger.py lines 58-69 shift. Accepted as cross-skill-idiomatic.",
+      "applies": [
+        "report"
+      ]
     }
   ]
 }
