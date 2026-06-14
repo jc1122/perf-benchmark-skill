@@ -60,12 +60,12 @@
 - Advanced `scripts/wave_anchor.txt` to
   `b5ed162ef4224340a7776e913321c38ec38bcf90`.
 - Added the ratchet ledger pair
-  `scripts/wave_baseline.json<->scripts/wave_frozen.md` to
+  `wave_baseline.json<->scripts/wave_frozen.md` to
   `scripts/hotspot_audit_config.json`; the hotspot leaf counts the suppression
   under `declared_coupling`.
 - Re-anchor surfaced two loop-induced churn rows:
   `scripts/perf_benchmark/scoring.py` from accepted security/constant work and
-  `scripts/wave_baseline.json` from repeated ratchets. Per SP11 pre-flight rule
+  `wave_baseline.json` from repeated ratchets. Per SP11 pre-flight rule
   5, both are recorded as real re-anchor residue for the next iteration rather
   than hidden or treated as unfixable growth.
 - Current baseline has 41 raw findings and 41 normalized identities.
@@ -243,15 +243,17 @@
 
 ## Residual findings
 
-The machine-readable authority is `scripts/wave_baseline.json`. The residual
-baseline now contains only structural code-health debt and the seven real
+The machine-readable authority is the repo's acceptance policy under the
+`.repo-audit` directory (Phase 2 migration replaced the former wave_baseline.json).
+The residual baseline now contains only structural code-health debt, the
 churn-complexity hotspot rows that must be reduced by future complexity work or
-honestly recorded as residue if no bounded win remains.
+honestly recorded as residue, and a growth-audit rule accepting expected surface
+growth vs the pinned anchor.
 
 | Leaf | Count | Class | Residue |
 | --- | ---: | --- | --- |
 | complexity | 24 | deferred-structural | Function complexity, function length, module maintainability, and parameter-count rows across the perf benchmark pipeline, reporting, scoring, support, stage helpers, and perf-optimization helpers. |
-| hotspot | 8 | deferred-structural / loop-reanchor-residue | `scripts/perf_benchmark/reporting.py`, `scripts/perf_benchmark/scoring.py`, `scripts/perf_benchmark_pipeline.py`, `perf-optimization/scripts/verify_win.py`, `scripts/wave_baseline.json`, `SKILL.md`, `scripts/wave_frozen.md`, and `tests/test_pipeline_scoring_reporting.py` carry `churn_complexity_product`; policy config deliberately does not suppress churn-complexity rows. |
+| hotspot | 7 | deferred-structural / loop-reanchor-residue | `scripts/perf_benchmark/reporting.py`, `scripts/perf_benchmark/scoring.py`, `scripts/perf_benchmark_pipeline.py`, `perf-optimization/scripts/verify_win.py`, `SKILL.md`, `scripts/wave_frozen.md`, and `tests/test_pipeline_scoring_reporting.py` carry `churn_complexity_product`; policy config deliberately does not suppress churn-complexity rows. |
 
 ## 2026-06-14 re-anchor + type fixes
 

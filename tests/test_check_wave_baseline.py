@@ -20,73 +20,51 @@ def _write_json(path: Path, obj: object) -> Path:
     return path
 
 
-def _findings_payload(capsys: pytest.CaptureFixture[str]) -> dict:
+def _payload(capsys: pytest.CaptureFixture[str]) -> dict:
     return json.loads(capsys.readouterr().out.strip())
 
 
-def _identity_as_lists(finding: dict[str, str]) -> list[list[str]]:
-    return [list(item) for item in sorted(finding.items())]
-
-
-def test_gate_passes_when_current_equals_baseline(
+def test_gate_passes_when_active_empty_and_no_stale(
     tmp_path: Path, capsys: pytest.CaptureFixture[str]
 ) -> None:
-    baseline = [
-        {"leaf": "A", "path": "p", "symbol": "s", "metric": "m"},
-    ]
-    snapshot = _write_json(tmp_path / "snapshot.json", baseline)
-    baseline_path = _write_json(tmp_path / "baseline.json", baseline)
-
-    code = main(["--snapshot", str(snapshot), "--baseline", str(baseline_path)])
-    payload = _findings_payload(capsys)
-
+    snapshot = _write_json(tmp_path / "active.json", [])
+    accepted = _write_json(
+        tmp_path / "acc.json", {"accepted": [{"leaf": "A"}], "stale": []}
+    )
+    code = main(["--snapshot", str(snapshot), "--accepted", str(accepted)])
+    payload = _payload(capsys)
     assert code == 0
     assert payload["status"] == "pass"
-    assert payload["count"] == 1
-    assert payload["baseline"] == 1
+    assert payload["accepted"] == 1
+    assert payload["active"] == 0
 
 
-def test_gate_fails_when_new_findings_exist(
+def test_gate_fails_on_active_findings(
     tmp_path: Path, capsys: pytest.CaptureFixture[str]
 ) -> None:
-    baseline = [{"leaf": "A", "path": "p", "symbol": "s", "metric": "m"}]
-    current = [
-        {"leaf": "A", "path": "p", "symbol": "s", "metric": "m"},
-        {"leaf": "B", "path": "q", "symbol": "t", "metric": "n"},
-    ]
-
-    snapshot = _write_json(tmp_path / "snapshot.json", current)
-    baseline_path = _write_json(tmp_path / "baseline.json", baseline)
-
-    code = main(["--snapshot", str(snapshot), "--baseline", str(baseline_path)])
-    payload = _findings_payload(capsys)
-    expected_new = [_identity_as_lists({"leaf": "B", "path": "q", "symbol": "t", "metric": "n"})]
-
+    snapshot = _write_json(
+        tmp_path / "active.json",
+        [{"leaf": "B", "path": "q", "symbol": "t", "metric": "n"}],
+    )
+    code = main(["--snapshot", str(snapshot)])
+    payload = _payload(capsys)
     assert code == 1
     assert payload["status"] == "fail"
-    assert payload["new_findings"] == expected_new
+    assert payload["new_findings"][0]["leaf"] == "B"
 
 
-def test_gate_fails_when_stale_baseline_findings_exist(
+def test_gate_fails_on_stale_acceptances(
     tmp_path: Path, capsys: pytest.CaptureFixture[str]
 ) -> None:
-    baseline = [
-        {"leaf": "A", "path": "p", "symbol": "s", "metric": "m"},
-        {"leaf": "B", "path": "q", "symbol": "t", "metric": "n"},
-    ]
-    current = [{"leaf": "A", "path": "p", "symbol": "s", "metric": "m"}]
-
-    snapshot = _write_json(tmp_path / "snapshot.json", current)
-    baseline_path = _write_json(tmp_path / "baseline.json", baseline)
-
-    code = main(["--snapshot", str(snapshot), "--baseline", str(baseline_path)])
-    payload = _findings_payload(capsys)
-    expected_stale = [_identity_as_lists({"leaf": "B", "path": "q", "symbol": "t", "metric": "n"})]
-
+    snapshot = _write_json(tmp_path / "active.json", [])
+    accepted = _write_json(
+        tmp_path / "acc.json", {"accepted": [], "stale": ["finding:{leaf=A}"]}
+    )
+    code = main(["--snapshot", str(snapshot), "--accepted", str(accepted)])
+    payload = _payload(capsys)
     assert code == 1
     assert payload["status"] == "fail"
-    assert payload["stale_baseline"] == expected_stale
-    assert payload["message"] == "ratchet: remove them from wave_baseline.json in the same commit"
+    assert payload["stale_acceptances"]
 
 
 def test_live_wave_forwards_anchor_and_configs(
@@ -104,10 +82,11 @@ def test_live_wave_forwards_anchor_and_configs(
         "out = Path(sys.argv[sys.argv.index('--out-dir') + 1])\n"
         "out.mkdir(parents=True, exist_ok=True)\n"
         "(out / 'wave_findings.json').write_text('[]', encoding='utf-8')\n"
+        "(out / 'wave_findings.accepted.json').write_text("
+        "json.dumps({'accepted': [], 'stale': []}), encoding='utf-8')\n"
         "(out / 'argv.json').write_text(json.dumps(sys.argv[1:]), encoding='utf-8')\n",
         encoding="utf-8",
     )
-    baseline_path = _write_json(tmp_path / "baseline.json", [])
     anchor = tmp_path / "wave_anchor.txt"
     anchor.write_text("anchor-sha\n", encoding="utf-8")
     security_config = tmp_path / "security_audit_config.json"
@@ -125,8 +104,8 @@ def test_live_wave_forwards_anchor_and_configs(
     monkeypatch.delenv("SECURITY_CONFIG", raising=False)
     monkeypatch.delenv("HOTSPOT_CONFIG", raising=False)
 
-    code = main(["--baseline", str(baseline_path)])
-    payload = _findings_payload(capsys)
+    code = main([])
+    payload = _payload(capsys)
     argv = json.loads((repo / ".wave_out" / "argv.json").read_text(encoding="utf-8"))
 
     assert code == 0
