@@ -251,4 +251,17 @@ honestly recorded as residue if no bounded win remains.
 | Leaf | Count | Class | Residue |
 | --- | ---: | --- | --- |
 | complexity | 24 | deferred-structural | Function complexity, function length, module maintainability, and parameter-count rows across the perf benchmark pipeline, reporting, scoring, support, stage helpers, and perf-optimization helpers. |
-| hotspot | 7 | deferred-structural / loop-reanchor-residue | `scripts/perf_benchmark/reporting.py`, `scripts/perf_benchmark/scoring.py`, `scripts/perf_benchmark_pipeline.py`, `perf-optimization/scripts/verify_win.py`, `scripts/wave_baseline.json`, `SKILL.md`, and `scripts/wave_frozen.md` still carry `churn_complexity_product`; policy config deliberately does not suppress churn-complexity rows. |
+| hotspot | 8 | deferred-structural / loop-reanchor-residue | `scripts/perf_benchmark/reporting.py`, `scripts/perf_benchmark/scoring.py`, `scripts/perf_benchmark_pipeline.py`, `perf-optimization/scripts/verify_win.py`, `scripts/wave_baseline.json`, `SKILL.md`, `scripts/wave_frozen.md`, and `tests/test_pipeline_scoring_reporting.py` carry `churn_complexity_product`; policy config deliberately does not suppress churn-complexity rows. |
+
+## 2026-06-14 re-anchor + type fixes
+
+- Advanced `scripts/wave_anchor.txt` to `702224f` (the type-fix commit). Re-anchoring
+  zeroed the three growth-audit rows (`cli_flag_growth`, `docs_loc_growth`,
+  `tracked_files_growth`) and cleared the stale `net_loc_growth` baseline row.
+- Fixed two real TYPE findings in source (no longer in the wave): `profile_discover.py`
+  `attr-defined` (pstats.Stats.stats typeshed gap → dynamic read) and
+  `synth_microbench.py` `arg-type` (ModuleSpec None-guard).
+- Per the known wave_anchor overload (growth uses it as a comparison baseline, hotspot as
+  a window end-point), re-anchoring to HEAD surfaced one loop-induced churn row on
+  `tests/test_pipeline_scoring_reporting.py`; recorded as `loop-reanchor-residue`.
+  Baseline regenerated from the converged post-anchor wave (count 25 == 25, gate green).

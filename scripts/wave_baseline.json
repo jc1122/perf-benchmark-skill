@@ -1,15 +1,9 @@
 [
   {
     "leaf": "complexity",
-    "path": "scripts/perf_benchmark/stage_helpers.py",
-    "symbol": "_parse_cachegrind_summary",
-    "metric": "cyclomatic_complexity"
-  },
-  {
-    "leaf": "complexity",
-    "path": "scripts/perf_benchmark_pipeline.py",
-    "symbol": "stage_tier1",
-    "metric": "cyclomatic_complexity"
+    "path": "scripts/perf_benchmark/findings.py",
+    "symbol": "<module>",
+    "metric": "maintainability_index"
   },
   {
     "leaf": "complexity",
@@ -31,9 +25,9 @@
   },
   {
     "leaf": "complexity",
-    "path": "scripts/perf_benchmark/support.py",
-    "symbol": "<module>",
-    "metric": "maintainability_index"
+    "path": "scripts/perf_benchmark/stage_helpers.py",
+    "symbol": "_discover_objdump_targets",
+    "metric": "cyclomatic_complexity"
   },
   {
     "leaf": "complexity",
@@ -44,14 +38,20 @@
   {
     "leaf": "complexity",
     "path": "scripts/perf_benchmark/stage_helpers.py",
-    "symbol": "_parse_perf_stat",
+    "symbol": "_parse_cachegrind_summary",
     "metric": "cyclomatic_complexity"
   },
   {
     "leaf": "complexity",
     "path": "scripts/perf_benchmark/stage_helpers.py",
-    "symbol": "_discover_objdump_targets",
+    "symbol": "_parse_perf_stat",
     "metric": "cyclomatic_complexity"
+  },
+  {
+    "leaf": "complexity",
+    "path": "scripts/perf_benchmark/support.py",
+    "symbol": "<module>",
+    "metric": "maintainability_index"
   },
   {
     "leaf": "complexity",
@@ -62,13 +62,13 @@
   {
     "leaf": "complexity",
     "path": "scripts/perf_benchmark_pipeline.py",
-    "symbol": "stage_tier1",
-    "metric": "function_nloc"
+    "symbol": "main",
+    "metric": "cyclomatic_complexity"
   },
   {
     "leaf": "complexity",
     "path": "scripts/perf_benchmark_pipeline.py",
-    "symbol": "stage_perf_record",
+    "symbol": "main",
     "metric": "function_nloc"
   },
   {
@@ -80,20 +80,20 @@
   {
     "leaf": "complexity",
     "path": "scripts/perf_benchmark_pipeline.py",
-    "symbol": "main",
+    "symbol": "stage_perf_record",
+    "metric": "function_nloc"
+  },
+  {
+    "leaf": "complexity",
+    "path": "scripts/perf_benchmark_pipeline.py",
+    "symbol": "stage_tier1",
     "metric": "cyclomatic_complexity"
   },
   {
     "leaf": "complexity",
     "path": "scripts/perf_benchmark_pipeline.py",
-    "symbol": "main",
+    "symbol": "stage_tier1",
     "metric": "function_nloc"
-  },
-  {
-    "leaf": "complexity",
-    "path": "scripts/perf_benchmark/findings.py",
-    "symbol": "<module>",
-    "metric": "maintainability_index"
   },
   {
     "leaf": "complexity",
@@ -144,9 +144,9 @@
     "metric": "churn_complexity_product"
   },
   {
-    "leaf": "growth-audit",
-    "path": "<repo>",
-    "symbol": "net_loc_growth",
-    "metric": "net_loc_growth"
+    "leaf": "hotspot",
+    "path": "tests/test_pipeline_scoring_reporting.py",
+    "symbol": "tests/test_pipeline_scoring_reporting.py",
+    "metric": "churn_complexity_product"
   }
 ]
