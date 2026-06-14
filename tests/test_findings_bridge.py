@@ -286,3 +286,90 @@ def test_mixed_dimensions_only_emit_fail_and_warn() -> None:
     assert severities == {"high", "medium"}
     metric_names = {f["metric"]["name"] for f in result}
     assert metric_names == {"l1_miss_rate", "ll_miss_rate"}
+
+
+# --- name-inference extractors (no explicit metric triplet) ---
+def test_extract_wall_time_from_cv() -> None:
+    rubric = {"dimensions": [("Wall-Time Stability", {"tier": "FAIL", "cv": 7.0})]}
+    result = findings.to_shared_findings(rubric, root="/r")
+    assert len(result) == 1
+    assert result[0]["metric"] == {"name": "wall_time_cv", "value": 7.0, "threshold": 3.0}
+    assert result[0]["severity"] == "high"
+
+
+def test_extract_cpu_emits_top_fn_and_ipc() -> None:
+    rubric = {"dimensions": [("CPU Efficiency", {"tier": "WARN", "top_fn_pct": 35.0, "IPC": 0.8})]}
+    result = findings.to_shared_findings(rubric, root="/r")
+    assert {f["metric"]["name"] for f in result} == {"IPC", "top_fn_pct"}
+    assert all(f["severity"] == "medium" for f in result)
+
+
+def test_extract_l1_cache_from_worst_pct() -> None:
+    rubric = {"dimensions": [("L1 Cache Efficiency", {"tier": "FAIL", "worst_pct": 9.0})]}
+    result = findings.to_shared_findings(rubric, root="/r")
+    assert result[0]["metric"] == {"name": "l1_miss_rate", "value": 9.0, "threshold": 1.0}
+
+
+def test_extract_ll_cache_from_worst_pct() -> None:
+    rubric = {"dimensions": [("Last-Level Cache", {"tier": "FAIL", "worst_pct": 3.0})]}
+    result = findings.to_shared_findings(rubric, root="/r")
+    assert result[0]["metric"]["name"] == "ll_miss_rate"
+
+
+def test_extract_branch_from_worst_pct() -> None:
+    rubric = {"dimensions": [("Branch Prediction", {"tier": "FAIL", "worst_pct": 4.0})]}
+    result = findings.to_shared_findings(rubric, root="/r")
+    assert result[0]["metric"]["name"] == "branch_mispred_rate"
+
+
+def test_extract_algorithmic_only_emits_fail_and_warn_subchecks() -> None:
+    rubric = {
+        "dimensions": [
+            (
+                "Algorithmic Scaling",
+                {
+                    "tier": "FAIL",
+                    "sub_checks": {
+                        "time_complexity": {"tier": "FAIL", "k": 2.5},
+                        "mem_complexity": {"tier": "PASS", "k": 1.0},
+                    },
+                },
+            )
+        ]
+    }
+    result = findings.to_shared_findings(rubric, root="/r")
+    assert len(result) == 1
+    assert result[0]["metric"]["name"] == "time_complexity"
+    assert result[0]["metric"]["value"] == 2.5
+
+
+def test_extract_memory_emits_peak_and_churn() -> None:
+    rubric = {
+        "dimensions": [
+            ("Memory Profile", {"tier": "WARN", "peak_bytes": 1024.0, "churn_peaks": 5.0})
+        ]
+    }
+    result = findings.to_shared_findings(rubric, root="/r")
+    assert {f["metric"]["name"] for f in result} == {"churn_peaks", "peak_bytes"}
+
+
+def test_unknown_dimension_without_triplet_emits_nothing() -> None:
+    rubric = {"dimensions": [("Mystery Dimension", {"tier": "FAIL"})]}
+    assert findings.to_shared_findings(rubric, root="/r") == []
+
+
+def test_suggested_action_uses_prescription_when_source_matches() -> None:
+    rubric = {
+        "dimensions": [
+            ("CPU Efficiency", {"tier": "FAIL", "top_fn_pct": 50.0, "source": "CPU hotspot"})
+        ]
+    }
+    result = findings.to_shared_findings(rubric, root="/r")
+    cpu = next(f for f in result if f["metric"]["name"] == "top_fn_pct")
+    assert "hotspot" in cpu["suggested_action"].lower()
+
+
+def test_suggested_action_falls_back_to_investigate() -> None:
+    rubric = {"dimensions": [("Memory Profile", {"tier": "FAIL", "peak_bytes": 1.0})]}
+    result = findings.to_shared_findings(rubric, root="/r")
+    assert result[0]["suggested_action"].startswith("Investigate")
