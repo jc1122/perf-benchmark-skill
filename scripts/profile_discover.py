@@ -20,7 +20,9 @@ from typing import Any
 def _stats_to_rows(stats: pstats.Stats, top: int) -> list[dict[str, Any]]:
     rows: list[dict[str, Any]] = []
     # stats.stats: {(file, line, func): (cc, nc, tt, ct, callers)}
-    for (fname, lineno, func), (_cc, nc, tt, ct, _callers) in stats.stats.items():
+    # pstats.Stats.stats is absent from typeshed; read it dynamically.
+    raw_stats = getattr(stats, "stats", {})
+    for (fname, lineno, func), (_cc, nc, tt, ct, _callers) in raw_stats.items():
         rows.append(
             {
                 "function": f"{Path(fname).name}:{lineno}:{func}",

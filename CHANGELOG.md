@@ -1,5 +1,16 @@
 # Changelog
 
+## 0.4.1 - 2026-06-14
+
+- Re-anchored the convergence wave and fixed two real TYPE findings in source
+  (`profile_discover.py` pstats typeshed gap; `synth_microbench.py` ModuleSpec
+  None-guard).
+- Phase 2 acceptance-safeguard migration: the internal residual baseline now lives in
+  `.repo-audit/accept.json` (a `growth-audit` rule accepts expected surface growth);
+  `wave_baseline.json` removed. The convergence gate (`check_wave_baseline.py`) now
+  trusts the wave's report/accept partition — converged iff the active set is empty and
+  no accepted entry is stale.
+
 ## 0.4.0 - 2026-06-14
 
 - Benchmark-synthesis primitives for the `synthesizable` performance lane:

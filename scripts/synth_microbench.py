@@ -98,9 +98,11 @@ def validate_make_input(
     if not path.is_file():
         return {"ok": False, "reason": "make_input.py missing"}
     spec = importlib.util.spec_from_file_location("_synth_make_input", path)
+    if spec is None or spec.loader is None:
+        return {"ok": False, "reason": "make_input.py not importable"}
     mod = importlib.util.module_from_spec(spec)
     try:
-        spec.loader.exec_module(mod)  # type: ignore[union-attr]
+        spec.loader.exec_module(mod)
         small, large = probe_sizes
         out_small, out_large = mod.make_input(small), mod.make_input(large)
     except NotImplementedError:
