@@ -28,9 +28,7 @@ def test_gate_passes_when_active_empty_and_no_stale(
     tmp_path: Path, capsys: pytest.CaptureFixture[str]
 ) -> None:
     snapshot = _write_json(tmp_path / "active.json", [])
-    accepted = _write_json(
-        tmp_path / "acc.json", {"accepted": [{"leaf": "A"}], "stale": []}
-    )
+    accepted = _write_json(tmp_path / "acc.json", {"accepted": [{"leaf": "A"}], "stale": []})
     code = main(["--snapshot", str(snapshot), "--accepted", str(accepted)])
     payload = _payload(capsys)
     assert code == 0
@@ -39,9 +37,7 @@ def test_gate_passes_when_active_empty_and_no_stale(
     assert payload["active"] == 0
 
 
-def test_gate_fails_on_active_findings(
-    tmp_path: Path, capsys: pytest.CaptureFixture[str]
-) -> None:
+def test_gate_fails_on_active_findings(tmp_path: Path, capsys: pytest.CaptureFixture[str]) -> None:
     snapshot = _write_json(
         tmp_path / "active.json",
         [{"leaf": "B", "path": "q", "symbol": "t", "metric": "n"}],
@@ -57,9 +53,7 @@ def test_gate_fails_on_stale_acceptances(
     tmp_path: Path, capsys: pytest.CaptureFixture[str]
 ) -> None:
     snapshot = _write_json(tmp_path / "active.json", [])
-    accepted = _write_json(
-        tmp_path / "acc.json", {"accepted": [], "stale": ["finding:{leaf=A}"]}
-    )
+    accepted = _write_json(tmp_path / "acc.json", {"accepted": [], "stale": ["finding:{leaf=A}"]})
     code = main(["--snapshot", str(snapshot), "--accepted", str(accepted)])
     payload = _payload(capsys)
     assert code == 1
