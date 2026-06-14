@@ -255,6 +255,26 @@ growth vs the pinned anchor.
 | complexity | 24 | deferred-structural | Function complexity, function length, module maintainability, and parameter-count rows across the perf benchmark pipeline, reporting, scoring, support, stage helpers, and perf-optimization helpers. |
 | hotspot | 7 | deferred-structural / loop-reanchor-residue | `scripts/perf_benchmark/reporting.py`, `scripts/perf_benchmark/scoring.py`, `scripts/perf_benchmark_pipeline.py`, `perf-optimization/scripts/verify_win.py`, `SKILL.md`, `scripts/wave_frozen.md`, and `tests/test_pipeline_scoring_reporting.py` carry `churn_complexity_product`; policy config deliberately does not suppress churn-complexity rows. |
 
+## 2026-06-14 perf-smell lane integration (v0.8.1 runner, 9th lane)
+
+The runner was bumped to v0.8.1 which added the `perf-smell` lane (perflint 0.8.1).
+131 raw perf-smell findings across 34 unique (path, symbol, metric) keys were triaged.
+No code changes were required: all findings were accepted with justified reasons.
+
+Acceptance breakdown by metric class (34 unique keys, 34 entries added to `.repo-audit/accept.json`):
+
+| Metric | Symbol | Count of unique keys | Class | Justification summary |
+| --- | --- | ---: | --- | --- |
+| W8201 | loop-invariant-statement | 7 | over-approximation | perflint flags loop-variant subscript accesses (`match.group()`, `entry[header]`, `info[...]`, `results[name]`) and dict-building from destructured loop vars as "invariant"; these are genuinely per-iteration. Scripts under `scripts/` in 5 files; tests and perf-optimization in 2 more. |
+| W8202 | loop-global-usage | 6 | over-approximation / I/O-dominated | perflint flags module-level constants (`_PRESCRIPTIONS`, `TIER_RANK`, `_PYTEST_BENCHMARK_MARKER`, `subprocess`, `DEFAULT_PERF_STAT_EVENTS`) as "global" inside loops. These are read-only module constants; caching them locally is negligible. Loops in scripts/ are I/O-dominated (subprocess spawn, file read). Plus perf-optimization/ (separate skill). |
+| W8205 | dotted-import-in-loop | 4 | over-approximation / I/O-dominated | perflint flags `re.match`, `re.search`, `contextlib.suppress`, `json.loads`, `json.JSONDecodeError`, `subprocess.run`, `subprocess.TimeoutExpired` inside loops. Parse loops are dominated by regex and string work; process loops by spawn cost. `contextlib.suppress` must be called per-iteration as a context manager. Plus perf-optimization/ (separate skill). |
+| W8301 | use-tuple-over-list | 5 | type-annotation-constrained / cold-path | Subprocess command lists in `scripts/perf_benchmark_pipeline.py` are typed `list[str]` matching `_run_stage_command(cmd: list[str])` — changing to tuple violates the declared parameter type. `_wave_command` in `check_wave_baseline.py` mutates the list with `+=`. Remaining two are test/benchmark cold-paths. |
+| W8401 | use-list-comprehension | 3 | for-loop-form-required | `scoring.py` builds two parallel lists (`matched_sizes`, `matched_times`) in one pass — impossible with a single comprehension. `reporting.py` loop calls `lines.append()` as a side effect on an existing list — comprehension would produce discarded `None` list. Plus perf-optimization/ (separate skill). |
+| W8402 | use-list-copy | 2 | for-loop-form-required | `reporting.py` formats each item with f-string before appending — not a copy, a transformation. `profile_discover.py` constructs a new dict per iteration from destructured stats tuple — also a transformation. |
+| W8403 | use-dict-comprehension | 3 | for-loop-form-required / over-approximation | `stage_helpers.py` uses `contextlib.suppress(ValueError)` per iteration — cannot embed exception suppression in a comprehension value. `support.py` has multi-branch if/elif per iteration — not expressible as a comprehension. `reporting.py` has conditional key insertion — readable as for-loop. |
+
+All 131 raw findings are accepted; gate converges at `active: 0`.
+
 ## 2026-06-14 re-anchor + type fixes
 
 - Advanced `scripts/wave_anchor.txt` to `702224f` (the type-fix commit). Re-anchoring
