@@ -1,0 +1,14 @@
+{
+  "coverage": "7.14.1",
+  "lizard": "1.23.0",
+  "radon": "6.0.1",
+  "vulture": "2.16",
+  "ruff": "0.15.16",
+  "mypy": "2.1.0",
+  "bandit": "1.9.4",
+  "pylint": "3.3.9",
+  "astroid": "3.3.11",
+  "perflint": "0.8.1",
+  "pytest": "9.0.3",
+  "hypothesis": "6.155.2"
+}
