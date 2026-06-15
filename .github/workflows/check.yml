@@ -41,6 +41,7 @@ jobs:
           python -m pip install coverage==7.14.1 lizard==1.23.0 radon==6.0.1 \
             vulture==2.16 ruff==0.15.16 mypy==2.1.0 bandit==1.9.4 pylint==3.3.9 \
             astroid==3.3.11 perflint==0.8.1
+          python -m pip install pytest jsonschema  # coverage-gap gate suite
       - name: Clone leaves + runner at pinned tags
         run: |
           git clone --depth 1 --branch v0.7.2 https://github.com/jc1122/repo-audit-skills.git /tmp/leaves
@@ -53,3 +54,10 @@ jobs:
           WAVE_RUNNER: /tmp/runner/scripts/run_diagnosis_wave.py
           SKILLS_ROOT: /tmp/leaves/skills
         run: python3 scripts/check_wave_baseline.py   # real exit code, not piped (L4)
+      - name: Coverage-gap gate (Tier-1 graduation)
+        env:
+          LEAF: /tmp/leaves/skills/coverage-gap-audit/scripts/coverage_gap_audit.py
+        run: >-
+          python3 scripts/check_coverage_gap.py --subprocess-capture
+          --suite tests --suite perf-optimization/tests
+          --source-prefix scripts --source-prefix perf-optimization/scripts
