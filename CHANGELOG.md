@@ -1,5 +1,24 @@
 # Changelog
 
+## 0.6.0 - 2026-06-15
+
+Dogfood gap remediation — Wave C (scope / deploy parity). Closes the cross-repo
+pin-coherence gap so a stale runner pin can never silently run an old runner and
+pass the wave gate:
+
+- **#8 runner pin-coherence gate.** New `scripts/check_runner_pin.py` +
+  `scripts/runner_requirements.json` (`min_version` 0.11.0, capabilities
+  `lane-error-gate`/`metric-ceiling`/`lane-timeout`). The gate invokes
+  `$WAVE_RUNNER --capabilities`, parses the advertised `{version, capabilities}`,
+  and fails (exit 1) when the pinned runner is below the minimum version, is
+  missing any required capability, or `WAVE_RUNNER` is unset/unparseable. Pure
+  `version_ok` / `missing_caps` helpers are unit-tested. Wired into CI before the
+  convergence gate.
+- **Runner re-pin v0.9.0 → v0.11.0**, the tag that advertises the required
+  capability surface.
+- **Leaf re-pin v0.7.5 → v0.8.0** (`repo-audit-skills`), bringing repo-A lane
+  parity (perf-smell/hotspot/exec gates) and the standalone-deploy fixes.
+
 ## 0.5.0 - 2026-06-15
 
 Dogfood gap remediation — Wave A (trustworthy green). Mirrors the convergence-gate
