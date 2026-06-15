@@ -54,7 +54,7 @@ def _wave_command(runner: str, out: Path) -> list[str]:
     return cmd
 
 
-def _run_wave() -> Path:
+def _run_wave() -> tuple[Path, int]:
     runner = os.environ.get(
         "WAVE_RUNNER",
         str(
@@ -63,8 +63,8 @@ def _run_wave() -> Path:
         ),
     )
     out = REPO / ".wave_out"
-    subprocess.run(_wave_command(runner, out), check=False)
-    return out
+    proc = subprocess.run(_wave_command(runner, out), check=False)
+    return out, proc.returncode
 
 
 def _load_sidecar(out: Path) -> tuple[list, list]:
@@ -75,10 +75,20 @@ def _load_sidecar(out: Path) -> tuple[list, list]:
     return [], []
 
 
+def _lane_errors(summary: dict) -> list[str]:
+    """Lane names whose status is 'error' (lane failed to produce a verdict)."""
+    return sorted(
+        name
+        for name, info in summary.items()
+        if isinstance(info, dict) and info.get("status") == "error"
+    )
+
+
 def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser()
     parser.add_argument("--snapshot", help="Active findings JSON (testing only)")
     parser.add_argument("--accepted", help="Accepted sidecar JSON (testing only)")
+    parser.add_argument("--summary", help="Wave summary JSON (testing only)")
     args = parser.parse_args(argv)
 
     if args.snapshot:
@@ -88,11 +98,28 @@ def main(argv: list[str] | None = None) -> int:
             accepted, stale = data.get("accepted", []), data.get("stale", [])
         else:
             accepted, stale = [], []
+        summary = json.loads(Path(args.summary).read_text()) if args.summary else {}
+        runner_rc = 0
     else:
-        out = _run_wave()
+        out, runner_rc = _run_wave()
         active = json.loads((out / "wave_findings.json").read_text())
         accepted, stale = _load_sidecar(out)
+        summary = json.loads((out / "wave_summary.json").read_text())
 
+    lane_errors = _lane_errors(summary)
+    if lane_errors or runner_rc != 0:
+        print(
+            json.dumps(
+                {
+                    "status": "fail",
+                    "reason": "lane_error",
+                    "errored_lanes": lane_errors,
+                    "runner_exit": runner_rc,
+                },
+                indent=2,
+            )
+        )
+        return 1
     if active:
         print(json.dumps({"status": "fail", "new_findings": active}, indent=2))
         return 1
