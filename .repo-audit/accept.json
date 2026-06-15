@@ -478,6 +478,19 @@
       "applies": [
         "report"
       ]
+    },
+    {
+      "match": {
+        "kind": "finding",
+        "leaf": "hotspot",
+        "path": "CHANGELOG.md",
+        "symbol": "CHANGELOG.md",
+        "metric": "churn_complexity_product"
+      },
+      "reason": "hotspot/churn_complexity_product on CHANGELOG.md: per-release changelog growth is inherent release activity (crossed the churn threshold at v0.6.0), not a refactor target; the file has no functions to decompose.",
+      "applies": [
+        "report"
+      ]
     }
   ]
 }

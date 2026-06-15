@@ -11,6 +11,7 @@ import subprocess  # nosec B404: fixed argv, shell=False
 import sys
 from collections.abc import Iterable
 from pathlib import Path
+from typing import Any
 
 REQUIREMENTS = Path(__file__).with_name("runner_requirements.json")
 
@@ -30,7 +31,7 @@ def missing_caps(advertised: Iterable[str], required: Iterable[str]) -> list[str
     return sorted(cap for cap in required if cap not in have)
 
 
-def _advertised(runner: str) -> dict[str, object]:
+def _advertised(runner: str) -> dict[str, Any]:
     proc = subprocess.run(  # nosec B603: fixed argv, shell=False
         [sys.executable, runner, "--capabilities"],
         check=False,
