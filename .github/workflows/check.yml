@@ -54,6 +54,8 @@ jobs:
           WAVE_RUNNER: /tmp/runner/scripts/run_diagnosis_wave.py
           SKILLS_ROOT: /tmp/leaves/skills
         run: python3 scripts/check_wave_baseline.py   # real exit code, not piped (L4)
+      - name: Accept-reason quality gate (#3)
+        run: python3 scripts/check_accept_reasons.py
       - name: Coverage-gap gate (Tier-1 graduation)
         env:
           LEAF: /tmp/leaves/skills/coverage-gap-audit/scripts/coverage_gap_audit.py

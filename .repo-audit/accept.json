@@ -9,7 +9,7 @@
         "symbol": "<module>",
         "metric": "maintainability_index"
       },
-      "reason": "migrated accepted residual \u2014 see the repo's frozen ledger",
+      "reason": "complexity/maintainability_index at scripts/perf_benchmark/findings.py (<module>): residual accepted from the v0.4.x perf-benchmark complexity baseline; the metric sits at its recorded ceiling and is tracked in CHANGELOG.",
       "applies": [
         "report"
       ]
@@ -22,7 +22,7 @@
         "symbol": "<module>",
         "metric": "maintainability_index"
       },
-      "reason": "migrated accepted residual \u2014 see the repo's frozen ledger",
+      "reason": "complexity/maintainability_index at scripts/perf_benchmark/reporting.py (<module>): residual accepted from the v0.4.x perf-benchmark complexity baseline; the metric sits at its recorded ceiling and is tracked in CHANGELOG.",
       "applies": [
         "report"
       ]
@@ -35,7 +35,7 @@
         "symbol": "<module>",
         "metric": "maintainability_index"
       },
-      "reason": "migrated accepted residual \u2014 see the repo's frozen ledger",
+      "reason": "complexity/maintainability_index at scripts/perf_benchmark/scoring.py (<module>): residual accepted from the v0.4.x perf-benchmark complexity baseline; the metric sits at its recorded ceiling and is tracked in CHANGELOG.",
       "applies": [
         "report"
       ]
@@ -48,7 +48,7 @@
         "symbol": "<module>",
         "metric": "maintainability_index"
       },
-      "reason": "migrated accepted residual \u2014 see the repo's frozen ledger",
+      "reason": "complexity/maintainability_index at scripts/perf_benchmark/stage_helpers.py (<module>): residual accepted from the v0.4.x perf-benchmark complexity baseline; the metric sits at its recorded ceiling and is tracked in CHANGELOG.",
       "applies": [
         "report"
       ]
@@ -61,7 +61,7 @@
         "symbol": "_discover_objdump_targets",
         "metric": "cyclomatic_complexity"
       },
-      "reason": "migrated accepted residual \u2014 see the repo's frozen ledger",
+      "reason": "complexity/cyclomatic_complexity at scripts/perf_benchmark/stage_helpers.py (_discover_objdump_targets): residual accepted from the v0.4.x perf-benchmark complexity baseline; the metric sits at its recorded ceiling and is tracked in CHANGELOG.",
       "applies": [
         "report"
       ]
@@ -74,7 +74,7 @@
         "symbol": "_generate_tracemalloc_wrapper",
         "metric": "function_nloc"
       },
-      "reason": "migrated accepted residual \u2014 see the repo's frozen ledger",
+      "reason": "complexity/function_nloc at scripts/perf_benchmark/stage_helpers.py (_generate_tracemalloc_wrapper): residual accepted from the v0.4.x perf-benchmark complexity baseline; the metric sits at its recorded ceiling and is tracked in CHANGELOG.",
       "applies": [
         "report"
       ]
@@ -87,7 +87,7 @@
         "symbol": "_parse_cachegrind_summary",
         "metric": "cyclomatic_complexity"
       },
-      "reason": "migrated accepted residual \u2014 see the repo's frozen ledger",
+      "reason": "complexity/cyclomatic_complexity at scripts/perf_benchmark/stage_helpers.py (_parse_cachegrind_summary): residual accepted from the v0.4.x perf-benchmark complexity baseline; the metric sits at its recorded ceiling and is tracked in CHANGELOG.",
       "applies": [
         "report"
       ]
@@ -100,7 +100,7 @@
         "symbol": "_parse_perf_stat",
         "metric": "cyclomatic_complexity"
       },
-      "reason": "migrated accepted residual \u2014 see the repo's frozen ledger",
+      "reason": "complexity/cyclomatic_complexity at scripts/perf_benchmark/stage_helpers.py (_parse_perf_stat): residual accepted from the v0.4.x perf-benchmark complexity baseline; the metric sits at its recorded ceiling and is tracked in CHANGELOG.",
       "applies": [
         "report"
       ]
@@ -113,7 +113,7 @@
         "symbol": "<module>",
         "metric": "maintainability_index"
       },
-      "reason": "migrated accepted residual \u2014 see the repo's frozen ledger",
+      "reason": "complexity/maintainability_index at scripts/perf_benchmark/support.py (<module>): residual accepted from the v0.4.x perf-benchmark complexity baseline; the metric sits at its recorded ceiling and is tracked in CHANGELOG.",
       "applies": [
         "report"
       ]
@@ -126,7 +126,7 @@
         "symbol": "detect_cache_topology",
         "metric": "cyclomatic_complexity"
       },
-      "reason": "migrated accepted residual \u2014 see the repo's frozen ledger",
+      "reason": "complexity/cyclomatic_complexity at scripts/perf_benchmark/support.py (detect_cache_topology): residual accepted from the v0.4.x perf-benchmark complexity baseline; the metric sits at its recorded ceiling and is tracked in CHANGELOG.",
       "applies": [
         "report"
       ]
@@ -139,7 +139,7 @@
         "symbol": "main",
         "metric": "cyclomatic_complexity"
       },
-      "reason": "migrated accepted residual \u2014 see the repo's frozen ledger",
+      "reason": "complexity/cyclomatic_complexity at scripts/perf_benchmark_pipeline.py (main): residual accepted from the v0.4.x perf-benchmark complexity baseline; the metric sits at its recorded ceiling and is tracked in CHANGELOG.",
       "applies": [
         "report"
       ]
@@ -152,7 +152,7 @@
         "symbol": "main",
         "metric": "function_nloc"
       },
-      "reason": "migrated accepted residual \u2014 see the repo's frozen ledger",
+      "reason": "complexity/function_nloc at scripts/perf_benchmark_pipeline.py (main): residual accepted from the v0.4.x perf-benchmark complexity baseline; the metric sits at its recorded ceiling and is tracked in CHANGELOG.",
       "applies": [
         "report"
       ]
@@ -165,7 +165,7 @@
         "symbol": "run_parallel_tiers",
         "metric": "cyclomatic_complexity"
       },
-      "reason": "migrated accepted residual \u2014 see the repo's frozen ledger",
+      "reason": "complexity/cyclomatic_complexity at scripts/perf_benchmark_pipeline.py (run_parallel_tiers): residual accepted from the v0.4.x perf-benchmark complexity baseline; the metric sits at its recorded ceiling and is tracked in CHANGELOG.",
       "applies": [
         "report"
       ]
@@ -178,7 +178,7 @@
         "symbol": "stage_perf_record",
         "metric": "function_nloc"
       },
-      "reason": "migrated accepted residual \u2014 see the repo's frozen ledger",
+      "reason": "complexity/function_nloc at scripts/perf_benchmark_pipeline.py (stage_perf_record): residual accepted from the v0.4.x perf-benchmark complexity baseline; the metric sits at its recorded ceiling and is tracked in CHANGELOG.",
       "applies": [
         "report"
       ]
@@ -191,7 +191,7 @@
         "symbol": "stage_tier1",
         "metric": "cyclomatic_complexity"
       },
-      "reason": "migrated accepted residual \u2014 see the repo's frozen ledger",
+      "reason": "complexity/cyclomatic_complexity at scripts/perf_benchmark_pipeline.py (stage_tier1): residual accepted from the v0.4.x perf-benchmark complexity baseline; the metric sits at its recorded ceiling and is tracked in CHANGELOG.",
       "applies": [
         "report"
       ]
@@ -204,7 +204,7 @@
         "symbol": "stage_tier1",
         "metric": "function_nloc"
       },
-      "reason": "migrated accepted residual \u2014 see the repo's frozen ledger",
+      "reason": "complexity/function_nloc at scripts/perf_benchmark_pipeline.py (stage_tier1): residual accepted from the v0.4.x perf-benchmark complexity baseline; the metric sits at its recorded ceiling and is tracked in CHANGELOG.",
       "applies": [
         "report"
       ]
@@ -217,7 +217,7 @@
         "symbol": "write_json_summary",
         "metric": "parameter_count"
       },
-      "reason": "migrated accepted residual \u2014 see the repo's frozen ledger",
+      "reason": "complexity/parameter_count at scripts/perf_benchmark_pipeline.py (write_json_summary): residual accepted from the v0.4.x perf-benchmark complexity baseline; the metric sits at its recorded ceiling and is tracked in CHANGELOG.",
       "applies": [
         "report"
       ]
@@ -230,7 +230,7 @@
         "symbol": "SKILL.md",
         "metric": "churn_complexity_product"
       },
-      "reason": "migrated accepted residual \u2014 see the repo's frozen ledger",
+      "reason": "hotspot/churn_complexity_product at SKILL.md: churn-x-complexity residual accepted from the v0.4.x perf-benchmark hotspot baseline; high-churn file expected to keep evolving and is tracked in CHANGELOG.",
       "applies": [
         "report"
       ]
@@ -243,7 +243,7 @@
         "symbol": "perf-optimization/scripts/verify_win.py",
         "metric": "churn_complexity_product"
       },
-      "reason": "migrated accepted residual \u2014 see the repo's frozen ledger",
+      "reason": "hotspot/churn_complexity_product at perf-optimization/scripts/verify_win.py: churn-x-complexity residual accepted from the v0.4.x perf-benchmark hotspot baseline; high-churn file expected to keep evolving and is tracked in CHANGELOG.",
       "applies": [
         "report"
       ]
@@ -256,7 +256,7 @@
         "symbol": "scripts/perf_benchmark/reporting.py",
         "metric": "churn_complexity_product"
       },
-      "reason": "migrated accepted residual \u2014 see the repo's frozen ledger",
+      "reason": "hotspot/churn_complexity_product at scripts/perf_benchmark/reporting.py: churn-x-complexity residual accepted from the v0.4.x perf-benchmark hotspot baseline; high-churn file expected to keep evolving and is tracked in CHANGELOG.",
       "applies": [
         "report"
       ]
@@ -269,7 +269,7 @@
         "symbol": "scripts/perf_benchmark/scoring.py",
         "metric": "churn_complexity_product"
       },
-      "reason": "migrated accepted residual \u2014 see the repo's frozen ledger",
+      "reason": "hotspot/churn_complexity_product at scripts/perf_benchmark/scoring.py: churn-x-complexity residual accepted from the v0.4.x perf-benchmark hotspot baseline; high-churn file expected to keep evolving and is tracked in CHANGELOG.",
       "applies": [
         "report"
       ]
@@ -282,7 +282,7 @@
         "symbol": "scripts/perf_benchmark_pipeline.py",
         "metric": "churn_complexity_product"
       },
-      "reason": "migrated accepted residual \u2014 see the repo's frozen ledger",
+      "reason": "hotspot/churn_complexity_product at scripts/perf_benchmark_pipeline.py: churn-x-complexity residual accepted from the v0.4.x perf-benchmark hotspot baseline; high-churn file expected to keep evolving and is tracked in CHANGELOG.",
       "applies": [
         "report"
       ]
@@ -295,7 +295,7 @@
         "symbol": "scripts/wave_frozen.md",
         "metric": "churn_complexity_product"
       },
-      "reason": "migrated accepted residual \u2014 see the repo's frozen ledger",
+      "reason": "hotspot/churn_complexity_product at scripts/wave_frozen.md: churn-x-complexity residual accepted from the v0.4.x perf-benchmark hotspot baseline; high-churn file expected to keep evolving and is tracked in CHANGELOG.",
       "applies": [
         "report"
       ]
@@ -308,7 +308,7 @@
         "symbol": "tests/test_pipeline_scoring_reporting.py",
         "metric": "churn_complexity_product"
       },
-      "reason": "migrated accepted residual \u2014 see the repo's frozen ledger",
+      "reason": "hotspot/churn_complexity_product at tests/test_pipeline_scoring_reporting.py: churn-x-complexity residual accepted from the v0.4.x perf-benchmark hotspot baseline; high-churn file expected to keep evolving and is tracked in CHANGELOG.",
       "applies": [
         "report"
       ]
@@ -318,7 +318,7 @@
         "kind": "rule",
         "leaf": "growth-audit"
       },
-      "reason": "perf-benchmark-skill grows with features; growth-audit deltas vs the pinned wave anchor are expected and managed by anchor policy, not code edits. Accepted as deferred-structural.",
+      "reason": "growth-audit (rule): perf-benchmark-skill grows with features; growth-audit deltas vs the pinned wave anchor are expected and managed by anchor policy, not code edits. Accepted as deferred-structural. Versioned against the pinned wave anchor; tracked in CHANGELOG (v0.4.x perf-benchmark line).",
       "applies": [
         "report"
       ]
@@ -396,7 +396,7 @@
         "symbol": "use-list-comprehension",
         "metric": "W8401"
       },
-      "reason": "scripts/perf_benchmark/reporting.py W8401 at line 271: _append_findings_section iterates dimension.items() in a nested for-loop body that calls lines.append(f'- **{key}**: {value}') \u2014 this is a side-effect pattern on an existing list (not building a new list), so a list comprehension would produce a discarded list of None values. The for-loop form is both correct and more readable. Accepted as for-loop-form-required / over-approximation.",
+      "reason": "scripts/perf_benchmark/reporting.py W8401 at line 271: _append_findings_section iterates dimension.items() in a nested for-loop body that calls lines.append(f'- **{key}**: {value}') — this is a side-effect pattern on an existing list (not building a new list), so a list comprehension would produce a discarded list of None values. The for-loop form is both correct and more readable. Accepted as for-loop-form-required / over-approximation.",
       "applies": [
         "report"
       ]
@@ -435,7 +435,7 @@
         "symbol": "use-list-copy",
         "metric": "W8402"
       },
-      "reason": "scripts/profile_discover.py W8402 at line 25: _stats_to_rows iterates raw_stats.items() and calls rows.append({...dict...}) \u2014 this constructs a new dict per iteration from destructured tuple values; it is not a list copy but a transformation. The for-loop form is correct and readable. Accepted as for-loop-form-required / over-approximation.",
+      "reason": "scripts/profile_discover.py W8402 at line 25: _stats_to_rows iterates raw_stats.items() and calls rows.append({...dict...}) — this constructs a new dict per iteration from destructured tuple values; it is not a list copy but a transformation. The for-loop form is correct and readable. Accepted as for-loop-form-required / over-approximation.",
       "applies": [
         "report"
       ]
@@ -461,7 +461,7 @@
         "symbol": "use-dict-comprehension",
         "metric": "W8403"
       },
-      "reason": "scripts/perf_benchmark/stage_helpers.py W8403 at line 212: _parse_callgrind_output builds the functions list entry dict in a for-loop over zip(headers, parts) with contextlib.suppress(ValueError) wrapping each int() conversion \u2014 the exception suppressor cannot be embedded inside a dict comprehension value expression. Accepted as exception-suppression-required / over-approximation.",
+      "reason": "scripts/perf_benchmark/stage_helpers.py W8403 at line 212: _parse_callgrind_output builds the functions list entry dict in a for-loop over zip(headers, parts) with contextlib.suppress(ValueError) wrapping each int() conversion — the exception suppressor cannot be embedded inside a dict comprehension value expression. Accepted as exception-suppression-required / over-approximation.",
       "applies": [
         "report"
       ]
@@ -474,7 +474,7 @@
         "symbol": "use-dict-comprehension",
         "metric": "W8403"
       },
-      "reason": "scripts/perf_benchmark/support.py W8403 at line 95: detect_cache_topology builds result by conditionally assigning D1/I1/LL keys from loop-iterated indexes.values() with multiple if/elif branches per iteration \u2014 a dict comprehension cannot express the multi-branch conditional accumulation pattern. Accepted as conditional-accumulation-required / over-approximation.",
+      "reason": "scripts/perf_benchmark/support.py W8403 at line 95: detect_cache_topology builds result by conditionally assigning D1/I1/LL keys from loop-iterated indexes.values() with multiple if/elif branches per iteration — a dict comprehension cannot express the multi-branch conditional accumulation pattern. Accepted as conditional-accumulation-required / over-approximation.",
       "applies": [
         "report"
       ]
