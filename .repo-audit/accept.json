@@ -353,45 +353,6 @@
       "match": {
         "kind": "finding",
         "leaf": "perf-smell",
-        "path": "tests/test_ledger.py",
-        "symbol": "use-tuple-over-list",
-        "metric": "W8301"
-      },
-      "reason": "tests/test_ledger.py is a test cold-path; the W8301 flag on a list literal in a test is not a production-path concern, and the list form is conventional in test parametrize/assertion constructs. Accepted as test-cold-path.",
-      "applies": [
-        "report"
-      ]
-    },
-    {
-      "match": {
-        "kind": "finding",
-        "leaf": "perf-smell",
-        "path": "tests/test_pipeline_scoring_reporting.py",
-        "symbol": "use-tuple-over-list",
-        "metric": "W8301"
-      },
-      "reason": "tests/test_pipeline_scoring_reporting.py is a test cold-path; the W8301 flag on a list literal in a test assertion or fixture is not a production-path concern. Accepted as test-cold-path.",
-      "applies": [
-        "report"
-      ]
-    },
-    {
-      "match": {
-        "kind": "finding",
-        "leaf": "perf-smell",
-        "path": "benchmarks/bench_parse_massif.py",
-        "symbol": "use-tuple-over-list",
-        "metric": "W8301"
-      },
-      "reason": "benchmarks/bench_parse_massif.py is a benchmark cold-path, not production code; the W8301 flag on a list literal in a benchmark parametrize or setup is not a production concern. Accepted as benchmark-cold-path.",
-      "applies": [
-        "report"
-      ]
-    },
-    {
-      "match": {
-        "kind": "finding",
-        "leaf": "perf-smell",
         "path": "scripts/check_wave_baseline.py",
         "symbol": "use-tuple-over-list",
         "metric": "W8301"

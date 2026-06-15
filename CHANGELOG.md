@@ -1,5 +1,13 @@
 # Changelog
 
+## 0.4.3 - 2026-06-15
+
+Re-pin the convergence-gate wave runner to `repo-audit-refactor-optimize` v0.8.2, which
+scopes the `perf-smell` lane to `--source-prefix`. With the fixed runner, perf-smell no
+longer scans `tests/` or `benchmarks/`, so the perf-smell accepts for those paths in
+`.repo-audit/accept.json` are stale and have been pruned (3 entries). Surfaced by a
+skillset-on-skillset dogfood run.
+
 ## 0.4.2 - 2026-06-14
 
 Self-contained convergent family — Phase 1. New `convergence-gate` CI job runs the
