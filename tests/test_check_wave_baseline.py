@@ -61,6 +61,58 @@ def test_gate_fails_on_stale_acceptances(
     assert payload["stale_acceptances"]
 
 
+def test_fail_when_a_lane_errored_even_if_active_empty(
+    tmp_path: Path, capsys: pytest.CaptureFixture[str]
+) -> None:
+    snapshot = _write_json(tmp_path / "active.json", [])
+    accepted = _write_json(tmp_path / "acc.json", {"accepted": [], "stale": []})
+    summary = _write_json(
+        tmp_path / "summary.json",
+        {"complexity": {"status": "ok"}, "security": {"status": "error"}},
+    )
+    code = main(
+        [
+            "--snapshot",
+            str(snapshot),
+            "--accepted",
+            str(accepted),
+            "--summary",
+            str(summary),
+        ]
+    )
+    payload = _payload(capsys)
+    assert code == 1
+    assert payload["status"] == "fail"
+    assert payload["reason"] == "lane_error"
+    assert payload["errored_lanes"] == ["security"]
+    assert payload["runner_exit"] == 0
+
+
+def test_pass_when_all_lanes_ok_and_active_empty(
+    tmp_path: Path, capsys: pytest.CaptureFixture[str]
+) -> None:
+    snapshot = _write_json(tmp_path / "active.json", [])
+    accepted = _write_json(tmp_path / "acc.json", {"accepted": [], "stale": []})
+    summary = _write_json(
+        tmp_path / "summary.json",
+        {"complexity": {"status": "ok"}, "security": {"status": "ok"}},
+    )
+    code = main(
+        [
+            "--snapshot",
+            str(snapshot),
+            "--accepted",
+            str(accepted),
+            "--summary",
+            str(summary),
+        ]
+    )
+    payload = _payload(capsys)
+    assert code == 0
+    assert payload["status"] == "pass"
+    assert payload["active"] == 0
+
+
 def test_live_wave_forwards_anchor_and_configs(
     tmp_path: Path,
     monkeypatch: pytest.MonkeyPatch,
@@ -78,6 +130,8 @@ def test_live_wave_forwards_anchor_and_configs(
         "(out / 'wave_findings.json').write_text('[]', encoding='utf-8')\n"
         "(out / 'wave_findings.accepted.json').write_text("
         "json.dumps({'accepted': [], 'stale': []}), encoding='utf-8')\n"
+        "(out / 'wave_summary.json').write_text("
+        "json.dumps({'complexity': {'status': 'ok'}}), encoding='utf-8')\n"
         "(out / 'argv.json').write_text(json.dumps(sys.argv[1:]), encoding='utf-8')\n",
         encoding="utf-8",
     )

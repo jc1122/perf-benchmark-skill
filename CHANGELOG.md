@@ -1,5 +1,20 @@
 # Changelog
 
+## 0.5.0 - 2026-06-15
+
+Dogfood gap remediation — Wave A (trustworthy green). Mirrors the convergence-gate
+hardening into perf-benchmark and re-pins the diagnosis-wave runner:
+
+- **#1 errored lane no longer passes the gate.** `check_wave_baseline.py` now reads
+  `wave_summary.json` + the runner exit code and fails on any `status:"error"` lane.
+- **#3 accept-reason quality gate.** New `check_accept_reasons.py` (with vendored
+  stdlib `_accept.py`/`validate_accept.py`) rejects boilerplate reasons; existing
+  reasons enriched with their finding identity. Wired into CI.
+- **#10 toolchain-drift assertion.** New `scripts/toolchain_pins.json` is the source of
+  truth; CI installs from it and `check_toolchain.py` asserts the running env matches.
+- **Runner re-pin v0.8.2 → v0.9.0**, bringing the runner-side fixes that reach
+  perf-benchmark by pin: #9 per-lane timeout and #2 metric value ceilings.
+
 ## 0.4.3 - 2026-06-15
 
 Re-pin the convergence-gate wave runner to `repo-audit-refactor-optimize` v0.8.2, which
