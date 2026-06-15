@@ -1,5 +1,14 @@
 # Changelog
 
+## 0.6.1 - 2026-06-16
+
+Add `bootstrap/install-perf.sh`: deploys both skills this repo provides
+(`perf-benchmark` from the repo root, `perf-optimization` from the subdir) into a
+destination skills dir. This is the installer the repo-audit family's one-line
+self-bootstrap (`repo-audit-refactor-optimize` `bootstrap/install.sh`) invokes for
+the perf source. Idempotent; deploys committed content via `git archive`.
+Regression test in `tests/test_install_perf.py`.
+
 ## 0.6.0 - 2026-06-15
 
 Dogfood gap remediation — Wave C (scope / deploy parity). Closes the cross-repo
