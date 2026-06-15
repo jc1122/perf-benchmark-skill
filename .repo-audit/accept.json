@@ -9,7 +9,7 @@
         "symbol": "<module>",
         "metric": "maintainability_index"
       },
-      "reason": "migrated accepted residual — see the repo's frozen ledger",
+      "reason": "migrated accepted residual \u2014 see the repo's frozen ledger",
       "applies": [
         "report"
       ]
@@ -22,7 +22,7 @@
         "symbol": "<module>",
         "metric": "maintainability_index"
       },
-      "reason": "migrated accepted residual — see the repo's frozen ledger",
+      "reason": "migrated accepted residual \u2014 see the repo's frozen ledger",
       "applies": [
         "report"
       ]
@@ -35,7 +35,7 @@
         "symbol": "<module>",
         "metric": "maintainability_index"
       },
-      "reason": "migrated accepted residual — see the repo's frozen ledger",
+      "reason": "migrated accepted residual \u2014 see the repo's frozen ledger",
       "applies": [
         "report"
       ]
@@ -48,7 +48,7 @@
         "symbol": "<module>",
         "metric": "maintainability_index"
       },
-      "reason": "migrated accepted residual — see the repo's frozen ledger",
+      "reason": "migrated accepted residual \u2014 see the repo's frozen ledger",
       "applies": [
         "report"
       ]
@@ -61,7 +61,7 @@
         "symbol": "_discover_objdump_targets",
         "metric": "cyclomatic_complexity"
       },
-      "reason": "migrated accepted residual — see the repo's frozen ledger",
+      "reason": "migrated accepted residual \u2014 see the repo's frozen ledger",
       "applies": [
         "report"
       ]
@@ -74,7 +74,7 @@
         "symbol": "_generate_tracemalloc_wrapper",
         "metric": "function_nloc"
       },
-      "reason": "migrated accepted residual — see the repo's frozen ledger",
+      "reason": "migrated accepted residual \u2014 see the repo's frozen ledger",
       "applies": [
         "report"
       ]
@@ -87,7 +87,7 @@
         "symbol": "_parse_cachegrind_summary",
         "metric": "cyclomatic_complexity"
       },
-      "reason": "migrated accepted residual — see the repo's frozen ledger",
+      "reason": "migrated accepted residual \u2014 see the repo's frozen ledger",
       "applies": [
         "report"
       ]
@@ -100,7 +100,7 @@
         "symbol": "_parse_perf_stat",
         "metric": "cyclomatic_complexity"
       },
-      "reason": "migrated accepted residual — see the repo's frozen ledger",
+      "reason": "migrated accepted residual \u2014 see the repo's frozen ledger",
       "applies": [
         "report"
       ]
@@ -113,7 +113,7 @@
         "symbol": "<module>",
         "metric": "maintainability_index"
       },
-      "reason": "migrated accepted residual — see the repo's frozen ledger",
+      "reason": "migrated accepted residual \u2014 see the repo's frozen ledger",
       "applies": [
         "report"
       ]
@@ -126,7 +126,7 @@
         "symbol": "detect_cache_topology",
         "metric": "cyclomatic_complexity"
       },
-      "reason": "migrated accepted residual — see the repo's frozen ledger",
+      "reason": "migrated accepted residual \u2014 see the repo's frozen ledger",
       "applies": [
         "report"
       ]
@@ -139,7 +139,7 @@
         "symbol": "main",
         "metric": "cyclomatic_complexity"
       },
-      "reason": "migrated accepted residual — see the repo's frozen ledger",
+      "reason": "migrated accepted residual \u2014 see the repo's frozen ledger",
       "applies": [
         "report"
       ]
@@ -152,7 +152,7 @@
         "symbol": "main",
         "metric": "function_nloc"
       },
-      "reason": "migrated accepted residual — see the repo's frozen ledger",
+      "reason": "migrated accepted residual \u2014 see the repo's frozen ledger",
       "applies": [
         "report"
       ]
@@ -165,7 +165,7 @@
         "symbol": "run_parallel_tiers",
         "metric": "cyclomatic_complexity"
       },
-      "reason": "migrated accepted residual — see the repo's frozen ledger",
+      "reason": "migrated accepted residual \u2014 see the repo's frozen ledger",
       "applies": [
         "report"
       ]
@@ -178,7 +178,7 @@
         "symbol": "stage_perf_record",
         "metric": "function_nloc"
       },
-      "reason": "migrated accepted residual — see the repo's frozen ledger",
+      "reason": "migrated accepted residual \u2014 see the repo's frozen ledger",
       "applies": [
         "report"
       ]
@@ -191,7 +191,7 @@
         "symbol": "stage_tier1",
         "metric": "cyclomatic_complexity"
       },
-      "reason": "migrated accepted residual — see the repo's frozen ledger",
+      "reason": "migrated accepted residual \u2014 see the repo's frozen ledger",
       "applies": [
         "report"
       ]
@@ -204,7 +204,7 @@
         "symbol": "stage_tier1",
         "metric": "function_nloc"
       },
-      "reason": "migrated accepted residual — see the repo's frozen ledger",
+      "reason": "migrated accepted residual \u2014 see the repo's frozen ledger",
       "applies": [
         "report"
       ]
@@ -217,7 +217,7 @@
         "symbol": "write_json_summary",
         "metric": "parameter_count"
       },
-      "reason": "migrated accepted residual — see the repo's frozen ledger",
+      "reason": "migrated accepted residual \u2014 see the repo's frozen ledger",
       "applies": [
         "report"
       ]
@@ -230,7 +230,7 @@
         "symbol": "SKILL.md",
         "metric": "churn_complexity_product"
       },
-      "reason": "migrated accepted residual — see the repo's frozen ledger",
+      "reason": "migrated accepted residual \u2014 see the repo's frozen ledger",
       "applies": [
         "report"
       ]
@@ -243,7 +243,7 @@
         "symbol": "perf-optimization/scripts/verify_win.py",
         "metric": "churn_complexity_product"
       },
-      "reason": "migrated accepted residual — see the repo's frozen ledger",
+      "reason": "migrated accepted residual \u2014 see the repo's frozen ledger",
       "applies": [
         "report"
       ]
@@ -256,7 +256,7 @@
         "symbol": "scripts/perf_benchmark/reporting.py",
         "metric": "churn_complexity_product"
       },
-      "reason": "migrated accepted residual — see the repo's frozen ledger",
+      "reason": "migrated accepted residual \u2014 see the repo's frozen ledger",
       "applies": [
         "report"
       ]
@@ -269,7 +269,7 @@
         "symbol": "scripts/perf_benchmark/scoring.py",
         "metric": "churn_complexity_product"
       },
-      "reason": "migrated accepted residual — see the repo's frozen ledger",
+      "reason": "migrated accepted residual \u2014 see the repo's frozen ledger",
       "applies": [
         "report"
       ]
@@ -282,7 +282,7 @@
         "symbol": "scripts/perf_benchmark_pipeline.py",
         "metric": "churn_complexity_product"
       },
-      "reason": "migrated accepted residual — see the repo's frozen ledger",
+      "reason": "migrated accepted residual \u2014 see the repo's frozen ledger",
       "applies": [
         "report"
       ]
@@ -295,7 +295,7 @@
         "symbol": "scripts/wave_frozen.md",
         "metric": "churn_complexity_product"
       },
-      "reason": "migrated accepted residual — see the repo's frozen ledger",
+      "reason": "migrated accepted residual \u2014 see the repo's frozen ledger",
       "applies": [
         "report"
       ]
@@ -308,7 +308,7 @@
         "symbol": "tests/test_pipeline_scoring_reporting.py",
         "metric": "churn_complexity_product"
       },
-      "reason": "migrated accepted residual — see the repo's frozen ledger",
+      "reason": "migrated accepted residual \u2014 see the repo's frozen ledger",
       "applies": [
         "report"
       ]
@@ -340,115 +340,11 @@
       "match": {
         "kind": "finding",
         "leaf": "perf-smell",
-        "path": "perf-optimization/tests/test_verify_win.py",
-        "symbol": "loop-invariant-statement",
-        "metric": "W8201"
-      },
-      "reason": "perf-optimization/ is a separate, independently-installed skill not being version-bumped in this release; test file cold-path loop constructs in test_verify_win.py are not production code and the W8201 flags are test infrastructure. Accepted as separate-skill/test-cold-path.",
-      "applies": [
-        "report"
-      ]
-    },
-    {
-      "match": {
-        "kind": "finding",
-        "leaf": "perf-smell",
-        "path": "perf-optimization/scripts/select_candidate.py",
-        "symbol": "loop-global-usage",
-        "metric": "W8202"
-      },
-      "reason": "perf-optimization/ is a separate, independently-installed skill not being version-bumped in this release; W8202 in select_candidate.py flags a module-level constant or loop-unpacked variable in the loop body. Accepted as separate-skill.",
-      "applies": [
-        "report"
-      ]
-    },
-    {
-      "match": {
-        "kind": "finding",
-        "leaf": "perf-smell",
-        "path": "perf-optimization/scripts/verify_win.py",
-        "symbol": "loop-global-usage",
-        "metric": "W8202"
-      },
-      "reason": "perf-optimization/ is a separate, independently-installed skill not being version-bumped in this release; W8202 in verify_win.py flags module-level constants or unpacked loop variables. Accepted as separate-skill.",
-      "applies": [
-        "report"
-      ]
-    },
-    {
-      "match": {
-        "kind": "finding",
-        "leaf": "perf-smell",
-        "path": "perf-optimization/scripts/verify_win.py",
-        "symbol": "dotted-import-in-loop",
-        "metric": "W8205"
-      },
-      "reason": "perf-optimization/ is a separate, independently-installed skill not being version-bumped in this release; W8205 in verify_win.py flags dotted attribute access inside loops. Accepted as separate-skill.",
-      "applies": [
-        "report"
-      ]
-    },
-    {
-      "match": {
-        "kind": "finding",
-        "leaf": "perf-smell",
-        "path": "perf-optimization/tests/test_verify_win.py",
-        "symbol": "dotted-import-in-loop",
-        "metric": "W8205"
-      },
-      "reason": "perf-optimization/ is a separate, independently-installed skill not being version-bumped in this release; test file cold-path dotted-attribute access in test_verify_win.py loops is not production code. Accepted as separate-skill/test-cold-path.",
-      "applies": [
-        "report"
-      ]
-    },
-    {
-      "match": {
-        "kind": "finding",
-        "leaf": "perf-smell",
         "path": "perf-optimization/scripts/verify_win.py",
         "symbol": "use-list-comprehension",
         "metric": "W8401"
       },
       "reason": "perf-optimization/ is a separate, independently-installed skill not being version-bumped in this release; the for-loop accumulation in verify_win.py is more readable in the for-loop form. Accepted as separate-skill.",
-      "applies": [
-        "report"
-      ]
-    },
-    {
-      "match": {
-        "kind": "finding",
-        "leaf": "perf-smell",
-        "path": "tests/test_accept_policy.py",
-        "symbol": "loop-invariant-statement",
-        "metric": "W8201"
-      },
-      "reason": "tests/test_accept_policy.py is a test cold-path; the W8201 flags in test loops (e.g., building expected structures for parametrize) are not production code. perflint over-approximates loop-invariant statements in test parametrize/fixture construction. Accepted as test-cold-path.",
-      "applies": [
-        "report"
-      ]
-    },
-    {
-      "match": {
-        "kind": "finding",
-        "leaf": "perf-smell",
-        "path": "tests/test_accept_policy.py",
-        "symbol": "loop-global-usage",
-        "metric": "W8202"
-      },
-      "reason": "tests/test_accept_policy.py is a test cold-path; the W8202 flags reference module-level test constants inside test loops. Accepted as test-cold-path/over-approximation.",
-      "applies": [
-        "report"
-      ]
-    },
-    {
-      "match": {
-        "kind": "finding",
-        "leaf": "perf-smell",
-        "path": "tests/test_profile_discover.py",
-        "symbol": "loop-invariant-statement",
-        "metric": "W8201"
-      },
-      "reason": "tests/test_profile_discover.py is a test cold-path; W8201 in test loops (e.g., iterating to check discovery results) is not production code. Accepted as test-cold-path.",
       "applies": [
         "report"
       ]
@@ -488,162 +384,6 @@
         "metric": "W8301"
       },
       "reason": "benchmarks/bench_parse_massif.py is a benchmark cold-path, not production code; the W8301 flag on a list literal in a benchmark parametrize or setup is not a production concern. Accepted as benchmark-cold-path.",
-      "applies": [
-        "report"
-      ]
-    },
-    {
-      "match": {
-        "kind": "finding",
-        "leaf": "perf-smell",
-        "path": "scripts/perf_benchmark/ledger.py",
-        "symbol": "loop-invariant-statement",
-        "metric": "W8201"
-      },
-      "reason": "scripts/perf_benchmark/ledger.py W8201 at line 96: perflint flags the expression inside the _compare_dimensions for-loop over `dimensions` pairs, but the flagged expression accesses per-iteration dict values (loop-variant keys). This is a perflint over-approximation of loop-invariant hoisting. Accepted as over-approximation.",
-      "applies": [
-        "report"
-      ]
-    },
-    {
-      "match": {
-        "kind": "finding",
-        "leaf": "perf-smell",
-        "path": "scripts/perf_benchmark/stage_helpers.py",
-        "symbol": "loop-invariant-statement",
-        "metric": "W8201"
-      },
-      "reason": "scripts/perf_benchmark/stage_helpers.py W8201 across multiple functions (_parse_cachegrind_summary, _parse_callgrind_output, _parse_perf_report, _parse_massif_out): perflint over-approximates loop-invariant hoisting on expressions that reference per-iteration parse state (e.g., match.group(), entry[header], part from zip). These are genuinely loop-variant. Accepted as over-approximation.",
-      "applies": [
-        "report"
-      ]
-    },
-    {
-      "match": {
-        "kind": "finding",
-        "leaf": "perf-smell",
-        "path": "scripts/perf_benchmark/support.py",
-        "symbol": "loop-invariant-statement",
-        "metric": "W8201"
-      },
-      "reason": "scripts/perf_benchmark/support.py W8201 at lines 88-92 and 97: perflint flags result[key]=... assignments inside the detect_cache_topology loop over indexes.values() where info is the loop variable; these are loop-variant subscript assignments, not invariant. Accepted as over-approximation.",
-      "applies": [
-        "report"
-      ]
-    },
-    {
-      "match": {
-        "kind": "finding",
-        "leaf": "perf-smell",
-        "path": "scripts/perf_benchmark_pipeline.py",
-        "symbol": "loop-invariant-statement",
-        "metric": "W8201"
-      },
-      "reason": "scripts/perf_benchmark_pipeline.py W8201 flags across run_parallel_tiers and stage_time: perflint over-approximates on expressions like {args.valgrind_timeout} and results[name] inside loops where name is the loop variable or where dict subscript depends on the loop key. Accepted as over-approximation.",
-      "applies": [
-        "report"
-      ]
-    },
-    {
-      "match": {
-        "kind": "finding",
-        "leaf": "perf-smell",
-        "path": "scripts/profile_discover.py",
-        "symbol": "loop-invariant-statement",
-        "metric": "W8201"
-      },
-      "reason": "scripts/profile_discover.py W8201 at line 27: perflint flags multiple occurrences of dict-construction inside the for (fname, lineno, func), (...) in raw_stats.items() loop where fname, lineno, func are the loop variables — these are genuinely loop-variant. Accepted as over-approximation.",
-      "applies": [
-        "report"
-      ]
-    },
-    {
-      "match": {
-        "kind": "finding",
-        "leaf": "perf-smell",
-        "path": "scripts/perf_benchmark/findings.py",
-        "symbol": "loop-global-usage",
-        "metric": "W8202"
-      },
-      "reason": "scripts/perf_benchmark/findings.py W8202 at line 180: perflint flags reference to _PRESCRIPTIONS (a module-level constant dict) inside _suggested_action's for-loop. _PRESCRIPTIONS is a module-level constant mapping, not a mutable global; caching it in a local is a micro-optimization of negligible impact. Accepted as over-approximation on module-level constant.",
-      "applies": [
-        "report"
-      ]
-    },
-    {
-      "match": {
-        "kind": "finding",
-        "leaf": "perf-smell",
-        "path": "scripts/perf_benchmark/scoring.py",
-        "symbol": "loop-global-usage",
-        "metric": "W8202"
-      },
-      "reason": "scripts/perf_benchmark/scoring.py W8202 at lines 522 and 525: perflint flags references to TIER_RANK (a module-level constant dict) inside _detect_regressions's for-loop over dimensions. TIER_RANK is a module-level constant and caching it locally is a micro-optimization of negligible impact for this analysis path. Accepted as over-approximation on module-level constant.",
-      "applies": [
-        "report"
-      ]
-    },
-    {
-      "match": {
-        "kind": "finding",
-        "leaf": "perf-smell",
-        "path": "scripts/perf_benchmark/support.py",
-        "symbol": "loop-global-usage",
-        "metric": "W8202"
-      },
-      "reason": "scripts/perf_benchmark/support.py W8202 at line 199: perflint flags reference to _PYTEST_BENCHMARK_MARKER (a module-level compiled regex constant) inside a for-loop over py_file paths in _discover_pytest_benchmark_targets. This is a module-level constant; caching is a negligible micro-optimization. Accepted as over-approximation on module-level constant.",
-      "applies": [
-        "report"
-      ]
-    },
-    {
-      "match": {
-        "kind": "finding",
-        "leaf": "perf-smell",
-        "path": "scripts/perf_benchmark_pipeline.py",
-        "symbol": "loop-global-usage",
-        "metric": "W8202"
-      },
-      "reason": "scripts/perf_benchmark_pipeline.py W8202 at lines 235, 251, 546, 626, 628, 631: perflint flags references to subprocess and DEFAULT_PERF_STAT_EVENTS module-level names inside loops. subprocess.TimeoutExpired and subprocess.run are module-attribute lookups that perflint suggests caching locally; for I/O-bound loops spawning external processes, the lookup overhead is negligible. Accepted as over-approximation on module-level names in I/O-dominated loops.",
-      "applies": [
-        "report"
-      ]
-    },
-    {
-      "match": {
-        "kind": "finding",
-        "leaf": "perf-smell",
-        "path": "scripts/perf_benchmark/ledger.py",
-        "symbol": "dotted-import-in-loop",
-        "metric": "W8205"
-      },
-      "reason": "scripts/perf_benchmark/ledger.py W8205 at lines 63-64: perflint flags json.loads and json.JSONDecodeError inside the JSONL-parse loop in _read_ledger_entries. These are I/O-dominated file-reading loops where dotted attribute lookup overhead is negligible. The json.JSONDecodeError is used in an except clause where importing it directly would require a module-level import alias. Accepted as I/O-bound loop / over-approximation.",
-      "applies": [
-        "report"
-      ]
-    },
-    {
-      "match": {
-        "kind": "finding",
-        "leaf": "perf-smell",
-        "path": "scripts/perf_benchmark/stage_helpers.py",
-        "symbol": "dotted-import-in-loop",
-        "metric": "W8205"
-      },
-      "reason": "scripts/perf_benchmark/stage_helpers.py W8205 at lines 40, 188, 217, 239, 356, 361, 392: perflint flags re.search, re.match, and contextlib.suppress inside text-parsing loops. These are parse loops over profiler output text where regex call overhead dominates; the dotted lookup is negligible. contextlib.suppress is used as a context manager (must be called per-iteration). Accepted as I/O/parse-bound loop / over-approximation.",
-      "applies": [
-        "report"
-      ]
-    },
-    {
-      "match": {
-        "kind": "finding",
-        "leaf": "perf-smell",
-        "path": "scripts/perf_benchmark_pipeline.py",
-        "symbol": "dotted-import-in-loop",
-        "metric": "W8205"
-      },
-      "reason": "scripts/perf_benchmark_pipeline.py W8205 at lines 237, 548, 627: perflint flags subprocess.run and subprocess.TimeoutExpired inside loops that spawn external processes (repeats of time/perf runs). These loops are I/O-dominated by subprocess execution; the dotted lookup overhead is negligible relative to process spawn cost. Accepted as I/O-dominated loop / over-approximation.",
       "applies": [
         "report"
       ]
@@ -695,7 +435,7 @@
         "symbol": "use-list-comprehension",
         "metric": "W8401"
       },
-      "reason": "scripts/perf_benchmark/reporting.py W8401 at line 271: _append_findings_section iterates dimension.items() in a nested for-loop body that calls lines.append(f'- **{key}**: {value}') — this is a side-effect pattern on an existing list (not building a new list), so a list comprehension would produce a discarded list of None values. The for-loop form is both correct and more readable. Accepted as for-loop-form-required / over-approximation.",
+      "reason": "scripts/perf_benchmark/reporting.py W8401 at line 271: _append_findings_section iterates dimension.items() in a nested for-loop body that calls lines.append(f'- **{key}**: {value}') \u2014 this is a side-effect pattern on an existing list (not building a new list), so a list comprehension would produce a discarded list of None values. The for-loop form is both correct and more readable. Accepted as for-loop-form-required / over-approximation.",
       "applies": [
         "report"
       ]
@@ -734,7 +474,7 @@
         "symbol": "use-list-copy",
         "metric": "W8402"
       },
-      "reason": "scripts/profile_discover.py W8402 at line 25: _stats_to_rows iterates raw_stats.items() and calls rows.append({...dict...}) — this constructs a new dict per iteration from destructured tuple values; it is not a list copy but a transformation. The for-loop form is correct and readable. Accepted as for-loop-form-required / over-approximation.",
+      "reason": "scripts/profile_discover.py W8402 at line 25: _stats_to_rows iterates raw_stats.items() and calls rows.append({...dict...}) \u2014 this constructs a new dict per iteration from destructured tuple values; it is not a list copy but a transformation. The for-loop form is correct and readable. Accepted as for-loop-form-required / over-approximation.",
       "applies": [
         "report"
       ]
@@ -760,7 +500,7 @@
         "symbol": "use-dict-comprehension",
         "metric": "W8403"
       },
-      "reason": "scripts/perf_benchmark/stage_helpers.py W8403 at line 212: _parse_callgrind_output builds the functions list entry dict in a for-loop over zip(headers, parts) with contextlib.suppress(ValueError) wrapping each int() conversion — the exception suppressor cannot be embedded inside a dict comprehension value expression. Accepted as exception-suppression-required / over-approximation.",
+      "reason": "scripts/perf_benchmark/stage_helpers.py W8403 at line 212: _parse_callgrind_output builds the functions list entry dict in a for-loop over zip(headers, parts) with contextlib.suppress(ValueError) wrapping each int() conversion \u2014 the exception suppressor cannot be embedded inside a dict comprehension value expression. Accepted as exception-suppression-required / over-approximation.",
       "applies": [
         "report"
       ]
@@ -773,7 +513,7 @@
         "symbol": "use-dict-comprehension",
         "metric": "W8403"
       },
-      "reason": "scripts/perf_benchmark/support.py W8403 at line 95: detect_cache_topology builds result by conditionally assigning D1/I1/LL keys from loop-iterated indexes.values() with multiple if/elif branches per iteration — a dict comprehension cannot express the multi-branch conditional accumulation pattern. Accepted as conditional-accumulation-required / over-approximation.",
+      "reason": "scripts/perf_benchmark/support.py W8403 at line 95: detect_cache_topology builds result by conditionally assigning D1/I1/LL keys from loop-iterated indexes.values() with multiple if/elif branches per iteration \u2014 a dict comprehension cannot express the multi-branch conditional accumulation pattern. Accepted as conditional-accumulation-required / over-approximation.",
       "applies": [
         "report"
       ]
