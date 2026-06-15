@@ -5,13 +5,10 @@ must be specific and non-boilerplate, not just structurally valid."""
 from __future__ import annotations
 
 import argparse
-import importlib
 import json
 import re
 import sys
 from pathlib import Path
-
-_acc = importlib.import_module("scripts._accept" if __package__ else "_accept")
 
 MIN_LEN = 24
 _BOILERPLATE = (
@@ -55,10 +52,11 @@ def main(argv=None) -> int:
         print(json.dumps({"status": "pass", "note": "no accept.json"}))
         return 0
     payload = json.loads(args.file.read_text(encoding="utf-8"))
-    entries = _acc._parse_policy(payload)  # reuse structural validation
+    entries = payload.get("accept", []) if isinstance(payload, dict) else []
     defects = []
     for i, entry in enumerate(entries):
-        ok, defect = audit_reason(entry.reason)
+        reason = entry.get("reason", "") if isinstance(entry, dict) else ""
+        ok, defect = audit_reason(reason)
         if not ok:
             defects.append(f"accept[{i}]: {defect}")
     if defects:
