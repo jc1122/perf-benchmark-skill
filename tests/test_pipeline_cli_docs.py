@@ -239,19 +239,19 @@ def test_docs_describe_explicit_target_as_repo_agnostic_path() -> None:
     assert "jc1122/perf-benchmark-skill" not in readme_text
 
 
-def test_readme_explains_skill_source_placeholder() -> None:
+def test_readme_explains_skill_install_destinations() -> None:
     readme_text = (REPO_ROOT / "README.md").read_text()
 
-    assert (
-        "`<skill-source>` means the installable source or repository path that hosts this skill."
-        in readme_text
-    )
+    assert "install-perf.sh --dest" in readme_text
+    assert "--harness codex" in readme_text
+    assert "--harness claude" in readme_text
 
 
 def test_skill_regression_example_uses_explicit_target_or_binary() -> None:
     text = (REPO_ROOT / "SKILL.md").read_text()
 
-    assert "--baseline /path/to/previous/benchmark_summary.json" in text
+    assert "--before /path/to/before/benchmark_summary.json" in text
+    assert "--after /path/to/after/benchmark_summary.json" in text
     assert '--target "./path/to/benchmark {SIZE}" --baseline' in text
 
 

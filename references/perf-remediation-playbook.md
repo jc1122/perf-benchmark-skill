@@ -12,9 +12,13 @@ this playbook is the measure -> change -> re-measure ratchet for fixing what it 
 3. **Measure before, measure after, same environment.** Both runs same tier, same sizes, same
    machine state (governor, SMT, load). The summary's environment fingerprint must match
    between the before/after runs; a fingerprint mismatch voids the comparison.
-4. **Acceptance ratchet:** a batch is accepted only if (a) median improves >= 5% on the target
-   dimension's metric, (b) wall-time CV stays <= --max-cv in both runs, (c) no other scored
-   dimension regresses by >= 1 tier, and (d) the test suite is green. Otherwise discard.
+4. **Acceptance ratchet:** a batch is accepted only if (a) the measured objective improves
+   per the objective policy (wall-time p50: configurable `--min-win`, default 5%;
+   memory: explicitly chosen peak threshold; scaling: no percent rule, any exponent
+   worsening rejects -- see `optimization-check.md`), (b) wall-time CV stays <= --max-cv
+   in both runs, (c) no other scored dimension regresses by >= 1 tier, and (d) the test
+   suite is green with its log attached (or the verdict stays explicitly `unverified`).
+   Otherwise discard.
 5. **Coverage gate (shared with code-health):** before editing an uncovered file, write
    behavior tests for its contract. Perf wins on untested code are not accepted.
 6. **Honest no-win:** if every candidate requires behavior changes, architecture work, or

@@ -1,111 +1,136 @@
 ---
 name: perf-benchmark
-version: 0.6.1
 description: >
   Use when profiling Linux Python or C workloads for algorithmic scaling,
-  cache, branch, memory, or ASM bottlenecks, or when comparing a benchmark run
-  against a saved performance baseline.
+  wall-time stability, CPU, cache, branch, or memory behavior, or when
+  verifying a claimed optimization with a before/after comparison.
+metadata:
+  version: 1.0.0
 ---
 
-# Performance Benchmark Pipeline
+# Performance Benchmark
 
-## Overview
+Measure first, change only when authorized. A benchmark run never edits code.
+Optimization work starts only on explicit user request, and every claimed win
+must survive an identical before/after comparison. Follow the user's repository
+workflow for commits; this skill never commits by itself.
 
-Run a deterministic Linux performance diagnosis. The pipeline profiles an
-explicit benchmark target or binary, scores a 7-dimension rubric, writes raw
-artifacts, and can emit shared-schema PERF findings plus an append-only trend
-ledger.
-
-Use this skill when you need evidence for algorithmic scaling, wall-time
-stability, CPU efficiency, cache behavior, branch prediction, memory profile,
-or ASM-level review.
-
-## Command
+## Measure
 
 ```bash
-python scripts/perf_benchmark_pipeline.py \
+perf-benchmark \
   --root /path/to/repo \
   --out-dir /tmp/perf-bench \
   --target "python -m benchmark_entrypoint {SIZE}" \
-  --sizes 1000,4000,16000 \
-  --tier fast \
-  --max-cv 5.0 \
-  --findings-out /tmp/perf-findings.json \
-  --baseline-ledger /tmp/perf-ledger.jsonl
+  --sizes 1000,4000
 ```
 
-Use `--binary ./program` instead of `--target` for standalone binaries.
+Use `--binary ./program` for standalone binaries.
 Use `--target` or `--binary` for non-pytest repos.
 Pytest benchmark autodiscovery is a convenience for Python repos.
 Multi-size explicit targets must include `{SIZE}`.
 
+Scripts resolve relative to the skill directory when pip is unavailable.
+
+Regression example: `perf-benchmark --root . --out-dir /tmp/bench --sizes 1000,4000 --target "./path/to/benchmark {SIZE}" --baseline /path/to/previous/benchmark_summary.json`
+
 ## Key Flags
 
-- `--root`: repository root under analysis.
-- `--out-dir`: output directory for reports and raw profiler artifacts.
-- `--target`: command template to benchmark; include `{SIZE}` with `--sizes`.
-- `--binary`: standalone binary entrypoint.
-- `--source-prefix`: project source filter; repeat for multiple prefixes.
-- `--tier`: `fast`, `medium`, `deep`, or `asm`.
-- `--sizes`: comma-separated input sizes for scaling checks.
-- `--expected-complexity`: expected growth class for scaling scoring.
-- `--max-cv`: timing-noise gate; noisy timing dimensions become `N/A (noise)`.
-- `--baseline`: point-in-time `benchmark_summary.json` comparison.
-- `--baseline-ledger`: append JSONL history and compare vs last/best entries.
+- `--root`, `--out-dir`: repository under analysis; where reports go.
+- `--target`, `--binary`: what to run (`{SIZE}` required with `--sizes`).
+- `--tier`: `fast` (default), `medium`, `deep`, or `asm`.
+- `--sizes`: input sizes for scaling evidence, e.g. `1000,4000,16000`.
+- `--expected-complexity`: `linear`, `nlogn` (default), or `quadratic`.
+- `--max-cv`: noise gate (default 5.0); noisy timing scores `N/A (noise)`.
 - `--findings-out`: shared-schema PERF findings for FAIL/WARN dimensions.
-- `--perf-record`: opt-in native sampled hotspots in deep/asm runs.
-- `--asm-audit`: include objdump/Numba ASM checks in asm tier.
+- `--baseline-ledger`: opt-in append-only JSONL run history.
+- `--perf-record`, `--asm-audit`: opt-in hotspots / ASM in deep runs.
 
 ## Tiers
 
-- `fast`: pytest-benchmark or direct timing, tracemalloc, GNU time.
-- `medium`: fast plus cachegrind and callgrind.
-- `deep`: medium plus massif, perf stat, and optional `--perf-record`.
+- `fast`: direct timing, tracemalloc, GNU time. Scores scaling exponent,
+  wall-time stability, and a memory-lite check; cache, branch, and CPU
+  dimensions report `N/A` instead of half-scores.
+- `medium`: fast plus cachegrind and callgrind (20-100x slowdown).
+- `deep`: medium plus massif, `perf stat`, optional `--perf-record`.
 - `asm`: deep plus objdump and optional Numba ASM inspection.
 
-## Outputs
-
-- `benchmark_report.md`: human report with scorecard and prescriptions.
-- `benchmark_summary.json`: machine summary and regression comparison data.
-- `perf_findings.json`: PERF findings when `--findings-out` is set.
-- `baseline_ledger.jsonl`: trend history when `--baseline-ledger` is set.
-- `tier1/` through `tier4/`: raw profiler artifacts by tier.
-
-## Interpretation
-
-The rubric scores Algorithmic Scaling, Wall-Time Stability, CPU Efficiency,
-L1 Cache, Last-Level Cache, Branch Prediction, and Memory Profile from 0 to 4.
-If Algorithmic Scaling fails, fix asymptotic behavior before cache, branch, or
-ASM tuning. Full scaling evidence requires multi-size runs; allocation churn
-requires `deep` or `asm` because it comes from massif.
 Full Algorithmic Scaling scoring requires `deep` or `asm` because allocation churn comes from massif.
 
-Regression example:
+## Optimize (only when authorized)
+
+1. Select one candidate from PERF findings (algorithmic FAIL gates all
+   constant-factor work; see `references/optimization-check.md`).
+2. Change one bounded file-set for one rubric dimension; add behavior tests
+   before touching uncovered code.
+3. Re-run the identical benchmark shape: same tier, sizes, target, machine.
+4. Verify with `perf-verify-win` (or the script at
+   `scripts/perf_benchmark/verify_win.py`); accept only on `accept`.
+5. Record honest no-win outcomes (`evaluated, no feasible low-risk win`) with
+   the evidence instead of forcing a change.
+
+## Verify Gates
+
+- Fingerprint (CPU, kernel, governor, SMT, Python) and workload (tier,
+  sizes, target, repeats, noise gate, complexity inputs) must match; each run
+  needs >= 2 wall-time samples and a typed non-empty rubric.
+- Noisy timing (`N/A (noise)`) in either run voids the comparison.
+- Objective policy: wall-time p50 uses the configurable `--min-win`
+  threshold (default 5%, a wall-time convention only); memory compares peak
+  bytes against an explicitly chosen threshold; scaling needs strict exponent
+  improvement. Wall-time or exponent collapse rejects under any objective;
+  cross-objective tradeoffs need explicit user approval, recorded with the run.
+- The suite must be proven green by bound evidence: a structured JSON record
+  via `--suite-evidence` (int `exit_code` plus a matching after-run
+  `target`/`root`/`revision`), or a live run via `--suite-command`.
+  Arbitrary files never count as verified. Without bound green evidence the
+  best verdict is `advisory`: measurement-only, not functional proof.
+- No scored dimension may be added, dropped, or regress by a tier.
 
 ```bash
-python scripts/perf_benchmark_pipeline.py \
-  --root . --out-dir /tmp/bench --sizes 1000,4000 \
-  --target "./path/to/benchmark {SIZE}" --baseline /path/to/previous/benchmark_summary.json
+perf-verify-win --before /path/to/before/benchmark_summary.json --after /path/to/after/benchmark_summary.json --suite-exit-code 0 --suite-evidence /path/to/suite-record.json --out /tmp/verdict.json
 ```
 
-## Agent Parallelism
+Verdicts: `accept` (proven win), `reject` (a gate failed), `advisory`
+(measurements pass, functionality unproven), `error` (malformed input).
+
+## Parallelism
 
 Tier 1 stays isolated because timing and tracemalloc measurements are noise-sensitive.
 Preferred subagent split: per-artifact or per-rubric-dimension after the pipeline finishes.
+
+## Outputs
+
+- `benchmark_report.md`: scorecard, findings, prescriptions.
+- `benchmark_summary.json`: machine summary with a `workload` comparability block.
+- Findings, ledger, `verdict.json` (`accept` / `reject` / `advisory` / `error`): only when requested.
+
+## Install
+
+```bash
+bootstrap/install-perf.sh --dest <skills-dir>
+bootstrap/install-perf.sh --harness codex   # ~/.agents/skills
+bootstrap/install-perf.sh --harness claude  # ~/.claude/skills
+```
+
+The same content ships to both hosts; scripts resolve relative to the skill
+directory. Alternatively `pip install .` provides `perf-benchmark`,
+`perf-verify-win`, and `perf-select-candidate`.
+
+## Limits
+
+- Linux only; `/proc`, `/sys`, Valgrind, and `perf` shape depth.
+- `tracemalloc` sees Python allocations, not all native memory; cachegrind
+  models L1 plus last-level cache only.
+- `perf stat` / `--perf-record` need permissive `perf_event_paranoid`; throughput-at-load (capacity) testing is out of scope.
 
 ## References
 
 - `references/rubric.md`: thresholds and scoring details.
 - `references/tool-guide.md`: profiler selection and limitations.
-- `references/perf-remediation-playbook.md`: measure/change/re-measure rules.
-- `references/question-bank.md`: advisory diagnosis prompts.
+- `references/optimization-check.md`: the authorized-change loop in full.
+- `references/optimization-playbook.md`: technique catalogue (appendix).
+- `references/perf-remediation-playbook.md`: execution discipline.
 - `references/finding-schema.json`: PERF finding schema.
+- `references/question-bank.md`: advisory diagnosis prompts.
 - `references/sample-report.md`: compact example report.
-
-## Limits
-
-- Linux only; `/proc`, `/sys`, Valgrind, and `perf` availability shape depth.
-- Valgrind slows runs heavily and models L1 plus last-level cache only.
-- `perf stat` and `--perf-record` require permissive `perf_event_paranoid`.
-- `tracemalloc` sees Python allocations, not all native/C extension memory.
-- Noisy timing is refused by `--max-cv` instead of being over-interpreted.

@@ -1,10 +1,10 @@
 # Optimization Playbook
 
-Technique catalogue for the `perf-optimization` skill. This playbook supplies
+Technique catalogue for the `perf-benchmark` optimization loop. This playbook supplies
 the *what* (technique selection) while `perf-remediation-playbook.md` supplies
 the *how* (execution discipline). Identify the rubric dimension from a PERF
 finding's `metric.name` (see the metric-to-dimension mapping in
-`perf-optimization/SKILL.md`) or from the paired `benchmark_summary.json`
+`optimization-check.md`) or from the paired `benchmark_summary.json`
 rubric; then apply techniques in the listed order, escalating only when
 first-line techniques have been exhausted and re-measured.
 
@@ -210,15 +210,14 @@ changes, or architectural restructuring). Before escalating:
 
 ## Cross-References
 
-- **`../references/perf-remediation-playbook.md`** (in the `perf-benchmark`
-  skill): The execution discipline. Supplies the standing rules, dimension
-  verification procedures, and the measure → change → re-measure ratchet.
-  This playbook extends that one with technique-level detail.
-- **`../SKILL.md`** (the `perf-optimization` skill): The 5-stage pipeline
-  workflow that drives technique selection and verification.
-- **`../references/finding-schema.json`**: The PERF findings schema consumed
-  as input. The rubric dimension for each finding is inferred from
-  `metric.name` (see the metric-to-dimension table in
-  `perf-optimization/SKILL.md`) and cross-referenced with the
-  `benchmark_summary.json` rubric; there is no raw `dimension` field on
-  findings.
+- **`perf-remediation-playbook.md`**: The execution discipline. Supplies
+  the standing rules, dimension verification procedures, and the
+  measure → change → re-measure ratchet. This playbook extends that one
+  with technique-level detail.
+- **`optimization-check.md`**: The authorized-change loop that drives
+  technique selection and verification.
+- **`finding-schema.json`**: The PERF findings schema consumed as input. The
+  rubric dimension for each finding is inferred from `metric.name` (see the
+  metric-to-dimension table in `optimization-check.md`) and cross-referenced
+  with the `benchmark_summary.json` rubric; there is no raw `dimension`
+  field on findings.

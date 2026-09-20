@@ -672,9 +672,10 @@ def _add_target_args(p: argparse.ArgumentParser) -> None:
 def _add_profile_args(p: argparse.ArgumentParser) -> None:
     p.add_argument(
         "--tier",
-        default="medium",
+        default="fast",
         choices=["fast", "medium", "deep", "asm"],
-        help="Profiling depth",
+        help="Profiling depth (default fast: timing + tracemalloc only; "
+        "medium/deep/asm add opt-in Valgrind/perf/ASM profilers)",
     )
     p.add_argument(
         "--sizes", default=None, help="Comma-separated input sizes (e.g. 1000,10000,100000)"

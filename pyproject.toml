@@ -1,3 +1,26 @@
+[project]
+name = "perf-benchmark-tools"
+version = "1.0.0"
+description = "Linux performance benchmarking and win-verification tools for the perf-benchmark skill"
+readme = "README.md"
+requires-python = ">=3.10"
+license = { text = "MIT" }
+keywords = ["benchmark", "performance", "profiling"]
+
+[project.scripts]
+perf-benchmark = "perf_benchmark_pipeline:main"
+perf-verify-win = "perf_benchmark.verify_win:main"
+perf-select-candidate = "perf_benchmark.select_candidate:main"
+
+[tool.setuptools]
+package-dir = { "" = "scripts" }
+# top-level helper scripts shipped alongside the package
+py-modules = ["perf_benchmark_pipeline", "profile_discover", "synth_microbench"]
+
+[tool.setuptools.packages.find]
+where = ["scripts"]
+include = ["perf_benchmark*"]
+
 [tool.ruff]
 line-length = 100
 target-version = "py310"

@@ -1,20 +1,136 @@
 #!/usr/bin/env bash
-# Deploy perf-benchmark (repo root) + perf-optimization (subdir) into <dest>.
+# Deploy the single perf-benchmark skill into a skills directory.
 # Run from a checkout of perf-benchmark-skill. Idempotent.
+#
+#   bootstrap/install-perf.sh --dest <skills-dir>
+#   bootstrap/install-perf.sh --harness codex
+#   bootstrap/install-perf.sh --harness claude --dest <skills-dir>
+#
+# --harness selects a default user skills dir (codex: ~/.agents/skills,
+# claude: ~/.claude/skills, both: install into each). An explicit --dest
+# always wins for that installation. Only runtime files ship: SKILL.md,
+# the benchmark/verify/select scripts, useful references, and packaging
+# metadata. Tests, history reports, benchmarks, and self-audit scaffolding
+# stay in the repo and are never installed.
+#
+# Existing installs are preserved: a prior perf-benchmark tree is moved to
+# a timestamped backup before replacement, and a legacy perf-optimization
+# tree is moved aside only when it is recognizably ours (a SKILL.md naming
+# perf-optimization); anything else is left untouched with a warning.
 set -euo pipefail
-DEST="${1:?usage: install-perf.sh <dest-skills-dir>}"
+
+usage() {
+  echo "usage: install-perf.sh [--dest <skills-dir>] [--harness codex|claude|both] [<dest>]"
+}
+
+HARNESS=""
+DEST=""
+while [ $# -gt 0 ]; do
+  case "$1" in
+    --dest) DEST="${2:?--dest requires a directory}"; shift 2 ;;
+    --harness) HARNESS="${2:?--harness requires codex|claude|both}"; shift 2 ;;
+    -h | --help) usage; exit 0 ;;
+    --*) echo "unknown option: $1" >&2; usage >&2; exit 2 ;;
+    *)
+      if [ -z "$DEST" ]; then DEST="$1"; shift; else echo "unexpected arg: $1" >&2; usage >&2; exit 2; fi
+      ;;
+  esac
+done
+
 REPO_ROOT="$(cd "$(dirname "$0")/.." && pwd)"
 
-mkdir -p "$DEST"
-# perf-benchmark = whole repo tree (matches current deployed layout, which
-# includes the nested perf-optimization/ copy).
-rm -rf "$DEST/perf-benchmark"
-mkdir -p "$DEST/perf-benchmark"
-git -C "$REPO_ROOT" archive HEAD | tar -x -C "$DEST/perf-benchmark"
+default_dest() {
+  case "$1" in
+    codex) printf '%s' "$HOME/.agents/skills" ;;
+    claude) printf '%s' "$HOME/.claude/skills" ;;
+    *) echo "unknown harness: $1 (expected codex|claude|both)" >&2; exit 2 ;;
+  esac
+}
 
-# perf-optimization = the subdir, deployed as its own skill dir.
-rm -rf "$DEST/perf-optimization"
-mkdir -p "$DEST/perf-optimization"
-git -C "$REPO_ROOT" archive HEAD:perf-optimization | tar -x -C "$DEST/perf-optimization"
+DESTS=()
+if [ -n "$DEST" ]; then
+  DESTS+=("$DEST")
+elif [ -n "$HARNESS" ]; then
+  case "$HARNESS" in
+    both) DESTS+=("$(default_dest codex)" "$(default_dest claude)") ;;
+    codex | claude) DESTS+=("$(default_dest "$HARNESS")") ;;
+    *) echo "unknown harness: $HARNESS (expected codex|claude|both)" >&2; exit 2 ;;
+  esac
+else
+  usage >&2; exit 2
+fi
 
-echo "installed perf-benchmark + perf-optimization -> $DEST"
+# Runtime payload only (relative to repo root).
+PAYLOAD=(
+  SKILL.md README.md LICENSE CHANGELOG.md pyproject.toml bootstrap references
+  scripts/perf_benchmark_pipeline.py scripts/perf_benchmark
+  scripts/profile_discover.py scripts/synth_microbench.py
+)
+
+refuse_root() {
+  local target="$1"
+  local trimmed
+  trimmed="$(printf '%s' "$target" | sed 's:/*$::')"
+  if [ -z "$trimmed" ]; then
+    echo "refusing destination '$target': resolves to filesystem root" >&2
+    exit 2
+  fi
+}
+
+is_managed_legacy() {
+  # True when $1 looks like a skill dir this family installed: a SKILL.md
+  # whose frontmatter names the expected skill.
+  local dir="$1" want="$2"
+  [ -f "$dir/SKILL.md" ] && grep -q "^name: $want$" "$dir/SKILL.md" 2>/dev/null
+}
+
+backup_aside() {
+  local path="$1"
+  local stamp
+  stamp="$(date +%Y%m%dT%H%M%S)-$$"
+  echo "  preserving $path -> ${path}.bak.${stamp}" >&2
+  mv "$path" "${path}.bak.${stamp}"
+  printf '%s' "${path}.bak.${stamp}"
+}
+
+install_one() {
+  local d="$1"
+  local backup=""
+  refuse_root "$d"
+  mkdir -p "$d"
+  if [ -e "$d/perf-benchmark" ]; then
+    backup="$(backup_aside "$d/perf-benchmark")"
+  fi
+  mkdir -p "$d/perf-benchmark"
+  if [ -n "${PERF_INSTALL_INJECT_COPY_FAILURE:-}" ]; then
+    echo "  injected copy failure (test hook)" >&2
+    rm -rf "$d/perf-benchmark"
+    if [ -n "$backup" ]; then
+      mv "$backup" "$d/perf-benchmark"
+      echo "  restored $backup -> $d/perf-benchmark" >&2
+    fi
+    return 1
+  fi
+  if ! (cd "$REPO_ROOT" && cp -r --parents "${PAYLOAD[@]}" "$d/perf-benchmark/"); then
+    echo "  copy failed; restoring prior install" >&2
+    rm -rf "$d/perf-benchmark"
+    if [ -n "$backup" ]; then
+      mv "$backup" "$d/perf-benchmark"
+      echo "  restored $backup -> $d/perf-benchmark" >&2
+    fi
+    return 1
+  fi
+  find "$d/perf-benchmark" \( -name __pycache__ -o -name "*.pyc" \) -exec rm -rf {} +
+  if [ -e "$d/perf-optimization" ]; then
+    if is_managed_legacy "$d/perf-optimization" "perf-optimization"; then
+      backup_aside "$d/perf-optimization" >/dev/null
+    else
+      echo "  leaving unmanaged $d/perf-optimization untouched" >&2
+    fi
+  fi
+  echo "installed perf-benchmark -> $d/perf-benchmark"
+}
+
+for d in "${DESTS[@]}"; do
+  install_one "$d"
+done

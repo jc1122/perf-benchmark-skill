@@ -17,58 +17,29 @@ jobs:
       - name: Install dependencies
         run: pip install pytest ruff jsonschema
       - name: Lint (ruff check)
-        run: ruff check scripts/ tests/
+        run: ruff check scripts/ tests/ perf-optimization/scripts/ perf-optimization/tests/
       - name: Format (ruff format --check)
-        run: ruff format --check scripts/ tests/
+        run: ruff format --check scripts/ tests/ perf-optimization/scripts/ perf-optimization/tests/
       - name: Test (pytest)
-        run: python3 -m pytest tests/ -q
+        run: python3 -m pytest tests/ perf-optimization/tests/ -q
 
-  convergence-gate:
+  package:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v6
-        with:
-          fetch-depth: 0   # hotspot/growth audits mine full git history (shallow clone errors them -> stale accepts)
-      - uses: actions/setup-node@v6
-        with:
-          node-version: '22'
       - uses: actions/setup-python@v6
         with:
-          python-version: '3.14'
-      - name: Install pinned toolchain (from manifest)
+          python-version: "3.12"
+      - name: Install package
+        run: pip install .
+      - name: Console scripts smoke
         run: |
-          python -m pip install --upgrade pip
-          python - <<'PY'
-          import json, subprocess, sys
-          pins = json.load(open("scripts/toolchain_pins.json"))
-          pkgs = [f"{n}=={v}" for n, v in pins.items()]
-          subprocess.check_call([sys.executable, "-m", "pip", "install", *pkgs])
-          PY
-          python -m pip install jsonschema  # coverage-gap gate suite (unpinned helper)
-      - name: Toolchain-drift gate (#10)
-        run: python3 scripts/check_toolchain.py
-      - name: Clone leaves + runner at pinned tags
+          perf-benchmark --help
+          perf-verify-win --help
+          perf-select-candidate --help
+      - name: Installer smoke (runtime-only payload)
         run: |
-          git clone --depth 1 --branch v0.8.0 https://github.com/jc1122/repo-audit-skills.git /tmp/leaves
-          (cd /tmp/leaves && npm ci)   # jscpd for the duplication leaf (L1)
-          test -x /tmp/leaves/node_modules/.bin/jscpd || (echo "jscpd missing" && exit 1)
-          git clone --depth 1 --branch v0.11.0 https://github.com/jc1122/repo-audit-refactor-optimize.git /tmp/runner
-          echo "/tmp/leaves/node_modules/.bin" >> "$GITHUB_PATH"
-      - name: Runner pin-coherence gate (#8)
-        env:
-          WAVE_RUNNER: /tmp/runner/scripts/run_diagnosis_wave.py
-        run: python3 scripts/check_runner_pin.py
-      - name: Convergence gate (Tier-1 wave)
-        env:
-          WAVE_RUNNER: /tmp/runner/scripts/run_diagnosis_wave.py
-          SKILLS_ROOT: /tmp/leaves/skills
-        run: python3 scripts/check_wave_baseline.py   # real exit code, not piped (L4)
-      - name: Accept-reason quality gate (#3)
-        run: python3 scripts/check_accept_reasons.py
-      - name: Coverage-gap gate (Tier-1 graduation)
-        env:
-          LEAF: /tmp/leaves/skills/coverage-gap-audit/scripts/coverage_gap_audit.py
-        run: >-
-          python3 scripts/check_coverage_gap.py --subprocess-capture
-          --suite tests --suite perf-optimization/tests
-          --source-prefix scripts --source-prefix perf-optimization/scripts
+          bash bootstrap/install-perf.sh --dest /tmp/skills-smoke
+          test -f /tmp/skills-smoke/perf-benchmark/SKILL.md
+          test ! -e /tmp/skills-smoke/perf-optimization
+          test ! -e /tmp/skills-smoke/perf-benchmark/tests

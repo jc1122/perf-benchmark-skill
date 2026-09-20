@@ -23,6 +23,9 @@ import pytest
 
 FIXTURES = Path(__file__).resolve().parent / "fixtures"
 SCRIPT = Path(__file__).resolve().parents[1] / "scripts" / "select_candidate.py"
+CANONICAL = (
+    Path(__file__).resolve().parents[2] / "scripts" / "perf_benchmark" / "select_candidate.py"
+)
 
 
 def run_select(findings: Path, out: Path) -> sp.CompletedProcess[str]:
@@ -341,7 +344,7 @@ def test_is_algorithmic_substring_match() -> None:
     """_is_algorithmic matches substrings, not just exact names."""
     import importlib.util
 
-    spec = importlib.util.spec_from_file_location("select_candidate", SCRIPT)
+    spec = importlib.util.spec_from_file_location("select_candidate", CANONICAL)
     assert spec and spec.loader
     mod = importlib.util.module_from_spec(spec)
     spec.loader.exec_module(mod)
@@ -356,7 +359,7 @@ def test_compute_ratio_normal() -> None:
     """_compute_ratio returns value/threshold when threshold > 0."""
     import importlib.util
 
-    spec = importlib.util.spec_from_file_location("select_candidate", SCRIPT)
+    spec = importlib.util.spec_from_file_location("select_candidate", CANONICAL)
     assert spec and spec.loader
     mod = importlib.util.module_from_spec(spec)
     spec.loader.exec_module(mod)
@@ -369,7 +372,7 @@ def test_compute_ratio_zero_threshold() -> None:
     """_compute_ratio returns value when threshold is 0."""
     import importlib.util
 
-    spec = importlib.util.spec_from_file_location("select_candidate", SCRIPT)
+    spec = importlib.util.spec_from_file_location("select_candidate", CANONICAL)
     assert spec and spec.loader
     mod = importlib.util.module_from_spec(spec)
     spec.loader.exec_module(mod)
@@ -382,7 +385,7 @@ def test_select_candidate_single_finding() -> None:
     """Single finding is selected."""
     import importlib.util
 
-    spec = importlib.util.spec_from_file_location("select_candidate", SCRIPT)
+    spec = importlib.util.spec_from_file_location("select_candidate", CANONICAL)
     assert spec and spec.loader
     mod = importlib.util.module_from_spec(spec)
     spec.loader.exec_module(mod)
@@ -405,7 +408,7 @@ def test_select_candidate_empty() -> None:
     """Empty list returns no_candidates."""
     import importlib.util
 
-    spec = importlib.util.spec_from_file_location("select_candidate", SCRIPT)
+    spec = importlib.util.spec_from_file_location("select_candidate", CANONICAL)
     assert spec and spec.loader
     mod = importlib.util.module_from_spec(spec)
     spec.loader.exec_module(mod)

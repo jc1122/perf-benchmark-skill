@@ -1,5 +1,60 @@
 # Changelog
 
+## 1.0.0 - 2026-09-20
+
+Modernization release: one public skill, hardened comparison, proper packaging.
+
+- **One public skill.** `perf-benchmark` (metadata.version 1.0.0) covers
+  measure plus the authorized measure -> change -> re-measure loop.
+  `perf-optimization/SKILL.md` is retired; the loop now lives in
+  `references/optimization-check.md` with the technique catalogue at
+  `references/optimization-playbook.md`.
+- **Hardened `verify_win`.** Empty rubric dimensions are malformed (exit 2);
+  fingerprint keys must be present non-empty strings on both sides (two absent
+  values never count as equal); NaN/inf samples are malformed; before/after
+  workload (tier, sizes, target, repeats, noise gate, complexity inputs,
+  revision) must match with strict typed sizes; each run needs >= 2 strict-int
+  wall-time samples; dimension sets must match with typed tiers (added/dropped
+  or scored-vs-unmeasured dimensions reject); summaries carry a `workload`
+  comparability block. New verdicts: `accept` (exit 0, proven win only),
+  `reject` (exit 1), `advisory` (exit 3, measurement-only, functionality
+  unproven), `error` (exit 2, uniform schema with null sentinels). New
+  verdict fields: `objective`, `objective_delta`, `functional_verification`
+  (`verified` only with bound green evidence), `suite_exit_code`.
+  New reasons: `workload`, `evidence`, `objective`.
+- **Objective policy.** Wall-time p50 keeps the configurable `--min-win`
+  (default 5.0, a wall-time convention). Memory compares peak bytes against
+  an explicitly chosen threshold. Scaling demands strict exponent
+  improvement. Wall-time or exponent collapse rejects under any objective;
+  deliberate cross-objective tradeoffs are user decisions recorded outside
+  the verifier, which stays conservative. No universal 5% rule for unrelated
+  metrics.
+- **Fast default.** `--tier` defaults to `fast` (timing + tracemalloc);
+  cache/branch/CPU dimensions report `N/A (fast lane)` instead of half
+  scores. Valgrind / `perf` / ASM stay opt-in via `medium` / `deep` / `asm`.
+- **Proper packaging.** Distribution `perf-benchmark-tools` 1.0.0 with
+  console scripts `perf-benchmark`, `perf-verify-win`,
+  `perf-select-candidate`. Canonical verifier/selector live in
+  `scripts/perf_benchmark/`; old `perf-optimization/scripts/` paths remain
+  thin CLI-only wrappers for one release (invocation works, imports do not).
+- **Runtime-only install.** `bootstrap/install-perf.sh` takes
+  `--dest` / `--harness codex|claude|both` (plus positional dest), installs
+  a single `perf-benchmark` dir (scripts, references, packaging metadata),
+  and excludes tests, history reports, and self-audit scaffolding. Array-safe
+  paths (spaces work), refuses root/empty destinations, backs up prior
+  installs to timestamped copies, and only moves aside recognizably managed
+  legacy dirs (anything else is left untouched). No hardcoded `~/.claude`
+  runtime defaults remain. The skill never commits; wins follow the user's
+  repository workflow. Ledger stays opt-in.
+- **Bound functional evidence.** `--suite-evidence` takes a structured JSON
+  suite record (int `exit_code` plus a matching after-run
+  `target`/`root`/`revision`); `--suite-command` runs the suite under the
+  verifier and records the observed result. Arbitrary files never verify.
+- **Retired self-audit machinery.** The wave/pin/toolchain/coverage gate
+  scripts and their tests are removed (repo-audit wave-pin convergence
+  scaffolding, not benchmark value). CI keeps lint/format/tests plus new
+  package and installer smoke jobs.
+
 ## 0.6.1 - 2026-06-16
 
 Add `bootstrap/install-perf.sh`: deploys both skills this repo provides

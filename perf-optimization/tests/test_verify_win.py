@@ -29,6 +29,36 @@ CLEAN_BEFORE = FIXTURES / "summary_clean_before.json"
 CLEAN_AFTER = FIXTURES / "summary_clean_after.json"
 
 
+_WORKLOAD = {
+    "tier": "deep",
+    "sizes": [1000, 4000],
+    "target": "python3 -m entry {SIZE}",
+    "binary": None,
+    "method": "explicit-target",
+    "time_repeats": 5,
+    "max_cv": 5.0,
+    "expected_complexity": "nlogn",
+    "sample_count": 10,
+}
+
+
+def _ev(tmp_path: Path, name: str = "suite.json", root: str | None = "/tmp/bench") -> Path:
+    """Write a valid structured suite record bound to the standard workload."""
+    record: dict = {
+        "command": "pytest -q",
+        "exit_code": 0,
+        "passed": 12,
+        "failed": 0,
+        "status": "pass",
+        "target": _WORKLOAD["target"],
+    }
+    if root is not None:
+        record["root"] = root
+    path = tmp_path / name
+    path.write_text(json.dumps(record))
+    return path
+
+
 def run_verify(
     before: Path,
     after: Path,
@@ -37,6 +67,9 @@ def run_verify(
     ledger: Path | None = None,
     out: Path | None = None,
     tmp_path: Path | None = None,
+    suite_evidence: Path | None = None,
+    require_verified: bool = False,
+    objective: str = "wall-time",
 ) -> sp.CompletedProcess[str]:
     """Run verify_win.py with given arguments."""
     if out is None and tmp_path is not None:
@@ -54,7 +87,13 @@ def run_verify(
         str(suite_exit_code),
         "--min-win",
         str(min_win),
+        "--objective",
+        objective,
     ]
+    if suite_evidence is not None:
+        cmd.extend(["--suite-evidence", str(suite_evidence)])
+    if require_verified:
+        cmd.append("--require-verified")
     if ledger is not None:
         cmd.extend(["--ledger", str(ledger)])
     cmd.extend(["--out", str(out)])
@@ -66,7 +105,13 @@ def run_verify(
 
 def test_clean_win_accept(tmp_path: Path) -> None:
     """before p50 2.0, after p50 1.8 --> 10% win --> accept, exit 0."""
-    cp = run_verify(CLEAN_BEFORE, CLEAN_AFTER, suite_exit_code=0, tmp_path=tmp_path)
+    cp = run_verify(
+        CLEAN_BEFORE,
+        CLEAN_AFTER,
+        suite_exit_code=0,
+        tmp_path=tmp_path,
+        suite_evidence=_ev(tmp_path),
+    )
 
     assert cp.returncode == 0
     verdict = json.loads(cp.stdout)
@@ -81,7 +126,10 @@ def test_clean_win_accept(tmp_path: Path) -> None:
 
 def test_clean_win_verdict_shape(tmp_path: Path) -> None:
     """Verdict JSON has exact required shape for accept case."""
-    cp = run_verify(CLEAN_BEFORE, CLEAN_AFTER, suite_exit_code=0, tmp_path=tmp_path)
+    evidence = _ev(tmp_path)
+    cp = run_verify(
+        CLEAN_BEFORE, CLEAN_AFTER, suite_exit_code=0, suite_evidence=evidence, tmp_path=tmp_path
+    )
 
     verdict = json.loads(cp.stdout)
     assert "verdict" in verdict
@@ -92,7 +140,37 @@ def test_clean_win_verdict_shape(tmp_path: Path) -> None:
     assert isinstance(verdict["reasons"], list)
     assert "vs_last" in verdict
     assert verdict["vs_last"] == {}  # no ledger provided
+    assert verdict["objective"] == "wall-time"
+    assert verdict["objective_delta"] == verdict["median_win_percent"]
+    assert verdict["functional_verification"] == "verified"
+    assert verdict["suite_exit_code"] == 0
+    assert verdict["suite_evidence"]["status"] == "verified"
+    assert verdict["suite_evidence"]["exit_code"] == 0
+    assert "target" in verdict["suite_evidence"]["binding"]
     assert "warnings" not in verdict
+
+
+def test_error_verdict_schema_matches_accept_shape(tmp_path: Path) -> None:
+    """Error verdicts carry the same keys as normal verdicts (null sentinels)."""
+    bad = tmp_path / "bad.json"
+    bad.write_text("not json")
+    cp = run_verify(bad, CLEAN_AFTER, suite_exit_code=0, tmp_path=tmp_path)
+
+    assert cp.returncode == 2
+    verdict = json.loads(cp.stdout)
+    assert verdict["verdict"] == "error"
+    for key in (
+        "median_win_percent",
+        "reasons",
+        "vs_last",
+        "objective",
+        "objective_delta",
+        "functional_verification",
+        "suite_exit_code",
+    ):
+        assert key in verdict, key
+    assert verdict["objective_delta"] is None
+    assert verdict["functional_verification"] == "unverified"
 
 
 def test_noisy_after_rejects(tmp_path: Path) -> None:
@@ -131,7 +209,13 @@ def test_fingerprint_mismatch_governor(tmp_path: Path) -> None:
 def test_timestamp_and_load_avg_ignored(tmp_path: Path) -> None:
     """timestamp_utc and load_avg_1m differ but all 5 FP keys match --> accept."""
     ts_mismatch = FIXTURES / "summary_timestamp_mismatch.json"
-    cp = run_verify(CLEAN_BEFORE, ts_mismatch, suite_exit_code=0, tmp_path=tmp_path)
+    cp = run_verify(
+        CLEAN_BEFORE,
+        ts_mismatch,
+        suite_exit_code=0,
+        tmp_path=tmp_path,
+        suite_evidence=_ev(tmp_path),
+    )
 
     assert cp.returncode == 0
     verdict = json.loads(cp.stdout)
@@ -193,7 +277,12 @@ def test_ledger_vs_last_echoed(tmp_path: Path) -> None:
     """Ledger given --> vs_last computed and echoed in verdict JSON."""
     ledger_good = FIXTURES / "ledger_good.jsonl"
     cp = run_verify(
-        CLEAN_BEFORE, CLEAN_AFTER, suite_exit_code=0, ledger=ledger_good, tmp_path=tmp_path
+        CLEAN_BEFORE,
+        CLEAN_AFTER,
+        suite_exit_code=0,
+        ledger=ledger_good,
+        tmp_path=tmp_path,
+        suite_evidence=_ev(tmp_path),
     )
 
     assert cp.returncode == 0
@@ -208,7 +297,12 @@ def test_ledger_corrupt_line_warns(tmp_path: Path) -> None:
     """Corrupt JSONL line --> warning emitted, no crash."""
     ledger_corrupt = FIXTURES / "ledger_corrupt.jsonl"
     cp = run_verify(
-        CLEAN_BEFORE, CLEAN_AFTER, suite_exit_code=0, ledger=ledger_corrupt, tmp_path=tmp_path
+        CLEAN_BEFORE,
+        CLEAN_AFTER,
+        suite_exit_code=0,
+        ledger=ledger_corrupt,
+        tmp_path=tmp_path,
+        suite_evidence=_ev(tmp_path),
     )
 
     assert cp.returncode == 0
@@ -222,7 +316,12 @@ def test_ledger_empty_vs_last_is_empty_object(tmp_path: Path) -> None:
     """Empty ledger --> vs_last is {} (empty object)."""
     ledger_empty = FIXTURES / "ledger_empty.jsonl"
     cp = run_verify(
-        CLEAN_BEFORE, CLEAN_AFTER, suite_exit_code=0, ledger=ledger_empty, tmp_path=tmp_path
+        CLEAN_BEFORE,
+        CLEAN_AFTER,
+        suite_exit_code=0,
+        ledger=ledger_empty,
+        tmp_path=tmp_path,
+        suite_evidence=_ev(tmp_path),
     )
 
     assert cp.returncode == 0
@@ -234,7 +333,14 @@ def test_ledger_empty_vs_last_is_empty_object(tmp_path: Path) -> None:
 def test_ledger_missing_produces_warning(tmp_path: Path) -> None:
     """Missing ledger file --> warning, vs_last is {}, no crash."""
     missing = tmp_path / "nonexistent.jsonl"
-    cp = run_verify(CLEAN_BEFORE, CLEAN_AFTER, suite_exit_code=0, ledger=missing, tmp_path=tmp_path)
+    cp = run_verify(
+        CLEAN_BEFORE,
+        CLEAN_AFTER,
+        suite_exit_code=0,
+        ledger=missing,
+        tmp_path=tmp_path,
+        suite_evidence=_ev(tmp_path),
+    )
 
     assert cp.returncode == 0
     verdict = json.loads(cp.stdout)
@@ -246,7 +352,14 @@ def test_ledger_missing_produces_warning(tmp_path: Path) -> None:
 
 def test_no_ledger_vs_last_empty_object(tmp_path: Path) -> None:
     """No --ledger flag --> vs_last is {}."""
-    cp = run_verify(CLEAN_BEFORE, CLEAN_AFTER, suite_exit_code=0, ledger=None, tmp_path=tmp_path)
+    cp = run_verify(
+        CLEAN_BEFORE,
+        CLEAN_AFTER,
+        suite_exit_code=0,
+        ledger=None,
+        tmp_path=tmp_path,
+        suite_evidence=_ev(tmp_path),
+    )
 
     assert cp.returncode == 0
     verdict = json.loads(cp.stdout)
@@ -285,6 +398,7 @@ def test_ledger_vs_last_with_regression(tmp_path: Path) -> None:
     }
     base = {
         "rubric": {"dimensions": dims},
+        "workload": _WORKLOAD,
         "wall_time_percentiles": {"p50": 2.0, "p95": 3.0, "p99": 4.0},
         "environment": {
             "cpu_model": "x",
@@ -298,7 +412,14 @@ def test_ledger_vs_last_with_regression(tmp_path: Path) -> None:
     base["wall_time_percentiles"] = {"p50": 1.8, "p95": 2.8, "p99": 3.8}
     after.write_text(json.dumps(base))
 
-    cp = run_verify(before, after, suite_exit_code=0, ledger=ledger, tmp_path=tmp_path)
+    cp = run_verify(
+        before,
+        after,
+        suite_exit_code=0,
+        ledger=ledger,
+        tmp_path=tmp_path,
+        suite_evidence=_ev(tmp_path),
+    )
 
     # still accept because before/after comparison wins, but vs_last shows regression
     assert cp.returncode == 0
@@ -344,6 +465,7 @@ def test_vs_last_regression_item_shape(tmp_path: Path) -> None:
     }
     base = {
         "rubric": {"dimensions": dims_same},
+        "workload": _WORKLOAD,
         "wall_time_percentiles": {"p50": 2.0, "p95": 3.0, "p99": 4.0},
         "environment": {
             "cpu_model": "x",
@@ -357,7 +479,14 @@ def test_vs_last_regression_item_shape(tmp_path: Path) -> None:
     base["wall_time_percentiles"] = {"p50": 1.8, "p95": 2.8, "p99": 3.8}
     after.write_text(json.dumps(base))
 
-    cp = run_verify(before, after, suite_exit_code=0, ledger=ledger, tmp_path=tmp_path)
+    cp = run_verify(
+        before,
+        after,
+        suite_exit_code=0,
+        ledger=ledger,
+        tmp_path=tmp_path,
+        suite_evidence=_ev(tmp_path),
+    )
     # before/after tiers match -> no tier drop; ledger shows regressions
     assert cp.returncode == 0
     verdict = json.loads(cp.stdout)
@@ -401,6 +530,7 @@ def test_vs_last_no_regressions_returns_empty_object(tmp_path: Path) -> None:
     }
     base = {
         "rubric": {"dimensions": dims},
+        "workload": _WORKLOAD,
         "wall_time_percentiles": {"p50": 2.0, "p95": 3.0, "p99": 4.0},
         "environment": {
             "cpu_model": "x",
@@ -414,7 +544,14 @@ def test_vs_last_no_regressions_returns_empty_object(tmp_path: Path) -> None:
     base["wall_time_percentiles"] = {"p50": 1.8, "p95": 2.8, "p99": 3.8}
     after.write_text(json.dumps(base))
 
-    cp = run_verify(before, after, suite_exit_code=0, ledger=ledger, tmp_path=tmp_path)
+    cp = run_verify(
+        before,
+        after,
+        suite_exit_code=0,
+        ledger=ledger,
+        tmp_path=tmp_path,
+        suite_evidence=_ev(tmp_path),
+    )
     assert cp.returncode == 0
     verdict = json.loads(cp.stdout)
     assert verdict["vs_last"] == {}
@@ -470,7 +607,15 @@ def test_before_not_a_dict_exit_2(tmp_path: Path) -> None:
 def test_missing_rubric_exit_2(tmp_path: Path) -> None:
     """Summary missing rubric --> exit 2."""
     bad = tmp_path / "bad.json"
-    bad.write_text(json.dumps({"wall_time_percentiles": {"p50": 1.0}, "environment": {}}))
+    bad.write_text(
+        json.dumps(
+            {
+                "workload": _WORKLOAD,
+                "wall_time_percentiles": {"p50": 1.0},
+                "environment": {},
+            }
+        )
+    )
     cp = run_verify(bad, CLEAN_AFTER, suite_exit_code=0, tmp_path=tmp_path)
 
     assert cp.returncode == 2
@@ -485,6 +630,7 @@ def test_missing_p50_exit_2(tmp_path: Path) -> None:
         json.dumps(
             {
                 "rubric": {"dimensions": {}},
+                "workload": _WORKLOAD,
                 "wall_time_percentiles": {"p95": 1.0},
                 "environment": {
                     "cpu_model": "x",
@@ -511,8 +657,22 @@ def test_byte_identical_across_runs(tmp_path: Path) -> None:
     out1 = tmp_path / "v1.json"
     out2 = tmp_path / "v2.json"
 
-    cp1 = run_verify(CLEAN_BEFORE, CLEAN_AFTER, suite_exit_code=0, out=out1, tmp_path=tmp_path)
-    cp2 = run_verify(CLEAN_BEFORE, CLEAN_AFTER, suite_exit_code=0, out=out2, tmp_path=tmp_path)
+    cp1 = run_verify(
+        CLEAN_BEFORE,
+        CLEAN_AFTER,
+        suite_exit_code=0,
+        out=out1,
+        tmp_path=tmp_path,
+        suite_evidence=_ev(tmp_path),
+    )
+    cp2 = run_verify(
+        CLEAN_BEFORE,
+        CLEAN_AFTER,
+        suite_exit_code=0,
+        out=out2,
+        tmp_path=tmp_path,
+        suite_evidence=_ev(tmp_path),
+    )
 
     assert cp1.returncode == 0
     assert cp2.returncode == 0
@@ -537,7 +697,14 @@ def test_byte_identical_reject_across_runs(tmp_path: Path) -> None:
 def test_custom_min_win(tmp_path: Path) -> None:
     """Custom --min-win threshold changes accept/reject boundary."""
     # 10% win, min-win=11% --> should reject
-    cp = run_verify(CLEAN_BEFORE, CLEAN_AFTER, suite_exit_code=0, min_win=11.0, tmp_path=tmp_path)
+    cp = run_verify(
+        CLEAN_BEFORE,
+        CLEAN_AFTER,
+        suite_exit_code=0,
+        min_win=11.0,
+        tmp_path=tmp_path,
+        suite_evidence=_ev(tmp_path),
+    )
 
     assert cp.returncode == 1
     verdict = json.loads(cp.stdout)
@@ -545,7 +712,14 @@ def test_custom_min_win(tmp_path: Path) -> None:
     assert "median" in verdict["reasons"]
 
     # 10% win, min-win=10% --> exactly at threshold --> accept
-    cp2 = run_verify(CLEAN_BEFORE, CLEAN_AFTER, suite_exit_code=0, min_win=10.0, tmp_path=tmp_path)
+    cp2 = run_verify(
+        CLEAN_BEFORE,
+        CLEAN_AFTER,
+        suite_exit_code=0,
+        min_win=10.0,
+        tmp_path=tmp_path,
+        suite_evidence=_ev(tmp_path),
+    )
 
     assert cp2.returncode == 0
     verdict2 = json.loads(cp2.stdout)
@@ -566,6 +740,7 @@ def test_exact_win_at_threshold(tmp_path: Path) -> None:
                         "Wall-Time Stability": {"score": 4, "tier": "PASS", "cv": 2.0},
                     }
                 },
+                "workload": _WORKLOAD,
                 "wall_time_percentiles": {"p50": 2.0, "p95": 2.1, "p99": 2.2},
                 "environment": {
                     "cpu_model": "Test CPU",
@@ -588,6 +763,7 @@ def test_exact_win_at_threshold(tmp_path: Path) -> None:
                         "Wall-Time Stability": {"score": 4, "tier": "PASS", "cv": 2.0},
                     }
                 },
+                "workload": _WORKLOAD,
                 "wall_time_percentiles": {"p50": 1.9, "p95": 2.0, "p99": 2.1},
                 "environment": {
                     "cpu_model": "Test CPU",
@@ -602,7 +778,14 @@ def test_exact_win_at_threshold(tmp_path: Path) -> None:
         )
     )
 
-    cp = run_verify(before, after, suite_exit_code=0, min_win=5.0, tmp_path=tmp_path)
+    cp = run_verify(
+        before,
+        after,
+        suite_exit_code=0,
+        min_win=5.0,
+        tmp_path=tmp_path,
+        suite_evidence=_ev(tmp_path),
+    )
     # win = (2.0-1.9)/2.0*100 = 5.0% --> exactly at threshold --> accept
     assert cp.returncode == 0
 
@@ -621,6 +804,7 @@ def test_median_win_computation(tmp_path: Path) -> None:
                         "Algorithmic Scaling": {"score": 4, "tier": "PASS"},
                     }
                 },
+                "workload": _WORKLOAD,
                 "wall_time_percentiles": {"p50": 10.0, "p95": 11.0, "p99": 12.0},
                 "environment": {
                     "cpu_model": "x",
@@ -640,6 +824,7 @@ def test_median_win_computation(tmp_path: Path) -> None:
                         "Algorithmic Scaling": {"score": 4, "tier": "PASS"},
                     }
                 },
+                "workload": _WORKLOAD,
                 "wall_time_percentiles": {"p50": 8.0, "p95": 9.0, "p99": 10.0},
                 "environment": {
                     "cpu_model": "x",
@@ -652,7 +837,14 @@ def test_median_win_computation(tmp_path: Path) -> None:
         )
     )
 
-    cp = run_verify(before, after, suite_exit_code=0, min_win=5.0, tmp_path=tmp_path)
+    cp = run_verify(
+        before,
+        after,
+        suite_exit_code=0,
+        min_win=5.0,
+        tmp_path=tmp_path,
+        suite_evidence=_ev(tmp_path),
+    )
 
     assert cp.returncode == 0
     verdict = json.loads(cp.stdout)
@@ -661,7 +853,7 @@ def test_median_win_computation(tmp_path: Path) -> None:
 
 
 def test_before_p50_zero_rejects(tmp_path: Path) -> None:
-    """before_p50=0 --> median check rejects (cannot compute ratio)."""
+    """before_p50=0 --> malformed (p50 must be strictly positive finite)."""
     before = tmp_path / "before.json"
     after = tmp_path / "after.json"
 
@@ -669,6 +861,7 @@ def test_before_p50_zero_rejects(tmp_path: Path) -> None:
         json.dumps(
             {
                 "rubric": {"dimensions": {"Algorithmic Scaling": {"score": 4, "tier": "PASS"}}},
+                "workload": _WORKLOAD,
                 "wall_time_percentiles": {"p50": 0.0, "p95": 0.1, "p99": 0.2},
                 "environment": {
                     "cpu_model": "x",
@@ -684,6 +877,7 @@ def test_before_p50_zero_rejects(tmp_path: Path) -> None:
         json.dumps(
             {
                 "rubric": {"dimensions": {"Algorithmic Scaling": {"score": 4, "tier": "PASS"}}},
+                "workload": _WORKLOAD,
                 "wall_time_percentiles": {"p50": 0.0, "p95": 0.1, "p99": 0.2},
                 "environment": {
                     "cpu_model": "x",
@@ -697,13 +891,13 @@ def test_before_p50_zero_rejects(tmp_path: Path) -> None:
     )
 
     cp = run_verify(before, after, suite_exit_code=0, tmp_path=tmp_path)
-    assert cp.returncode == 1
+    assert cp.returncode == 2
     verdict = json.loads(cp.stdout)
-    assert "median" in verdict["reasons"]
+    assert verdict["verdict"] == "error"
 
 
-def test_accept_with_missing_dimension_in_after(tmp_path: Path) -> None:
-    """A dimension present in before but missing from after --> no tier drop, still accept."""
+def test_dropped_dimension_rejects(tmp_path: Path) -> None:
+    """A dimension present in before but missing from after --> reject (tier)."""
     before = tmp_path / "before.json"
     after = tmp_path / "after.json"
 
@@ -716,6 +910,7 @@ def test_accept_with_missing_dimension_in_after(tmp_path: Path) -> None:
                         "CPU Efficiency": {"score": 4, "tier": "PASS"},
                     }
                 },
+                "workload": _WORKLOAD,
                 "wall_time_percentiles": {"p50": 2.0, "p95": 3.0, "p99": 4.0},
                 "environment": {
                     "cpu_model": "x",
@@ -735,6 +930,7 @@ def test_accept_with_missing_dimension_in_after(tmp_path: Path) -> None:
                         "Algorithmic Scaling": {"score": 4, "tier": "PASS"},
                     }
                 },
+                "workload": _WORKLOAD,
                 "wall_time_percentiles": {"p50": 1.0, "p95": 2.0, "p99": 3.0},
                 "environment": {
                     "cpu_model": "x",
@@ -747,11 +943,140 @@ def test_accept_with_missing_dimension_in_after(tmp_path: Path) -> None:
         )
     )
 
-    cp = run_verify(before, after, suite_exit_code=0, min_win=5.0, tmp_path=tmp_path)
-    assert cp.returncode == 0
+    cp = run_verify(
+        before,
+        after,
+        suite_exit_code=0,
+        min_win=5.0,
+        suite_evidence=_ev(tmp_path),
+        tmp_path=tmp_path,
+    )
+    assert cp.returncode == 1
     verdict = json.loads(cp.stdout)
-    assert verdict["verdict"] == "accept"
-    assert "tier" not in verdict["reasons"]
+    assert verdict["verdict"] == "reject"
+    assert "tier" in verdict["reasons"]
+
+
+def test_added_dimension_rejects(tmp_path: Path) -> None:
+    """A dimension added in after (even FAIL) --> reject (tier), never silent accept."""
+    before = tmp_path / "before.json"
+    after = tmp_path / "after.json"
+
+    dims_before = {"Algorithmic Scaling": {"score": 4, "tier": "PASS"}}
+    dims_after = {
+        "Algorithmic Scaling": {"score": 4, "tier": "PASS"},
+        "CPU Efficiency": {"score": 0, "tier": "FAIL"},
+    }
+    for path, dims, p50 in ((before, dims_before, 2.0), (after, dims_after, 1.8)):
+        path.write_text(
+            json.dumps(
+                {
+                    "rubric": {"dimensions": dims},
+                    "workload": _WORKLOAD,
+                    "wall_time_percentiles": {"p50": p50, "p95": p50, "p99": p50},
+                    "environment": {
+                        "cpu_model": "x",
+                        "kernel": "x",
+                        "governor": "x",
+                        "smt": "1",
+                        "python_version": "3.11",
+                    },
+                }
+            )
+        )
+
+    cp = run_verify(
+        before,
+        after,
+        suite_exit_code=0,
+        min_win=5.0,
+        suite_evidence=_ev(tmp_path),
+        tmp_path=tmp_path,
+    )
+    assert cp.returncode == 1
+    assert "tier" in json.loads(cp.stdout)["reasons"]
+
+
+def test_both_sides_unmeasured_dimension_is_comparable(tmp_path: Path) -> None:
+    """N/A on both sides is comparable unmeasured coverage, not a mismatch."""
+    before = tmp_path / "before.json"
+    after = tmp_path / "after.json"
+
+    dims = {
+        "Algorithmic Scaling": {"score": 4, "tier": "PASS"},
+        "CPU Efficiency": {"score": -1, "tier": "N/A"},
+    }
+    for path, p50 in ((before, 2.0), (after, 1.8)):
+        path.write_text(
+            json.dumps(
+                {
+                    "rubric": {"dimensions": dims},
+                    "workload": _WORKLOAD,
+                    "wall_time_percentiles": {"p50": p50, "p95": p50, "p99": p50},
+                    "environment": {
+                        "cpu_model": "x",
+                        "kernel": "x",
+                        "governor": "x",
+                        "smt": "1",
+                        "python_version": "3.11",
+                    },
+                }
+            )
+        )
+
+    cp = run_verify(
+        before,
+        after,
+        suite_exit_code=0,
+        min_win=5.0,
+        suite_evidence=_ev(tmp_path),
+        tmp_path=tmp_path,
+    )
+    assert cp.returncode == 0
+    assert json.loads(cp.stdout)["verdict"] == "accept"
+
+
+def test_scored_vs_unmeasured_dimension_rejects(tmp_path: Path) -> None:
+    """Scored on one side, N/A on the other --> reject (tier)."""
+    before = tmp_path / "before.json"
+    after = tmp_path / "after.json"
+
+    dims_before = {
+        "Algorithmic Scaling": {"score": 4, "tier": "PASS"},
+        "CPU Efficiency": {"score": 4, "tier": "PASS"},
+    }
+    dims_after = {
+        "Algorithmic Scaling": {"score": 4, "tier": "PASS"},
+        "CPU Efficiency": {"score": -1, "tier": "N/A"},
+    }
+    for path, dims, p50 in ((before, dims_before, 2.0), (after, dims_after, 1.8)):
+        path.write_text(
+            json.dumps(
+                {
+                    "rubric": {"dimensions": dims},
+                    "workload": _WORKLOAD,
+                    "wall_time_percentiles": {"p50": p50, "p95": p50, "p99": p50},
+                    "environment": {
+                        "cpu_model": "x",
+                        "kernel": "x",
+                        "governor": "x",
+                        "smt": "1",
+                        "python_version": "3.11",
+                    },
+                }
+            )
+        )
+
+    cp = run_verify(
+        before,
+        after,
+        suite_exit_code=0,
+        min_win=5.0,
+        suite_evidence=_ev(tmp_path),
+        tmp_path=tmp_path,
+    )
+    assert cp.returncode == 1
+    assert "tier" in json.loads(cp.stdout)["reasons"]
 
 
 def test_accept_with_same_tier_keep(tmp_path: Path) -> None:
@@ -765,6 +1090,7 @@ def test_accept_with_same_tier_keep(tmp_path: Path) -> None:
     }
     base = {
         "rubric": {"dimensions": dims},
+        "workload": _WORKLOAD,
         "wall_time_percentiles": {"p50": 2.0, "p95": 3.0, "p99": 4.0},
         "environment": {
             "cpu_model": "x",
@@ -778,7 +1104,14 @@ def test_accept_with_same_tier_keep(tmp_path: Path) -> None:
     base["wall_time_percentiles"] = {"p50": 1.8, "p95": 2.8, "p99": 3.8}
     after.write_text(json.dumps(base))
 
-    cp = run_verify(before, after, suite_exit_code=0, min_win=5.0, tmp_path=tmp_path)
+    cp = run_verify(
+        before,
+        after,
+        suite_exit_code=0,
+        min_win=5.0,
+        tmp_path=tmp_path,
+        suite_evidence=_ev(tmp_path),
+    )
     assert cp.returncode == 0
 
 
@@ -790,6 +1123,7 @@ def test_fingerprint_all_keys_compared(tmp_path: Path) -> None:
                 "Algorithmic Scaling": {"score": 4, "tier": "PASS"},
             }
         },
+        "workload": _WORKLOAD,
         "wall_time_percentiles": {"p50": 2.0, "p95": 3.0, "p99": 4.0},
         "environment": {
             "cpu_model": "x",
@@ -837,7 +1171,14 @@ def test_suite_exit_code_negative(tmp_path: Path) -> None:
 def test_stdout_equals_out_file(tmp_path: Path) -> None:
     """stdout and --out file contents are identical."""
     out = tmp_path / "verdict.json"
-    cp = run_verify(CLEAN_BEFORE, CLEAN_AFTER, suite_exit_code=0, out=out, tmp_path=tmp_path)
+    cp = run_verify(
+        CLEAN_BEFORE,
+        CLEAN_AFTER,
+        suite_exit_code=0,
+        out=out,
+        tmp_path=tmp_path,
+        suite_evidence=_ev(tmp_path),
+    )
     assert out.exists()
     assert out.read_text().strip() == cp.stdout.strip()
 
@@ -854,14 +1195,40 @@ def test_noise_and_median_collected(tmp_path: Path) -> None:
 
 
 def test_warnings_key_absent_when_no_warnings(tmp_path: Path) -> None:
-    """When no ledger or clean ledger, warnings key is absent."""
+    """With suite evidence and a clean ledger, warnings key is absent."""
+    evidence = _ev(tmp_path)
     cp = run_verify(
         CLEAN_BEFORE,
         CLEAN_AFTER,
         suite_exit_code=0,
         ledger=FIXTURES / "ledger_good.jsonl",
+        suite_evidence=evidence,
         tmp_path=tmp_path,
     )
     verdict = json.loads(cp.stdout)
-    # Good ledger, no corrupt lines --> no warnings key
+    # Good ledger, no corrupt lines, verified suite --> no warnings key
     assert "warnings" not in verdict
+
+
+def test_unverified_without_evidence_is_advisory_not_accept(tmp_path: Path) -> None:
+    """No --suite-evidence --> advisory (exit 3), never accept."""
+    cp = run_verify(CLEAN_BEFORE, CLEAN_AFTER, suite_exit_code=0, tmp_path=tmp_path)
+
+    assert cp.returncode == 3
+    verdict = json.loads(cp.stdout)
+    assert verdict["verdict"] == "advisory"
+    assert verdict["functional_verification"] == "unverified"
+    assert any("measurement-only" in w for w in verdict.get("warnings", []))
+
+
+def test_require_verified_rejects_without_evidence(tmp_path: Path) -> None:
+    """--require-verified without evidence --> reject, reason 'suite'."""
+    cp = run_verify(
+        CLEAN_BEFORE, CLEAN_AFTER, suite_exit_code=0, require_verified=True, tmp_path=tmp_path
+    )
+
+    assert cp.returncode == 1
+    verdict = json.loads(cp.stdout)
+    assert verdict["verdict"] == "reject"
+    assert "suite" in verdict["reasons"]
+    assert verdict["functional_verification"] == "unverified"

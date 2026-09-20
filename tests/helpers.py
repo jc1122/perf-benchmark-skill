@@ -22,7 +22,7 @@ def make_args(tmp_path: Path, **overrides: object) -> Namespace:
         "binary": None,
         "python": sys.executable,
         "source_prefix": None,
-        "tier": "medium",
+        "tier": "fast",
         "sizes": [],
         "valgrind_size": 10_000,
         "max_valgrind_parallel": 2,

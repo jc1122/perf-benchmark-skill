@@ -2,6 +2,17 @@
   "generated_at": "2025-01-15T10:05:00+00:00",
   "root": "/tmp/bench",
   "tier": "deep",
+  "workload": {
+    "tier": "deep",
+    "sizes": [1000, 4000],
+    "target": "python3 -m entry {SIZE}",
+    "binary": null,
+    "method": "explicit-target",
+    "time_repeats": 5,
+    "max_cv": 5.0,
+    "expected_complexity": "nlogn",
+    "sample_count": 10
+  },
   "rubric": {
     "total": 24,
     "max_possible": 28,

@@ -417,6 +417,56 @@ def build_summary_contract(rubric: dict) -> dict:
     }
 
 
+def _git_revision(root) -> str | None:
+    """Best-effort git revision of the benchmarked tree (None when unknown)."""
+    import subprocess
+
+    try:
+        if root is None:
+            return None
+        proc = subprocess.run(
+            ["git", "-C", str(root), "rev-parse", "HEAD"],
+            capture_output=True,
+            text=True,
+            timeout=10,
+        )
+    except (OSError, ValueError, subprocess.SubprocessError):
+        return None
+    if proc.returncode != 0:
+        return None
+    return (proc.stdout or "").strip() or None
+
+
+def _workload_block(args) -> dict[str, Any]:
+    """Comparable workload/method inputs for before/after verification.
+
+    The verifier requires equal tier/sizes/target/binary/method plus equal
+    typed time_repeats/max_cv/expected_complexity and >= 2 wall-time
+    samples (strict-int sample_count) on both sides; revision is the
+    best-effort git SHA of the benchmarked tree for evidence binding.
+    """
+    sizes = list(getattr(args, "sizes", []) or [])
+    target = getattr(args, "target", None)
+    binary = getattr(args, "binary", None)
+    if binary:
+        method = "binary"
+    elif target:
+        method = "explicit-target"
+    else:
+        method = "pytest-autodiscovery"
+    return {
+        "tier": getattr(args, "tier", "unknown"),
+        "sizes": sizes,
+        "target": target,
+        "binary": binary,
+        "method": method,
+        "time_repeats": getattr(args, "time_repeats", None),
+        "max_cv": getattr(args, "max_cv", None),
+        "expected_complexity": getattr(args, "expected_complexity", None),
+        "revision": _git_revision(getattr(args, "root", None)),
+    }
+
+
 def _base_json_summary(rubric: dict, prereqs: dict, args) -> dict[str, Any]:
     return {
         **build_summary_contract(
@@ -425,6 +475,7 @@ def _base_json_summary(rubric: dict, prereqs: dict, args) -> dict[str, Any]:
         "generated_at": datetime.now(timezone.utc).isoformat(),
         "root": str(args.root),
         "tier": args.tier,
+        "workload": _workload_block(args),
         "rubric": {
             "total": rubric["total"],
             "max_possible": rubric["max_possible"],
@@ -503,6 +554,7 @@ def write_json_summary(
     out_dir = extra[1]
     cv_fn = extra[2]
     summary = _base_json_summary(rubric, prereqs, args)
+    summary["workload"]["sample_count"] = len(_wall_time_samples(tier1))
     summary.update(_summarize_wall_time_metrics(tier1, cv_fn))
     summary["environment"] = _environment_fingerprint()
     _add_wall_time_percentiles(summary, tier1)

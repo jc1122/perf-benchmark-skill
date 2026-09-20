@@ -2,17 +2,26 @@
 
 Linux performance benchmarking skill for coding agents that support Skills. It
 profiles Python and C workloads, scores a 7-dimension rubric, and keeps
-algorithmic issues ahead of cache, branch, and ASM tuning.
+algorithmic issues ahead of cache, branch, and ASM tuning. When authorized to
+optimize, it enforces a measure -> change -> re-measure loop with a hardened
+before/after comparison.
 
 For repo-agnostic use, pass an explicit `--target` or `--binary`.
 
 ## Installation
 
 ```bash
-npx skills add <skill-source>/perf-benchmark-skill
+bootstrap/install-perf.sh --dest <skills-dir>
+bootstrap/install-perf.sh --harness codex   # ~/.agents/skills
+bootstrap/install-perf.sh --harness claude  # ~/.claude/skills
 ```
 
-`<skill-source>` means the installable source or repository path that hosts this skill.
+The same content ships to both hosts. Only runtime files install; tests,
+history reports, and self-audit scaffolding stay in this repo.
+
+Alternatively, `pip install .` provides `perf-benchmark`,
+`perf-verify-win`, and `perf-select-candidate` (package
+`perf-benchmark-tools`, version 1.0.0).
 
 ## Scope
 
@@ -31,22 +40,19 @@ Full Algorithmic Scaling scoring requires `deep` or `asm` because allocation chu
 ## Usage
 
 ```bash
-python scripts/perf_benchmark_pipeline.py \
+perf-benchmark \
   --root /path/to/repo \
   --out-dir /tmp/bench \
-  --tier deep \
   --target "python -m benchmark_entrypoint {SIZE}" \
   --sizes 10000,100000 \
   --source-prefix path/to/source/ \
-  --perf-record \
-  --max-cv 5.0 \
   --findings-out /tmp/perf-findings.json \
   --baseline-ledger /tmp/perf-ledger.jsonl
 ```
 
-`--perf-record` is opt-in native hotspot sampling via `perf record` and
-`perf report`. Use it when `perf` is available and you want flat sampled
-hotspots in addition to the rubric.
+`--tier` defaults to `fast` (timing + tracemalloc); `medium`, `deep`, and
+`asm` add opt-in Valgrind / `perf` / ASM profilers, including opt-in
+`--perf-record` native hotspots and `--asm-audit` in deep runs.
 
 `--max-cv` (default 5.0) sets the coefficient-of-variation noise gate:
 timing-derived dimensions exceeding this threshold are scored `N/A (noise)`.
@@ -55,33 +61,40 @@ dimension, `signal: "PERF"`). `--baseline-ledger` maintains an append-only
 JSONL run history with vs-last and vs-best regression checks; can be used
 alongside `--baseline` for point-in-time comparison.
 
+## Optimization Loop (authorized changes only)
+
+```bash
+perf-select-candidate --findings /tmp/perf-findings.json --out /tmp/candidate.json
+# ... make one bounded change, re-run the identical benchmark shape, save the test log ...
+perf-verify-win \
+  --before /path/to/before/benchmark_summary.json \
+  --after /path/to/after/benchmark_summary.json \
+  --suite-exit-code 0 \
+  --suite-evidence /path/to/test.log \
+  --out /tmp/verdict.json
+```
+
+A win verifies only when workload and environment fingerprint match, timing
+is not noisy, no dimension regresses a tier, and the suite is green without
+an attached log the verdict is explicitly labeled `unverified`. The 5%
+`--min-win` default is a wall-time convention; memory and scaling objectives
+use their own honest policy (see `references/optimization-check.md`). Wins
+and no-win outcomes follow the user's repository workflow; the skill never
+commits by itself.
+
 ## Outputs
 
 - `benchmark_report.md`: scorecard, findings, prescriptions
-- `benchmark_summary.json`: machine-readable scores and regression data
+- `benchmark_summary.json`: machine-readable scores, regression data, and workload block
 - `perf_findings.json`: shared-schema PERF findings (when `--findings-out` set)
 - `baseline_ledger.jsonl`: append-only run history (when `--baseline-ledger` set)
+- `verdict.json`: `accept` / `reject` / `error` with reasons
 - `tier1/` to `tier4/`: raw profiler artifacts by depth
 
 ## More Detail
 
 See [SKILL.md](SKILL.md) for the full workflow, tier behavior, agent guidance,
 and reference links.
-
-## Related Skills
-
-### perf-optimization (v0.1.0)
-
-The [`perf-optimization/`](perf-optimization/) directory contains a companion
-skill that consumes `perf-benchmark` findings and applies an iterative
-measure -> change -> re-measure ratchet to systematically resolve diagnosed
-bottlenecks. It selects the highest-impact candidate per iteration, makes one
-bounded change, re-runs profiling under identical conditions, and records
-accepted wins in an append-only ledger. Algorithmic scaling failures gate all
-constant-factor work.
-
-See [perf-optimization/SKILL.md](perf-optimization/SKILL.md) for workflow details
-and verification requirements.
 
 ## License
 
