@@ -1,6 +1,6 @@
 [project]
 name = "perf-benchmark-tools"
-version = "1.0.0"
+version = "1.0.1"
 description = "Linux performance benchmarking and win-verification tools for the perf-benchmark skill"
 readme = "README.md"
 requires-python = ">=3.10"

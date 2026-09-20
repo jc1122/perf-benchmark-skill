@@ -1,5 +1,19 @@
 # Changelog
 
+## 1.0.1 - 2026-09-20
+
+Backup-discovery fix: installer timestamped backups (prior `perf-benchmark`
+trees and managed legacy `perf-optimization` trees) now live in a sibling
+`<skills-dir>-backups` directory by default, or an explicit `--backup-dir`
+outside the skills destination (refused when inside). Previously backups
+sat inside the skills root carrying a `SKILL.md`, and live `skills/list`
+discovery listed the backup as a second `perf-benchmark` skill. The upgrade
+now leaves exactly one discoverable `perf-benchmark` SKILL.md under the
+destination; priors stay recoverable in the backup dir; stale in-place
+`.bak.*` trees from older installers are relocated (never deleted);
+copy-failure rollback, argv-safe paths, and unmanaged-dir handling are
+preserved.
+
 ## 1.0.0 - 2026-09-20
 
 Modernization release: one public skill, hardened comparison, proper packaging.

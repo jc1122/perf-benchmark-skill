@@ -5,7 +5,7 @@ description: >
   wall-time stability, CPU, cache, branch, or memory behavior, or when
   verifying a claimed optimization with a before/after comparison.
 metadata:
-  version: 1.0.0
+  version: 1.0.1
 ---
 
 # Performance Benchmark

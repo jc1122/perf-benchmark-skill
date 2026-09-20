@@ -13,22 +13,28 @@
 # metadata. Tests, history reports, benchmarks, and self-audit scaffolding
 # stay in the repo and are never installed.
 #
-# Existing installs are preserved: a prior perf-benchmark tree is moved to
-# a timestamped backup before replacement, and a legacy perf-optimization
-# tree is moved aside only when it is recognizably ours (a SKILL.md naming
-# perf-optimization); anything else is left untouched with a warning.
+# Existing installs are preserved OUTSIDE the discovery root: a prior
+# perf-benchmark tree is moved to a timestamped backup before replacement,
+# and a legacy perf-optimization tree is moved aside only when it is
+# recognizably ours (a SKILL.md naming perf-optimization); anything else
+# is left untouched with a warning. Backups live in a sibling
+# "<skills-dir>-backups" directory by default (never inside the skills
+# dir, where a backup SKILL.md would be discovered as a second skill), or
+# in an explicit --backup-dir, which must also lie outside the skills dir.
 set -euo pipefail
 
 usage() {
-  echo "usage: install-perf.sh [--dest <skills-dir>] [--harness codex|claude|both] [<dest>]"
+  echo "usage: install-perf.sh [--dest <skills-dir>] [--harness codex|claude|both] [--backup-dir <dir>] [<dest>]"
 }
 
 HARNESS=""
 DEST=""
+BACKUP_DIR=""
 while [ $# -gt 0 ]; do
   case "$1" in
     --dest) DEST="${2:?--dest requires a directory}"; shift 2 ;;
     --harness) HARNESS="${2:?--harness requires codex|claude|both}"; shift 2 ;;
+    --backup-dir) BACKUP_DIR="${2:?--backup-dir requires a directory}"; shift 2 ;;
     -h | --help) usage; exit 0 ;;
     --*) echo "unknown option: $1" >&2; usage >&2; exit 2 ;;
     *)
@@ -84,22 +90,82 @@ is_managed_legacy() {
   [ -f "$dir/SKILL.md" ] && grep -q "^name: $want$" "$dir/SKILL.md" 2>/dev/null
 }
 
+trim_trailing_slashes() {
+  printf '%s' "$1" | sed 's:/*$::'
+}
+
+backup_root_for() {
+  # Backup root for a skills dir: explicit --backup-dir wins, otherwise a
+  # sibling "<skills-dir>-backups" directory. Never inside the skills dir:
+  # a backup tree carries a SKILL.md that discovery would list as a skill.
+  if [ -n "$BACKUP_DIR" ]; then
+    printf '%s' "$BACKUP_DIR"
+  else
+    printf '%s-backups' "$(trim_trailing_slashes "$1")"
+  fi
+}
+
+refuse_backup_inside_dest() {
+  local broot="$1" dest="$2"
+  local trimmed_broot trimmed_dest
+  trimmed_broot="$(trim_trailing_slashes "$broot")"
+  trimmed_dest="$(trim_trailing_slashes "$dest")"
+  if [ "$trimmed_broot" = "$trimmed_dest" ] || [[ "$trimmed_broot" == "$trimmed_dest"/* ]]; then
+    echo "refusing backup dir '$broot': inside skills destination '$dest'" >&2
+    exit 2
+  fi
+}
+
 backup_aside() {
-  local path="$1"
-  local stamp
+  # Move $1 into backup root $2 as <basename>.bak.<stamp>; print the new path.
+  local path="$1" broot="$2"
+  local base stamp target
+  base="$(basename "$path")"
+  mkdir -p "$broot"
   stamp="$(date +%Y%m%dT%H%M%S)-$$"
-  echo "  preserving $path -> ${path}.bak.${stamp}" >&2
-  mv "$path" "${path}.bak.${stamp}"
-  printf '%s' "${path}.bak.${stamp}"
+  target="$broot/${base}.bak.${stamp}"
+  while [ -e "$target" ]; do
+    stamp="$(date +%Y%m%dT%H%M%S)-$$-$RANDOM"
+    target="$broot/${base}.bak.${stamp}"
+  done
+  echo "  preserving $path -> $target" >&2
+  mv "$path" "$target"
+  printf '%s' "$target"
+}
+
+sweep_stale_backups() {
+  # Relocate backups left INSIDE the skills dir by older installers to the
+  # backup root (same marker check as live trees; unmanaged names stay put).
+  local d="$1" broot="$2"
+  local entry base want
+  for entry in "$d"/perf-benchmark.bak.* "$d"/perf-optimization.bak.*; do
+    [ -e "$entry" ] || continue
+    [ -d "$entry" ] || continue
+    base="$(basename "$entry")"
+    case "$base" in
+      perf-benchmark.bak.*) want="perf-benchmark" ;;
+      perf-optimization.bak.*) want="perf-optimization" ;;
+      *) continue ;;
+    esac
+    if is_managed_legacy "$entry" "$want"; then
+      backup_aside "$entry" "$broot" >/dev/null
+    else
+      echo "  leaving unmanaged $entry untouched" >&2
+    fi
+  done
 }
 
 install_one() {
   local d="$1"
-  local backup=""
+  local broot backup=""
   refuse_root "$d"
-  mkdir -p "$d"
+  broot="$(backup_root_for "$d")"
+  refuse_root "$broot"
+  refuse_backup_inside_dest "$broot" "$d"
+  mkdir -p "$d" "$broot"
+  sweep_stale_backups "$d" "$broot"
   if [ -e "$d/perf-benchmark" ]; then
-    backup="$(backup_aside "$d/perf-benchmark")"
+    backup="$(backup_aside "$d/perf-benchmark" "$broot")"
   fi
   mkdir -p "$d/perf-benchmark"
   if [ -n "${PERF_INSTALL_INJECT_COPY_FAILURE:-}" ]; then
@@ -123,7 +189,7 @@ install_one() {
   find "$d/perf-benchmark" \( -name __pycache__ -o -name "*.pyc" \) -exec rm -rf {} +
   if [ -e "$d/perf-optimization" ]; then
     if is_managed_legacy "$d/perf-optimization" "perf-optimization"; then
-      backup_aside "$d/perf-optimization" >/dev/null
+      backup_aside "$d/perf-optimization" "$broot" >/dev/null
     else
       echo "  leaving unmanaged $d/perf-optimization untouched" >&2
     fi

@@ -92,8 +92,18 @@ def test_install_refuses_root_dest(tmp_path):
     assert rc.returncode != 0
 
 
+def backup_root(dest: Path) -> Path:
+    """Sibling backup root for a skills destination (outside discovery)."""
+    return dest.parent / f"{dest.name}-backups"
+
+
+def skill_manifests(dest: Path) -> list[Path]:
+    """All SKILL.md files discoverable directly under a skills destination."""
+    return sorted(dest.glob("*/SKILL.md"))
+
+
 def test_install_backs_up_prior_skill_dir(tmp_path):
-    """An existing install is preserved as a timestamped backup, not deleted."""
+    """An existing install is preserved as a timestamped backup outside dest."""
     dest = tmp_path / "skills"
     rc = run_install("--dest", str(dest))
     assert rc.returncode == 0, rc.stderr
@@ -103,9 +113,11 @@ def test_install_backs_up_prior_skill_dir(tmp_path):
     assert rc.returncode == 0, rc.stderr
     assert (dest / "perf-benchmark" / "SKILL.md").is_file()
     assert not marker.exists()
-    backups = list(dest.glob("perf-benchmark.bak.*"))
+    assert list(dest.glob("perf-benchmark.bak.*")) == []
+    backups = list(backup_root(dest).glob("perf-benchmark.bak.*"))
     assert len(backups) == 1
     assert (backups[0] / "previous.txt").is_file()
+    assert (backups[0] / "SKILL.md").is_file()
 
 
 def test_install_backs_up_managed_legacy_dir(tmp_path):
@@ -119,7 +131,8 @@ def test_install_backs_up_managed_legacy_dir(tmp_path):
     assert rc.returncode == 0, rc.stderr
     assert (dest / "perf-benchmark" / "SKILL.md").is_file()
     assert not legacy.exists()
-    backups = list(dest.glob("perf-optimization.bak.*"))
+    assert list(dest.glob("perf-optimization.bak.*")) == []
+    backups = list(backup_root(dest).glob("perf-optimization.bak.*"))
     assert len(backups) == 1
     assert (backups[0] / "notes.txt").is_file()
 
@@ -160,3 +173,87 @@ def test_install_rollback_restores_prior_on_copy_failure(tmp_path):
     assert (dest / "perf-benchmark" / "previous.txt").read_text() == ("previous install content\n")
     assert (dest / "perf-benchmark" / "SKILL.md").is_file()
     assert list(dest.glob("perf-benchmark.bak.*")) == []
+    assert list(backup_root(dest).glob("perf-benchmark.bak.*")) == []
+
+
+def test_upgrade_twice_keeps_single_discoverable_skill(tmp_path):
+    """Two upgrades: exactly one SKILL.md under dest, priors recoverable outside."""
+    import time
+
+    dest = tmp_path / "skills"
+    assert run_install("--dest", str(dest)).returncode == 0
+    (dest / "perf-benchmark" / "version.txt").write_text("v1\n")
+    time.sleep(1.1)
+    assert run_install("--dest", str(dest)).returncode == 0
+    (dest / "perf-benchmark" / "version.txt").write_text("v2\n")
+    time.sleep(1.1)
+    rc = run_install("--dest", str(dest))
+    assert rc.returncode == 0, rc.stderr
+    assert skill_manifests(dest) == [dest / "perf-benchmark" / "SKILL.md"]
+    assert list(dest.glob("*.bak.*")) == []
+    broot = backup_root(dest)
+    assert broot.is_dir()
+    versions = set()
+    for backup in broot.glob("perf-benchmark.bak.*"):
+        assert (backup / "SKILL.md").is_file()
+        assert "name: perf-benchmark" in (backup / "SKILL.md").read_text()
+        marker = backup / "version.txt"
+        if marker.is_file():
+            versions.add(marker.read_text())
+    assert versions == {"v1\n", "v2\n"}
+
+
+def test_install_sweeps_old_inplace_backups_outside(tmp_path):
+    """Backups left inside dest by older installers are relocated, not deleted."""
+    dest = tmp_path / "skills"
+    assert run_install("--dest", str(dest)).returncode == 0
+    stale = dest / "perf-benchmark.bak.20990101T000000-1"
+    stale.mkdir()
+    (stale / "SKILL.md").write_text("---\nname: perf-benchmark\n---\n")
+    (stale / "previous.txt").write_text("stale content\n")
+    rc = run_install("--dest", str(dest))
+    assert rc.returncode == 0, rc.stderr
+    assert skill_manifests(dest) == [dest / "perf-benchmark" / "SKILL.md"]
+    assert not stale.exists()
+    moved = list(backup_root(dest).glob("perf-benchmark.bak.*"))
+    assert any((b / "previous.txt").is_file() for b in moved)
+
+
+def test_install_custom_backup_dir(tmp_path):
+    """--backup-dir keeps backups in an explicit external dir, dest stays single-skill."""
+    dest = tmp_path / "skills"
+    ext = tmp_path / "ext-backup"
+    assert run_install("--dest", str(dest), "--backup-dir", str(ext)).returncode == 0
+    (dest / "perf-benchmark" / "previous.txt").write_text("prev\n")
+    rc = run_install("--dest", str(dest), "--backup-dir", str(ext))
+    assert rc.returncode == 0, rc.stderr
+    assert skill_manifests(dest) == [dest / "perf-benchmark" / "SKILL.md"]
+    backups = list(ext.glob("perf-benchmark.bak.*"))
+    assert len(backups) == 1
+    assert (backups[0] / "previous.txt").is_file()
+    assert not backup_root(dest).exists()
+
+
+def test_install_backup_dir_inside_dest_refused(tmp_path):
+    """A backup dir inside the skills destination is refused before any mutation."""
+    dest = tmp_path / "skills"
+    assert run_install("--dest", str(dest)).returncode == 0
+    before = (dest / "perf-benchmark" / "SKILL.md").read_bytes()
+    rc = run_install("--dest", str(dest), "--backup-dir", str(dest / "inner"))
+    assert rc.returncode != 0
+    assert (dest / "perf-benchmark" / "SKILL.md").read_bytes() == before
+    assert not (dest / "inner").exists()
+    assert skill_manifests(dest) == [dest / "perf-benchmark" / "SKILL.md"]
+
+
+def test_install_upgrade_dest_with_spaces(tmp_path):
+    """Upgrade of a spaced path keeps backups outside and argv-safe."""
+    dest = tmp_path / "my skills dir"
+    assert run_install("--dest", str(dest)).returncode == 0
+    (dest / "perf-benchmark" / "previous.txt").write_text("prev\n")
+    rc = run_install("--dest", str(dest))
+    assert rc.returncode == 0, rc.stderr
+    assert skill_manifests(dest) == [dest / "perf-benchmark" / "SKILL.md"]
+    backups = list(backup_root(dest).glob("perf-benchmark.bak.*"))
+    assert len(backups) == 1
+    assert (backups[0] / "previous.txt").is_file()
